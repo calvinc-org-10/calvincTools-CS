@@ -1,0 +1,71 @@
+{% extends "WICS_common.html" %}
+{% load widget_tweaks %}
+{% load static %}
+
+
+{% block tTitle %}SQL Results{% endblock %}
+{# {% block tHeader %}{% endblock %} #}
+{% block customCSS %}
+{% include "proposed-table-CSS.css" %}
+{% endblock %}
+
+{% block boddy %}
+<hr>
+
+<div class="container mx-auto">
+    {{ OrigSQL }}<br>
+    {{ nRecs }} Records<br>
+    {{ colNames }}
+</div>
+<hr>
+<div class="container">
+<table style="height:360px;">
+    <thead>
+        <tr>
+            {% for col in colNames %}
+                <td>{{ col }}</td>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+    {% for row in SQLresults %}
+        <tr style="border-bottom: solid;">
+            {% for kk, vv in row.items %}
+                <td>{{ vv }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<hr>
+</div>
+
+<div class="row mx-auto max-width=100%">
+    <div class="col-4"></div>
+    <div class="col-5">
+        <button onclick="history.back()">Back to SQL</button>
+    </div>
+    <div class="col">
+        {% if ExcelFileName %}
+        <button id="download_btn" type="button" class="d-print-none btn btn-light btn-outline-secondary">
+            <a href="{% static ExcelFileName %}" download>
+                D/L results
+            </a>
+        </button>
+        {% endif %}
+        <button id="close_btn" type="button">
+            <img src="{% static 'stop-road-sign-icon.svg' %}" width="20" height="20"></img>
+            Close
+        </button>
+    </div>
+</div>
+
+<script>
+    document.body.onbeforeunload = function() {
+        document.getElementById("wait_spinner").style.display = "block";
+        }
+
+    $("#close_btn").on("click", function () { window.close() });
+</script>
+{% endblock %}
+

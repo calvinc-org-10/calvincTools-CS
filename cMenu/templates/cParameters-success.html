@@ -1,0 +1,51 @@
+{% extends "WICS_common.html" %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block tTitle %}Parameter Change Results{% endblock %}
+{% block tHeader %}{% endblock %}
+<!-- form head -->
+{% block formName %}<u>WICS Parameters Changed</u>{% endblock  %}
+{% block statusMsgs %}
+    {% if Changes.changed or Changes.deleted or Changes.added %}
+        Changed: {{ Changes.changed }}
+        <br>
+        Deleted: {{ Changes.deleted }}
+        <br>
+        Added: {{ Changes.added }}
+    {% endif %}
+{% endblock %}
+<hr>
+
+{% block boddy %}
+    <!-- form footer -->
+    <div class="container">
+        <div class="row mx-auto max-width=100%">
+            <div class="col-5">
+            </div>
+            <div class="col-5"></div>
+            <div class="col">
+                <button type="button" onclick="window.close();">
+                    <img src="{% static 'stop-road-sign-icon.svg' %}" width="20" height="20"></img>
+                    Close Form
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        document.body.onbeforeunload = function() {
+            document.getElementById("wait_spinner").style.display = "block";
+            }
+
+        function create_empty_rec() {
+            var form_idx = $('#id_form-TOTAL_FORMS').val()
+            // check against max-forms before allowing add
+            $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx).replace("hidden",""))
+            $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1)
+        }
+    </script>
+
+{% endblock %}

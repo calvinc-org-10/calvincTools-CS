@@ -1,0 +1,17 @@
+TODO: move clearLayout to prototype utils, better yet, move utils to prototype
+TODO: pragma foreign_keys = ON; for each db connection
+TODO: convert session.query() calls to session.select()
+TODO: QMessageBox.question -> AreYouSure
+TODO: move parent arg for pleaseWriteMe to end
+TODO: Close EditMenu triggers menu reload
+TODO: button or control on menu to force reload
+TODO: EditMenu: way to set/unset/check uniqueness of Default Menu
+TODO: ShowTable - Set FormName/WindowName to Name of Table
+TODO: Refresh Menu after Copy/Move
+
+DONE: put headers on Table forms
+DONE: SimpleTableForm
+DONE: divorce _data from the model instances, so that it persists without session  (cMenu.utils/SQLAlchemyTableModel)
+DONE: **NOW!!** check uses of _buildForm, etc across entire project
+DONE: move parent arg for pleaseWriteMe to end
+

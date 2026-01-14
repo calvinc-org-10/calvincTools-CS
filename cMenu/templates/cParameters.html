@@ -1,0 +1,132 @@
+{% extends "WICS_common.html" %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block tTitle %}Parameters{% endblock %}
+{% block tHeader %}{% endblock %}
+
+{% block formName %}<u>WICS Parameters</u>{% endblock formName %}
+{% block statusMsgs %}
+    {% if Changes.changed or Changes.deleted or Changes.added %}
+        Changed: {{ Changes.changed }}
+        <br>
+        Deleted: {{ Changes.deleted }}
+        <br>
+        Added: {{ Changes.added }}
+    {% endif %}
+{% endblock %}
+
+{% block boddy %}
+<hr>
+    <!-- form body -->
+<form method="post">  <!-- action=?? - not needed - submit will submit to calling view -->
+    <!-- form header -->
+    {% csrf_token %}
+    {{ plist.management_form }}
+    <div class="container text-center">
+        {% if plist.non_form_errors %}
+        <div>
+            {{ plist.non_form_errors }}
+        </div>
+        <hr>
+        {% endif %}
+        <table>
+            <thead>
+                <tr>
+                    <td>ParmName</td>
+                    <td>ParmValue</td>
+                    <td>UserModifiable</td>
+                    <td>Comments</td>
+                    <td>Delete?</td>
+                </tr>
+            </thead>
+            <tbody>
+            {% for cprm in plist %}
+                {% if cprm.UserModifiable.value == True or request.user.is_superuser %}
+                {% if cprm.errors %}
+                    <tr>
+                    <td colspan=5>{{ cprm.errors }}</td>
+                    </tr>
+                {% endif %}
+                <tr style="border-bottom:solid;">
+                    <td>{% render_field cprm.ParmName %}</td>
+                    <td>{% render_field cprm.ParmValue %}</td>
+                    <td>{% render_field cprm.UserModifiable %}</td>
+                    <td>{% render_field cprm.Comments %}</td>
+                    <td>
+                        {% if plist.can_delete %}
+                            {{ cprm.DELETE }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <!-- form main -->
+
+    <!-- form footer -->
+    <div class="container">
+        <div class="row mx-auto max-width=100%">
+            <div class="col-5">
+                <button type="submit">
+                    <img src="{% static 'poem-poetry-icon.svg' %}" width="20" height="20"></img>
+                    Save changes
+                </button>
+                <!-- 
+                <button id="add-user" type="button" onclick="create_empty_rec()">
+                    Add parameter
+                </button>
+                --> 
+            </div>
+            <div class="col-5"></div>
+            <div class="col">
+                <button type="button" onclick="window.close();">
+                    <img src="{% static 'stop-road-sign-icon.svg' %}" width="20" height="20"></img>
+                    Close Form
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="empty_form" hidden>
+        <li>
+        <div class="row mx-auto max-width=100%">
+            <div class="col-3">
+                {% render_field plist.empty_form.ParmName %}
+            </div>
+            <div class="col-3">
+                {% render_field plist.empty_form.ParmValue %}
+            </div>
+            <div class="col-1">
+                {{ plist.empty_form.UserModifable }}
+            </div>
+            <div class="col-3">
+                {% render_field plist.empty_form.Comments %}
+                {% if plist.can_delete %}
+                    {% render_field plist.empty_form.DELETE %}
+                {% endif %}
+            </div>
+        </div>
+        </li>
+        <hr>
+    </div>
+
+</form>
+
+    <script>
+
+        document.body.onbeforeunload = function() {
+            document.getElementById("wait_spinner").style.display = "block";
+            }
+
+        function create_empty_rec() {
+            var form_idx = $('#id_form-TOTAL_FORMS').val()
+            // check against max-forms before allowing add
+            $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx).replace("hidden",""))
+            $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1)
+        }
+    </script>
+
+{% endblock %}
