@@ -27,17 +27,21 @@ class cTools_apphooks:
     @classmethod
     def initialize(cls, 
             app_sessionmaker=None, 
-            FormNameToURL_Map={},
-            ExternalWebPageURL_Map={},
+            FormNameToURL_Map=None,
+            ExternalWebPageURL_Map=None,
             appver='',
             **kwargs
-            ):
+            ):  # pylint: disable=unused-argument
         """
         The main method to initialize the singleton with all required hooks.
         This should be called ONCE during application startup before
         any calvinctools module is used.
         """
         instance = cls() # This ensures the instance exists
+        if FormNameToURL_Map is None:
+            FormNameToURL_Map={}
+        if ExternalWebPageURL_Map is None:
+            ExternalWebPageURL_Map={}
         if app_sessionmaker is not None:
             instance.set_app_sessionmaker(app_sessionmaker)
         if FormNameToURL_Map:
