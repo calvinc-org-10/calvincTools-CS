@@ -31,7 +31,7 @@ from .database import (
     )
 from .dbmenulist import (MenuRecords, newgroupnewmenu_menulist, newmenu_menulist, )
 # from sysver import sysver
-from .menucommand_constants import MENUCOMMANDS, COMMANDNUMBER
+from .menucommand_constants import MENUCOMMANDDICTIONARY, MENUCOMMAND
 from .models import (menuItems, menuGroups, )
 from .utils import (
     recordsetList,
@@ -538,7 +538,7 @@ class cWidgetMenuItem(cSimpleRecordForm_Base):
         'OptionText': {'label': 'OptionText', 'widgetType': QLineEdit, 'position': (0,1,1,2)},
         'TopLine': {'label': 'Top Line', 'widgetType': QCheckBox, 'position': (0,3,1,2), 'lblChkBxYesNo': {True:'YES', False:'NO'}, },
         'BottomLine': {'label': 'Btm Line', 'widgetType': QCheckBox, 'position': (0,5), 'lblChkBxYesNo': {True:'YES', False:'NO'}, },
-        'Command': {'label': 'Command', 'widgetType': cComboBoxFromDict, 'choices': vars(COMMANDNUMBER), 'position': (1,0,1,2)},
+        'Command': {'label': 'Command', 'widgetType': cComboBoxFromDict, 'choices': vars(MENUCOMMAND), 'position': (1,0,1,2)},
         'Argument': {'label': 'Argument', 'widgetType': QLineEdit, 'position': (1,2,1,2), },
         'PWord': {'label': 'Password', 'widgetType': QLineEdit, 'position': (1,4,1,2), },
     }

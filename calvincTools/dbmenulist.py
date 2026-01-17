@@ -2,7 +2,7 @@ from typing import (Any, Dict, List, Optional, )
 
 from sqlalchemy import Row, RowMapping, Select, Table, select, text
 
-from .menucommand_constants import (MENUCOMMANDS, COMMANDNUMBER, )
+from .menucommand_constants import (MENUCOMMANDDICTIONARY, MENUCOMMAND, )
 from .database import get_cMenu_session, get_cMenu_sessionmaker
 
 from .utils import (retListofQSQLRecord, recordsetList, select_with_join_excluding, )
@@ -14,27 +14,27 @@ initmenu_menulist = [
 {'MenuID': -1, 'OptionNumber': 0,
     'OptionText': 'New Menu', 'Command': None, 'Argument': 'Default', 'PWord': '', 'TopLine': 1, 'BottomLine': 1, },
 {'MenuID': -1, 'OptionNumber': 11,
-    'OptionText': 'Edit Menu', 'Command': COMMANDNUMBER.EditMenu, 'Argument': '', 'PWord': '', },
+    'OptionText': 'Edit Menu', 'Command': MENUCOMMAND.EditMenu, 'Argument': '', 'PWord': '', },
 {'MenuID': -1, 'OptionNumber': 19,
-    'OptionText': 'Change Password', 'Command': COMMANDNUMBER.ChangePW, 'Argument': '', 'PWord': '', },
+    'OptionText': 'Change Password', 'Command': MENUCOMMAND.ChangePW, 'Argument': '', 'PWord': '', },
 {'MenuID': -1, 'OptionNumber': 20,
-    'OptionText': 'Go Away!', 'Command': COMMANDNUMBER.ExitApplication, 'Argument': '', 'PWord': '', },
+    'OptionText': 'Go Away!', 'Command': MENUCOMMAND.ExitApplication, 'Argument': '', 'PWord': '', },
 ]
 
 newgroupnewmenu_menulist = [
 {'MenuID': 0, 'OptionNumber': 0,
     'OptionText': 'New Menu', 'Command': None, 'Argument': 'Default', 'PWord': '', 'TopLine': 1, 'BottomLine': 1, },
 {'MenuID': 0, 'OptionNumber': 19,
-    'OptionText': 'Change Password', 'Command': COMMANDNUMBER.ChangePW, 'Argument': '', 'PWord': '', },
+    'OptionText': 'Change Password', 'Command': MENUCOMMAND.ChangePW, 'Argument': '', 'PWord': '', },
 {'MenuID': 0, 'OptionNumber': 20,
-    'OptionText': 'Go Away!', 'Command': COMMANDNUMBER.ExitApplication, 'Argument': '', 'PWord': '', },
+    'OptionText': 'Go Away!', 'Command': MENUCOMMAND.ExitApplication, 'Argument': '', 'PWord': '', },
 ]
 
 newmenu_menulist = [
 {'OptionNumber': 0,
     'OptionText': 'New Menu', 'Command': None, 'Argument': '', 'PWord': '', 'TopLine': 1, 'BottomLine': 1, },
 {'OptionNumber': 20,
-    'OptionText': 'Return to Main Menu', 'Command': COMMANDNUMBER.LoadMenu, 'Argument': '0', 'PWord': '', },
+    'OptionText': 'Return to Main Menu', 'Command': MENUCOMMAND.LoadMenu, 'Argument': '0', 'PWord': '', },
 ]
 
 

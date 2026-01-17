@@ -19,7 +19,7 @@ from PySide6.QtSvgWidgets import QSvgWidget
 
 from .apphooks import cTools_apphooks
 from .dbmenulist import MenuRecords
-from .menucommand_constants import MENUCOMMANDS, COMMANDNUMBER
+from .menucommand_constants import MENUCOMMANDDICTIONARY, MENUCOMMAND
 from . import menucommand_handlers
 from .utils import (cComboBoxFromDict, pleaseWriteMe, cGridWidget, )
 
@@ -243,7 +243,7 @@ class cMenu(QWidget):
         # return
         CommandNum = menuItem['Command']
         CommandArg = menuItem['Argument']
-        CommandText = MENUCOMMANDS.get(CommandNum)
+        CommandText = MENUCOMMANDDICTIONARY.get(CommandNum)
 
         if CommandText == 'LoadMenu' :
             CommandArg = int(CommandArg)
@@ -290,7 +290,7 @@ class cMenu(QWidget):
             appinst = QApplication.instance()
             if appinst is not None:
                 appinst.quit()
-        elif CommandNum in MENUCOMMANDS:
+        elif CommandNum in MENUCOMMANDDICTIONARY:
             # command recognized but not yet implemented
             # TODO: QMessageBox.information ?
             msg = QMessageBox(self)
