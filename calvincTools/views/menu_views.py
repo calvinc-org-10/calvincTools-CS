@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_required, current_user
 from sqlalchemy import func
+
 from ..models import db, MenuItem, MenuGroup, MenuCommand
 from ..decorators import superuser_required
 from ..menucommand_constants import MENUCOMMANDDICTIONARY, MENUCOMMAND
@@ -93,6 +94,7 @@ def build_menu_html(menu_items, menu_group, menu_num):
         if item.command_id == MENUCOMMAND.LoadMenu. value:
             href = url_for('menu.load_menu', menu_group=menu_group, menu_num=item.argument)
             target = ''
+            onclick = ''
         elif item.command_id == MENUCOMMAND.ExitApplication.value:
             href = '#'
             onclick = ' onclick="event.preventDefault(); document.getElementById(\'lgoutfm\').submit();"'
