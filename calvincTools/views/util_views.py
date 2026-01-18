@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from sqlalchemy import text
 
-from ..models import db, Parameter, Greeting
+from ..models import db, cParameters, Greeting
 from ..forms import RawSQLForm
 from ..decorators import superuser_required
 
@@ -70,7 +70,7 @@ def edit_parameters():
         for key, value in request.form.items():
             if key.startswith('parm_value_'):
                 parm_name = key.replace('parm_value_', '')
-                param = Parameter.query.get(parm_name)
+                param = cParameters.query.get(parm_name)
                 if param and (param.user_modifiable or current_user.is_superuser):
                     param.parm_value = value
         
@@ -79,7 +79,7 @@ def edit_parameters():
         return redirect(url_for('utils.edit_parameters'))
     
     # GET request
-    parameters = Parameter.query.order_by(Parameter.parm_name).all()
+    parameters = cParameters.query.order_by(cParameters.parm_name).all()
     return render_template('utils/parameters.html', parameters=parameters)
 
 

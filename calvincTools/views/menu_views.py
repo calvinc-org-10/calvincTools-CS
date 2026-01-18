@@ -206,7 +206,7 @@ def edit_menu(menu_group, menu_num):
 
 
 @menu_bp.route('/create/<int:menu_group>/<int:menu_num>')
-@menu_bp.route('/create/<int:menu_group>/<int: menu_num>/<int:from_group>/<int:from_menu>')
+@menu_bp.route('/create/<int:menu_group>/<int:menu_num>/<int:from_group>/<int:from_menu>')
 @superuser_required
 def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
     """

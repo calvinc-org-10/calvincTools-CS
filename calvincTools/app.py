@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, url_for
 from flask_migrate import Migrate
-from .models import db
+
+from .models import db      # TODO: move this to database.py?
 from .usr_auth.views import init_login_manager, register_auth_blueprint
 from .views.menu_views import menu_bp
 from .views.util_views import util_bp

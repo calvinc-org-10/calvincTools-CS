@@ -1,5 +1,6 @@
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import UniqueConstraint
 
 db = SQLAlchemy()
@@ -8,6 +9,7 @@ db = SQLAlchemy()
 # MENU SYSTEM MODELS
 # ============================================================================
 
+# deprecate?
 class MenuCommand(db.Model):
     """
     Django equivalent: menuCommands
@@ -24,7 +26,7 @@ class MenuCommand(db.Model):
         return f'<MenuCommand {self.command} - {self.command_text}>'
     
     def __str__(self):
-        return f'{self.command} - {self. command_text}'
+        return f'{self.command} - {self.command_text}'
 
 
 class MenuGroup(db.Model):
@@ -38,7 +40,7 @@ class MenuGroup(db.Model):
     group_info = db.Column(db.String(250), default='')
     
     # Relationships
-    menu_items = db.relationship('MenuItem', back_populates='menu_group', lazy='dynamic')
+    menu_items = db.relationship('MenuItem', back_populates='menu_group', lazy='selectin')
     
     def __repr__(self):
         return f'<MenuGroup {self.id} - {self.group_name}>'
@@ -65,7 +67,7 @@ class MenuItem(db.Model):
     bottom_line = db.Column(db.Boolean, nullable=True)
     
     # Relationships
-    menu_group = db.relationship('MenuGroup', back_populates='menu_items')
+    menu_group = db.relationship('MenuGroup', back_populates='menu_items', lazy='joined')
     command_obj = db.relationship('MenuCommand', back_populates='menu_items')
     
     # Unique constraint (Django's UniqueConstraint)
@@ -78,25 +80,59 @@ class MenuItem(db.Model):
         return f'<MenuItem {self.menu_group_id},{self.menu_id}/{self.option_number}>'
     
     def __str__(self):
-        return f'{self. menu_group}, {self.menu_id}/{self.option_number}, {self.option_text}'
+        return f'{self.menu_group}, {self.menu_id}/{self.option_number}, {self.option_text}'
 
 
-class Parameter(db.Model):
+class cParameters(db.Model):
     """
     Django equivalent: cParameters
     """
     __tablename__ = 'parameters'
     
-    parm_name = db.Column(db.String(100), primary_key=True)
-    parm_value = db.Column(db.String(512), default='', nullable=False)
-    user_modifiable = db.Column(db. Boolean, default=True, nullable=False)
-    comments = db.Column(db.String(512), default='', nullable=False)
+    parm_name: str = db.Column(db.String(100), primary_key=True)
+    parm_value: str = db.Column(db.String(512), default='', nullable=False)
+    user_modifiable: bool = db.Column(db.Boolean, default=True, nullable=False)
+    comments: str = db.Column(db.String(512), default='', nullable=False)
+    
+    def __init__(self, parm_name: str, parm_value: str = '', user_modifiable: bool = True, comments: str = ''):
+        self.parm_name = parm_name
+        self.parm_value = parm_value
+        self.user_modifiable = user_modifiable
+        self.comments = comments
     
     def __repr__(self):
         return f'<Parameter {self.parm_name}>'
     
     def __str__(self):
         return f'{self.parm_name} ({self.parm_value})'
+    
+    @classmethod
+    def get_parameter(cls, parm_name: str, default: str = '') -> str:
+        """
+        Django equivalent: getcParm
+        """
+        param = cls.query.filter_by(parm_name=parm_name).first()
+        return param.parm_value if param else default
+    
+    @classmethod
+    def set_parameter(cls, parm_name: str, parm_value: str, user_modifiable: bool = True, comments: str = ''):
+        """
+        Django equivalent: setcParm
+        """
+        param = cls.query.filter_by(parm_name=parm_name).first()
+        if param:
+            param.parm_value = parm_value
+        else:
+            param = cls(
+                parm_name=parm_name,
+                parm_value=parm_value,
+                user_modifiable=user_modifiable,
+                comments=comments
+            )
+            db.session.add(param)
+        
+        db.session.commit()
+        return param
 
 
 class Greeting(db.Model):
@@ -113,35 +149,3 @@ class Greeting(db.Model):
     
     def __str__(self):
         return f'{self.greeting} (ID: {self.id})'
-
-
-# ============================================================================
-# HELPER FUNCTIONS (replacing Django's get/set functions)
-# ============================================================================
-
-def get_parameter(parm_name, default=''):
-    """
-    Django equivalent: getcParm
-    """
-    param = Parameter.query.filter_by(parm_name=parm_name).first()
-    return param.parm_value if param else default
-
-
-def set_parameter(parm_name, parm_value, user_modifiable=True, comments=''):
-    """
-    Django equivalent: setcParm
-    """
-    param = Parameter.query.filter_by(parm_name=parm_name).first()
-    if param:
-        param.parm_value = parm_value
-    else:
-        param = Parameter(
-            parm_name=parm_name,
-            parm_value=parm_value,
-            user_modifiable=user_modifiable,
-            comments=comments
-        )
-        db.session.add(param)
-    
-    db.session.commit()
-    return param

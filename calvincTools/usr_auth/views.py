@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 
+from .models import User
 from ..models import db
 # Assuming you have db instance from Flask-SQLAlchemy
 # from your_app import db
@@ -19,7 +20,7 @@ def init_login_manager(app):
     """Initialize Flask-Login with the Flask app."""
     login_manager = LoginManager()
     login_manager.init_app(app)
-    login_manager.login_view = 'auth.login'  # Redirect to login page if not authenticated
+    login_manager.login_view = 'auth.login'  # type: ignore # Redirect to login page if not authenticated
     login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'info'
     
@@ -132,6 +133,7 @@ def login_view():
             return render_template('auth/login.html')
         
         # Log the user in
+        assert isinstance(remember, bool), "Remember must be a boolean value"
         login_user(user, remember=remember)
         user.update_last_login()
         
@@ -236,7 +238,7 @@ def register_view():
             return render_template('auth/register.html')
         
         # Create new user
-        new_user = User(username=username, email=email)
+        new_user = User(username=username, email=email)      # type: ignore
         new_user.set_password(password)
         
         db.session.add(new_user)
@@ -300,6 +302,7 @@ class LoginView(MethodView):
             flash('Your account has been deactivated.', 'danger')
             return render_template('auth/login.html')
         
+        assert isinstance(remember, bool), "Remember must be a boolean value"
         login_user(user, remember=remember)
         user.update_last_login()
         

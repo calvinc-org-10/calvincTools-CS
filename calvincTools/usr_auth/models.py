@@ -32,6 +32,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False) # type: ignore
     is_superuser = db.Column(db.Boolean, default=False, nullable=False)
+    permissions = db.Column(db.String(1024), nullable=False)
     date_joined = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
     last_login = db.Column(db.DateTime, nullable=True)
     

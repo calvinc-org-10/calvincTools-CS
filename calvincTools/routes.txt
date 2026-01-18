@@ -1,0 +1,21 @@
+(.venv-H) PS F:\calvincTools-CS\calvincTools> flask routes
+Endpoint               Methods    Rule
+---------------------  ---------  -----------------------------------------------------------------------------
+auth.change_password   GET, POST  /auth/change-password
+auth.login             GET, POST  /auth/login
+auth.logout            GET, POST  /auth/logout
+auth.register          GET, POST  /auth/register
+index                  GET        /
+menu.create_menu       GET        /menu/create/<int:menu_group>/<int:menu_num>/<int:from_group>/<int:from_menu>
+menu.create_menu       GET        /menu/create/<int:menu_group>/<int:menu_num>
+menu.edit_menu         GET, POST  /menu/edit/<int:menu_group>/<int:menu_num>
+menu.edit_menu_init    GET        /menu/edit
+menu.handle_command    GET        /menu/command/<int:command_num>/<command_arg>
+menu.load_menu         GET        /menu/load/<int:menu_group>/<int:menu_num>
+menu.remove_menu       GET        /menu/remove/<int:menu_group>/<int:menu_num>
+static                 GET        /static/<path:filename>
+utils.edit_parameters  GET, POST  /utils/parameters
+utils.greetings        GET, POST  /utils/greetings
+utils.run_sql          GET, POST  /utils/sql
+
+NOTES: edit/configure index
