@@ -3,6 +3,8 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import UniqueConstraint
 
+from calvincTools.mixins import _ModelInitMixin
+
 db = SQLAlchemy()
 
 # ============================================================================
@@ -10,7 +12,7 @@ db = SQLAlchemy()
 # ============================================================================
 
 # deprecate?
-class MenuCommand(db.Model):
+class MenuCommand(_ModelInitMixin, db.Model):
     """
     Django equivalent: menuCommands
     """
@@ -29,7 +31,7 @@ class MenuCommand(db.Model):
         return f'{self.command} - {self.command_text}'
 
 
-class MenuGroup(db.Model):
+class MenuGroup(_ModelInitMixin, db.Model):
     """
     Django equivalent: menuGroups
     """
@@ -49,7 +51,7 @@ class MenuGroup(db.Model):
         return f'menuGroup {self.group_name}'
 
 
-class MenuItem(db.Model):
+class MenuItem(_ModelInitMixin, db.Model):
     """
     Django equivalent: menuItems
     """
@@ -83,7 +85,7 @@ class MenuItem(db.Model):
         return f'{self.menu_group}, {self.menu_id}/{self.option_number}, {self.option_text}'
 
 
-class cParameters(db.Model):
+class cParameters(_ModelInitMixin, db.Model):
     """
     Django equivalent: cParameters
     """
@@ -135,7 +137,7 @@ class cParameters(db.Model):
         return param
 
 
-class Greeting(db.Model):
+class Greeting(_ModelInitMixin, db.Model):
     """
     Django equivalent: cGreetings
     """

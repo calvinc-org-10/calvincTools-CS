@@ -31,7 +31,7 @@ def get_default_menu(menu_group_id):
         option_number=0
     ).scalar()
     
-    return result, None
+    return result, ''
 
 
 @menu_bp.route('/load/<int:menu_group>/<int:menu_num>')
