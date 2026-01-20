@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine
+from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import sessionmaker
 
 db = SQLAlchemy()
@@ -11,9 +11,13 @@ db = SQLAlchemy()
 # will be deprecated in the client-server version; flask-sqlalchemy will handle connections
 # an Engine, which the Session will use for connection
 # resources, typically in module scope
-cMenu_engine = db.engine
+cMenu_engine: Engine
 # a sessionmaker(), also in the same scope as the engine
-_cMenu_Session = sessionmaker(cMenu_engine)
+_cMenu_Session: sessionmaker
+# def init_cDatabase(dbParm):
+#     global cMenu_engine, _cMenu_Session     #pylint: disable=global-statement
+#     cMenu_engine = dbParm.engine
+#     _cMenu_Session = sessionmaker(cMenu_engine)
 
 def get_cMenu_session():
     return _cMenu_Session()
