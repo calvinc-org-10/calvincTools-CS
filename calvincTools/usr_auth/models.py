@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 
-from ..models import db
+from ..database import db
 # Assuming you have db instance from Flask-SQLAlchemy
 # from your_app import db
 

@@ -5,7 +5,9 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from sqlalchemy import text
 
-from ..models import db, cParameters, Greeting
+from ..database import db
+
+from ..models import cParameters, Greeting
 from ..forms import RawSQLForm
 from ..decorators import superuser_required
 

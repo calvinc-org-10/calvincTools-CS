@@ -1,5 +1,8 @@
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+db = SQLAlchemy()
 
 rootdir = "."
 cMenu_dbName = f"{rootdir}\\cMenudb.sqlite"
@@ -124,6 +127,8 @@ class Repository(Generic[T]):
             session.commit()
         # endwith
         return updated_count
+
+
     #updatewhere
     
 # Repository

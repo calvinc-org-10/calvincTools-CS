@@ -1,11 +1,9 @@
 from datetime import datetime
 
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import UniqueConstraint
 
+from calvincTools.database import db
 from calvincTools.mixins import _ModelInitMixin
-
-db = SQLAlchemy()
 
 # ============================================================================
 # MENU SYSTEM MODELS
