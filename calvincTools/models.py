@@ -94,11 +94,11 @@ class cParameters(_ModelInitMixin, db.Model):
     user_modifiable: bool = db.Column(db.Boolean, default=True, nullable=False)
     comments: str = db.Column(db.String(512), default='', nullable=False)
     
-    def __init__(self, parm_name: str, parm_value: str = '', user_modifiable: bool = True, comments: str = ''):
-        self.parm_name = parm_name
-        self.parm_value = parm_value
-        self.user_modifiable = user_modifiable
-        self.comments = comments
+    # def __init__(self, parm_name: str, parm_value: str = '', user_modifiable: bool = True, comments: str = ''):
+    #     self.parm_name = parm_name
+    #     self.parm_value = parm_value
+    #     self.user_modifiable = user_modifiable
+    #     self.comments = comments
     
     def __repr__(self):
         return f'<Parameter {self.parm_name}>'
@@ -149,3 +149,4 @@ class Greeting(_ModelInitMixin, db.Model):
     
     def __str__(self):
         return f'{self.greeting} (ID: {self.id})'
+

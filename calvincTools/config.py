@@ -12,18 +12,24 @@ class Config:
     SESSION_COOKIE_SAMESITE = 'Lax'
     PERMANENT_SESSION_LIFETIME = 3600  # 1 hour
 
+    # calvincTools specific
+    root_path = "."
+    # root_path = os.path.abspath(os.path.dirname(__file__))
+    cMenu_dbPath = f"{root_path}\\cMenudb.sqlite"
 
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-        'sqlite:///dev_database.db'
+        f'sqlite:///{Config.cMenu_dbPath}'
+        # 'sqlite:///dev_database.db'
     SQLALCHEMY_ECHO = True
 
 
 class ProductionConfig(Config):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os. environ.get('DATABASE_URL') or \
-        'sqlite:///prod_database.db'
+        f'sqlite:///{Config.cMenu_dbPath}'
+        # 'sqlite:///prod_database.db'
     
     # Enhanced security for production
     SESSION_COOKIE_SECURE = True  # HTTPS only

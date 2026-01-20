@@ -4,14 +4,14 @@ from sqlalchemy.orm import sessionmaker
 
 db = SQLAlchemy()
 
-rootdir = "."
-cMenu_dbName = f"{rootdir}\\cMenudb.sqlite"
+# moved to config.py
+# rootdir = "."
+# cMenu_dbName = f"{rootdir}\\cMenudb.sqlite"
 
+# will be deprecated in the client-server version; flask-sqlalchemy will handle connections
 # an Engine, which the Session will use for connection
 # resources, typically in module scope
-cMenu_engine = create_engine(
-    f"sqlite:///{cMenu_dbName}",
-    )
+cMenu_engine = db.engine
 # a sessionmaker(), also in the same scope as the engine
 _cMenu_Session = sessionmaker(cMenu_engine)
 

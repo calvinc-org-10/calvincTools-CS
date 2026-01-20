@@ -9,10 +9,12 @@ class cTools_apphooks:
     """
     _instance = None
     _app_sessionmaker = None
+    _app_db = None
     _appver = ''
     _FormNameToURL_Map = {}
     _ExternalWebPageURL_Map = {}
     _MUSTBEINITIALIZED: set = {
+        'app_db',
         'app_sessionmaker',
         'FormNameToURL_Map', 
         'ExternalWebPageURL_Map',
@@ -26,6 +28,7 @@ class cTools_apphooks:
 
     @classmethod
     def initialize(cls, 
+            app_db=None,
             app_sessionmaker=None, 
             FormNameToURL_Map=None,
             ExternalWebPageURL_Map=None,
@@ -42,6 +45,8 @@ class cTools_apphooks:
             FormNameToURL_Map={}
         if ExternalWebPageURL_Map is None:
             ExternalWebPageURL_Map={}
+        if app_db is not None:
+            instance.set_app_db(app_db)
         if app_sessionmaker is not None:
             instance.set_app_sessionmaker(app_sessionmaker)
         if FormNameToURL_Map:
@@ -65,6 +70,24 @@ class cTools_apphooks:
         return not any(getattr(instance, f'_{attr}', None) is None for attr in cls._MUSTBEINITIALIZED)
     # is_initialized
 
+
+    def get_app_db(self):
+        """
+        Retrieve the configured application database sessionmaker.
+        """
+        if self._app_db is None:
+            raise RuntimeError(
+                "cTools_apphooks has not been initialized with 'app_sessionmaker'. "
+                "Call cTools_apphooks.initialize() first."
+            )
+        return self._app_db
+    # get_app_db
+    def set_app_db(self, app_db):
+        """
+        Set the application database sessionmaker.
+        """
+        self._app_db = app_db
+    # set_app_db
 
     def get_app_sessionmaker(self):
         """
