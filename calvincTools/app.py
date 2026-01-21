@@ -8,7 +8,7 @@ from .views.util_views import util_bp
 from . import config
 
 def create_app(config_name='development'):
-    flskapp = Flask(__name__)
+    flskapp = Flask(__name__, static_folder='assets', template_folder='templates')
     flskapp.config.from_object(config.config[config_name])
     
     # Initialize extensions

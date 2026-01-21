@@ -1,0 +1,66 @@
+{#####  WICS_common  #####}
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- jQuery CSS -->
+    <link rel="stylesheet" href="{% static 'jquery/jquery-ui.min.css' %}">
+    <!-- jQuery JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- jQuery UI -->
+    <script src="{% static 'jquery/jquery-ui.min.js' %}"></script>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <!-- Bootstrap JS bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+
+    <link href="{% static 'calvinstyles.css' %}" rel="stylesheet">
+    <script src="{% static 'calvinprocs.js' %}"></script>
+    <link rel="icon" type="image/x-icon" href="{% static 'WICS-favicon.png' %}">
+    <title>{% block tTitle %}{% endblock %}</title>
+    {% block tHeader %}
+	<style>
+        {% comment %}
+        {# include "proposed-table-CSS.css" #}
+        {% endcomment %}
+        {% block customCSS %}{% endblock %}
+    </style>
+	{% endblock %}
+</head>
+<body {% block boddyAttr %}{% endblock %}>
+<div class="container text-center mx-auto {% block WICSHeader_div_attr %}{% endblock %}">
+    {% block WICSHdr_LogoFormNameUserName %}
+    <div class="row">   <!-- WICS Logo, FormName and username -->
+		<div class="col-6 fs-3 text-center">{% block formName %}{% endblock %}</div>
+        <div class="col-4 fs-2 text-start"><img src={% static 'WICS-Logo.png' %} width="150" height="75"></div>
+        <div class="col-2 text-end"> {{ user.get_full_name }} </div>
+    </div>
+    {% endblock %}
+    <div class="row"> <!-- status messages -->
+        <div id="wait_spinner" class="container" style="display:none">
+			<div class="spinner-border text-success">
+			</div>
+			{% block wait_spinner_msgs %}
+			{% endblock %}
+		</div>
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+		{% block statusMsgs %}<!-- extra status messages should be div's -->{% endblock %}
+    </div> <!-- row -->
+</div> <!-- container -->
+
+{% block boddy %}
+{% endblock %}
+</body>
+</html>
