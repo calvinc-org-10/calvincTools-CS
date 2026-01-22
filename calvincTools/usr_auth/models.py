@@ -8,6 +8,9 @@ from flask_sqlalchemy import SQLAlchemy
 
 from ..database import db
 # Assuming you have db instance from Flask-SQLAlchemy
+
+from ..models import MenuGroup
+
 # from your_app import db
 
 
@@ -33,6 +36,7 @@ class User(UserMixin, db.Model):
     is_active = db.Column(db.Boolean, default=True, nullable=False) # type: ignore
     is_superuser = db.Column(db.Boolean, default=False, nullable=False)
     permissions = db.Column(db.String(1024), nullable=False)
+    menugroup = db.relationship('MenuGroup', backref='users', lazy='joined')
     date_joined = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
     last_login = db.Column(db.DateTime, nullable=True)
     

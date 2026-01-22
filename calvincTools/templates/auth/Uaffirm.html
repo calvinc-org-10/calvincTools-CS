@@ -1,12 +1,11 @@
 {% extends "cTools_common.html" %}
-{% load static %}
 
-{% block tTitle %}WICS Log in{% if sysver_key == 'DEV' %} D{%endif%}{% endblock %}
+{% block tTitle %}App Log in{% if sysver_key == 'DEV' %} D{%endif%}{% endblock %}
 {% block tHeader %}
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <meta name="robots" content="NONE,NOARCHIVE">
 {% endblock %}
-{% block WICSHdr_LogoFormNameUserName %}{% endblock %}  {# I don't want standard header on this form #}
+{% block Hdr_LogoFormNameUserName %}{% endblock %}  {# I don't want standard header on this form #}
 {% block boddy %}
 
 <div class="container m-2">
@@ -65,7 +64,7 @@
             </div>
         </div>
         <div class="col-6">
-            {% include "WICSNews.html" %}
+            {% include "appNews.html" %}
         </div>
     </div>
     </div>

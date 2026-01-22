@@ -1,8 +1,7 @@
-{#####  WICS_common  #####}
+{#####  cTools_common  #####}
 <!DOCTYPE html>
-{% load static %}
 
-EXAMPLES OF GETTING STATIS FILES
+EXAMPLES OF GETTING STATIC FILES
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
@@ -19,9 +18,8 @@ EXAMPLES OF GETTING STATIS FILES
     <!-- Bootstrap JS bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
 
-    <link href="{% static 'calvinstyles.css' %}" rel="stylesheet">
-    <script src="{% static 'calvinprocs.js' %}"></script>
-    <link rel="icon" type="image/x-icon" href="{% static 'WICS-favicon.png' %}">
+    <script src="{{ url_for('static', filename='js/calvinprocs.js') }}"></script>
+    {# <link rel="icon" type="image/x-icon" href="{% static 'WICS-favicon.png' %}"> do block/tag for app icon #}
     <title>{% block tTitle %}{% endblock %}</title>
     {% block tHeader %}
 	<style>
@@ -33,11 +31,11 @@ EXAMPLES OF GETTING STATIS FILES
 	{% endblock %}
 </head>
 <body {% block boddyAttr %}{% endblock %}>
-<div class="container text-center mx-auto {% block WICSHeader_div_attr %}{% endblock %}">
-    {% block WICSHdr_LogoFormNameUserName %}
+<div class="container text-center mx-auto {% block Header_div_attr %}{% endblock %}">
+    {% block Hdr_LogoFormNameUserName %}
     <div class="row">   <!-- WICS Logo, FormName and username -->
 		<div class="col-6 fs-3 text-center">{% block formName %}{% endblock %}</div>
-        <div class="col-4 fs-2 text-start"><img src={% static 'WICS-Logo.png' %} width="150" height="75"></div>
+        <div class="col-4 fs-2 text-start">{# <img src={% static 'WICS-Logo.png' %} width="150" height="75"> #}</div>
         <div class="col-2 text-end"> {{ user.get_full_name }} </div>
     </div>
     {% endblock %}
