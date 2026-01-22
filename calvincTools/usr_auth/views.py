@@ -148,7 +148,81 @@ def login_view():
     # GET request
     return render_template('auth/login.html')
 
+# flask-login example login view
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     # Here we use a class of some kind to represent and validate our
+#     # client-side form data. For example, WTForms is a library that will
+#     # handle this for us, and we use a custom LoginForm to validate.
+#     form = LoginForm()
+#     if form.validate_on_submit():
+#         # Login and validate the user.
+#         # user should be an instance of your `User` class
+#         login_user(user)
 
+#         flask.flash('Logged in successfully.')
+
+#         next = flask.request.args.get('next')
+#         # url_has_allowed_host_and_scheme should check if the url is safe
+#         # for redirects, meaning it matches the request host.
+#         # See Django's url_has_allowed_host_and_scheme for an example.
+#         if not url_has_allowed_host_and_scheme(next, request.host):
+#             return flask.abort(400)
+
+#         return flask.redirect(next or flask.url_for('index'))
+#     return flask.render_template('login.html', form=form)
+# also see Django's implementation:
+# currently at calvincTools\oldcode\http.py
+def url_has_allowed_host_and_scheme(url, allowed_hosts, require_https=False):
+    """
+    Return ``True`` if the url uses an allowed host and a safe scheme.
+
+    Always return ``False`` on an empty url.
+
+    If ``require_https`` is ``True``, only 'https' will be considered a valid
+    scheme, as opposed to 'http' and 'https' with the default, ``False``.
+
+    Note: "True" doesn't entail that a URL is "safe". It may still be e.g.
+    quoted incorrectly. Ensure to also use django.utils.encoding.iri_to_uri()
+    on the path component of untrusted URLs.
+    """
+    if url is not None:
+        url = url.strip()
+    if not url:
+        return False
+    if allowed_hosts is None:
+        allowed_hosts = set()
+    elif isinstance(allowed_hosts, str):
+        allowed_hosts = {allowed_hosts}
+    # Chrome treats \ completely as / in paths but it could be part of some
+    # basic auth credentials so we need to check both URLs.
+    return (
+        _url_has_allowed_host_and_scheme(url, allowed_hosts, require_https=require_https) and
+        _url_has_allowed_host_and_scheme(url.replace('\\', '/'), allowed_hosts, require_https=require_https)
+    )
+
+def _url_has_allowed_host_and_scheme(url, allowed_hosts, require_https=False):
+    from urllib.parse import urlparse
+
+    try:
+        url_info = urlparse(url)
+    except ValueError:
+        return False
+    # URL has a netloc (domain with optional port)
+    if url_info.netloc:
+        host = url_info.hostname
+        if host is None:
+            return False
+        if host not in allowed_hosts and '*' not in allowed_hosts:
+            return False
+    # URL has no netloc and therefore is relative.
+    else:
+        return True
+    # Check scheme is safe.
+    scheme = url_info.scheme
+    if require_https:
+        return scheme == 'https'
+    return scheme in ('http', 'https')
 def logout_view():
     """
     Handle user logout.
