@@ -1,7 +1,12 @@
+from typing import Any
 from datetime import datetime
 
 from flask_login import UserMixin
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import (
+    UniqueConstraint,
+    inspect,
+    )
+from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from calvincTools.database import cMenu_db
@@ -52,7 +57,7 @@ class menuGroups(_ModelInitMixin, cMenu_db.Model):
         return f'menuGroup {self.group_name}'
 
     @classmethod
-    def _createtable(cls, engine):
+    def _createtable(cls):
         # Create tables if they don't exist
         cMenu_db.create_all()
 
@@ -60,44 +65,44 @@ class menuGroups(_ModelInitMixin, cMenu_db.Model):
             # Check if any group exists
             if not cMenu_db.session.query(cls).first():
                 # Add starter group
-                starter = cls(GroupName="Group Name", GroupInfo="Group Info")
+                starter = cls(group_name="Group Name", group_info="Group Info")
                 cMenu_db.session.add(starter)
                 cMenu_db.session.commit()
                 # Add default menu items for the starter group
                 starter_id = starter.id
                 menu_items = [
                     menuItems(
-                        MenuGroup_id=starter_id, MenuID=0, OptionNumber=0, 
-                        OptionText='New Menu', 
-                        Command=None, Argument='Default', 
-                        PWord='', TopLine=True, BottomLine=True
+                        menu_group_id=starter_id, menu_id=0, option_number=0, 
+                        option_text='New Menu', 
+                        command_id=None, argument='Default', 
+                        pword='', top_line=True, bottom_line=True
                         ),
                     menuItems(
-                        MenuGroup_id=starter_id, MenuID=0, OptionNumber=11, 
-                        OptionText='Edit Menu', 
-                        Command=COMMANDNUMBER.EditMenu, Argument='', 
-                        PWord='', TopLine=None, BottomLine=None
+                        menu_group_id=starter_id, menu_id=0, option_number=11, 
+                        option_text='Edit Menu', 
+                        command_id=COMMANDNUMBER.EditMenu, argument='', 
+                        pword='', top_line=None, bottom_line=None
                         ),
                     menuItems(
-                        MenuGroup_id=starter_id, MenuID=0, OptionNumber=19, 
-                        OptionText='Change Password', 
-                        Command=COMMANDNUMBER.ChangePW, Argument='', 
-                        PWord='', TopLine=None, BottomLine=None
+                        menu_group_id=starter_id, menu_id=0, option_number=19, 
+                        option_text='Change Password', 
+                        command_id=COMMANDNUMBER.ChangePW, argument='', 
+                        pword='', top_line=None, bottom_line=None
                         ),
                     menuItems(
-                        MenuGroup_id=starter_id, MenuID=0, OptionNumber=20, 
-                        OptionText='Go Away!', 
-                        Command=COMMANDNUMBER.ExitApplication, Argument='', 
-                        PWord='', TopLine=None, BottomLine=None
+                        menu_group_id=starter_id, menu_id=0, option_number=20, 
+                        option_text='Go Away!', 
+                        command_id=COMMANDNUMBER.ExitApplication, argument='', 
+                        pword='', top_line=None, bottom_line=None
                         ),
                     ]
-                session.add_all(menu_items)
-                session.commit()
+                cMenu_db.session.add_all(menu_items)
+                cMenu_db.session.commit()
             # endif no group exists
         except IntegrityError:
-            session.rollback()
+            cMenu_db.session.rollback()
         finally:
-            session.close()
+            cMenu_db.session.close()
         # end try
     # _createtable
 
@@ -141,12 +146,12 @@ class menuItems(_ModelInitMixin, cMenu_db.Model):
         If the menuGroups table doesn't exist, it will also be created, and a starter group and menu will be added.
         :param kw: Keyword arguments for the menuItems instance.
         """
-        inspector = inspect(get_cMenu_session().get_bind())
+        inspector = inspect(cMenu_db.engine)
         if not inspector.has_table(self.__tablename__):
             # If the table does not exist, create it
-            cMenuBase.metadata.create_all(get_cMenu_session().get_bind())
+            cMenu_db.create_all()
             # Optionally, you can also create a starter group and menu here
-            menuGroups._createtable(get_cMenu_session().get_bind())
+            menuGroups._createtable()
         #endif not inspector.has_table():
         super().__init__(**kw)
     # __init__
@@ -259,9 +264,23 @@ class User(UserMixin, cMenu_db.Model):
     def __repr__(self):
         return f'<User {self.username}>'
 
-cMenuBase.metadata.create_all(get_cMenu_session().get_bind())
+    def __init__(self, **kw: Any):
+        """
+        Initialize a user instance. If the user table doesn't exist, it will be created.
+        """
+        inspector = inspect(cMenu_db.engine)
+        if not inspector.has_table(self.__tablename__):
+            # If the table does not exist, create it
+            cMenu_db.create_all()
+        #endif not inspector.has_table():
+        super().__init__(**kw)
+    # __init__
+
+
+cMenu_db.create_all()
 # Ensure that the tables are created when the module is imported
-menuGroups._createtable(get_cMenu_session().get_bind())
-menuItems() #._createtable(get_cMenu_session().get_bind())
-cParameters() #._createtable(get_cMenu_session().get_bind())
-cGreetings() #._createtable(get_cMenu_session().get_bind())
+menuGroups._createtable()
+menuItems() #._createtable()
+cParameters() #._createtable()
+cGreetings() #._createtable()
+User() #._createtable()
