@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, session
 from flask_migrate import Migrate
 
 from .database import db  # , init_cDatabase      # TODO: move this to database.py?
@@ -25,7 +25,9 @@ def create_app(config_name='development'):
     # Home route
     @flskapp.route('/')
     def index():
-        return redirect(url_for('menu.load_menu', menu_group=1, menu_num=0))
+        mnugrp = session.get('menu_group', 1)
+        return redirect(url_for('menu.load_menu', menu_group=mnugrp))
+        # return redirect(url_for('menu.load_menu', menu_group=1, menu_num=0))
     
     # Error handlers
     @flskapp.errorhandler(404)
