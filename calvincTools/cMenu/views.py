@@ -2,9 +2,9 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from sqlalchemy import func
 
-from ..database import db
+from ..database import cMenu_db
 
-from ..models import MenuItem, MenuGroup, MenuCommand
+from ..models import menuItems, menuGroups, MenuCommand
 from ..decorators import superuser_required
 from ..menucommand_constants import MENUCOMMANDDICTIONARY, MENUCOMMAND
 
@@ -15,11 +15,11 @@ def get_default_menu(menu_group_id):
     """
     Django equivalent: DefaultMenu
     """
-    menu_group = MenuGroup.query.get(menu_group_id)
+    menu_group = menuGroups.query.get(menu_group_id)
     if not menu_group: 
         return None, f'No such MenuGroup as {menu_group_id}'
     
-    menu_item = MenuItem.query.filter_by(
+    menu_item = menuItems.query.filter_by(
         menu_group_id=menu_group_id,
         option_number=0
     ).first()
@@ -28,7 +28,7 @@ def get_default_menu(menu_group_id):
         return None, f'MenuGroup {menu_group_id} has no menu'
     
     # Get minimum menu_id for this group with option_number=0
-    result = db.session.query(func.min(MenuItem.menu_id)).filter_by(
+    result = cMenu_db.session.query(func.min(menuItems.menu_id)).filter_by(
         menu_group_id=menu_group_id,
         option_number=0
     ).scalar()
@@ -44,7 +44,7 @@ def load_menu(menu_group, menu_num):
     Displays a menu to the user. 
     """
     # Check if menu exists
-    menu_items_query = MenuItem.query.filter_by(
+    menu_items_query = menuItems.query.filter_by(
         menu_group_id=menu_group,
         menu_id=menu_num,
         option_number=0
@@ -61,10 +61,10 @@ def load_menu(menu_group, menu_num):
             return redirect(url_for('auth.logout'))
     
     # Get all menu items for this menu
-    menu_items = MenuItem.query.filter_by(
+    menu_items = menuItems.query.filter_by(
         menu_group_id=menu_group,
         menu_id=menu_num
-    ).order_by(MenuItem.option_number).all()
+    ).order_by(menuItems.option_number).all()
     
     menu_name = next((item.option_text for item in menu_items if item.option_number == 0), 'Menu')
     
@@ -156,13 +156,13 @@ def edit_menu_init():
     Django equivalent: EditMenu_init
     """
     # Get first menu group and menu ID
-    result = db.session.query(func.min(MenuItem.menu_group_id)).filter_by(
+    result = cMenu_db.session.query(func.min(menuItems.menu_group_id)).filter_by(
         option_number=0
     ).scalar()
     
     menu_grp = result if result else 1
     
-    result = db.session.query(func.min(MenuItem.menu_id)).filter_by(
+    result = cMenu_db.session.query(func.min(menuItems.menu_id)).filter_by(
         menu_group_id=menu_grp,
         option_number=0
     ).scalar()
@@ -179,12 +179,12 @@ def edit_menu(menu_group, menu_num):
     Django equivalent: EditMenu
     This is a complex view - simplified version shown
     """
-    menu_items = MenuItem.query.filter_by(
+    menu_items = menuItems.query.filter_by(
         menu_group_id=menu_group,
         menu_id=menu_num
-    ).order_by(MenuItem.option_number).all()
+    ).order_by(menuItems.option_number).all()
     
-    menu_group_obj = MenuGroup.query.get(menu_group)
+    menu_group_obj = menuGroups.query.get(menu_group)
     
     if not menu_items:
         flash(f'Menu {menu_group},{menu_num} does not exist', 'error')
@@ -215,7 +215,7 @@ def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
     Django equivalent:  MenuCreate
     """
     # Check if menu already exists
-    existing = MenuItem.query.filter_by(
+    existing = menuItems.query.filter_by(
         menu_group_id=menu_group,
         menu_id=menu_num
     ).first()
@@ -225,24 +225,24 @@ def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
         return redirect(url_for('menu.edit_menu_init'))
     
     # Get or create menu group
-    menu_group_obj = MenuGroup.query.get(menu_group)
+    menu_group_obj = menuGroups.query.get(menu_group)
     if not menu_group_obj: 
-        menu_group_obj = MenuGroup(id=menu_group, group_name='New Menu Group')
-        db.session. add(menu_group_obj)
-        db.session.flush()
+        menu_group_obj = menuGroups(id=menu_group, group_name='New Menu Group')
+        cMenu_db.session. add(menu_group_obj)
+        cMenu_db.session.flush()
     
     if from_menu is not None:
         # Copy from existing menu
         if from_group is None:
             from_group = menu_group
         
-        source_items = MenuItem.query.filter_by(
+        source_items = menuItems.query.filter_by(
             menu_group_id=from_group,
             menu_id=from_menu
         ).all()
         
         for item in source_items:
-            new_item = MenuItem(
+            new_item = menuItems(
                 menu_group_id=menu_group,
                 menu_id=menu_num,
                 option_number=item.option_number,
@@ -250,18 +250,18 @@ def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
                 command_id=item.command_id,
                 argument=item.argument
             )
-            db.session.add(new_item)
+            cMenu_db.session.add(new_item)
     else:
         # Create new menu from scratch
-        title_item = MenuItem(
+        title_item = menuItems(
             menu_group_id=menu_group,
             menu_id=menu_num,
             option_number=0,
             option_text='New Menu'
         )
-        db.session.add(title_item)
+        cMenu_db.session.add(title_item)
         
-        exit_item = MenuItem(
+        exit_item = menuItems(
             menu_group_id=menu_group,
             menu_id=menu_num,
             option_number=20,
@@ -269,9 +269,9 @@ def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
             command_id=MENUCOMMAND.LoadMenu.value,
             argument='0'
         )
-        db.session.add(exit_item)
+        cMenu_db.session.add(exit_item)
     
-    db.session.commit()
+    cMenu_db.session.commit()
     flash('Menu created successfully', 'success')
     return redirect(url_for('menu.edit_menu', menu_group=menu_group, menu_num=menu_num))
 
@@ -282,11 +282,11 @@ def remove_menu(menu_group, menu_num):
     """
     Django equivalent: MenuRemove
     """
-    MenuItem.query.filter_by(
+    menuItems.query.filter_by(
         menu_group_id=menu_group,
         menu_id=menu_num
     ).delete()
     
-    db.session.commit()
+    cMenu_db.session.commit()
     flash('Menu removed successfully', 'success')
     return redirect(url_for('menu.edit_menu_init'))

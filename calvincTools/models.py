@@ -4,7 +4,7 @@ from flask_login import UserMixin
 from sqlalchemy import UniqueConstraint
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from calvincTools.database import db
+from calvincTools.database import cMenu_db
 from calvincTools.mixins import _ModelInitMixin
 
 # ============================================================================
@@ -12,17 +12,17 @@ from calvincTools.mixins import _ModelInitMixin
 # ============================================================================
 
 # deprecate?
-class MenuCommand(_ModelInitMixin, db.Model):
+class MenuCommand(_ModelInitMixin, cMenu_db.Model):
     """
     Django equivalent: menuCommands
     """
     __tablename__ = 'menu_commands'
     
-    command = db.Column(db.Integer, primary_key=True)
-    command_text = db.Column(db.String(250), nullable=False)
+    command = cMenu_db.Column(cMenu_db.Integer, primary_key=True)
+    command_text = cMenu_db.Column(cMenu_db.String(250), nullable=False)
     
     # Relationships
-    menu_items = db.relationship('MenuItem', back_populates='command_obj', lazy='dynamic')
+    menu_items = cMenu_db.relationship('MenuItem', back_populates='command_obj', lazy='dynamic')
     
     def __repr__(self):
         return f'<MenuCommand {self.command} - {self.command_text}>'
@@ -30,19 +30,18 @@ class MenuCommand(_ModelInitMixin, db.Model):
     def __str__(self):
         return f'{self.command} - {self.command_text}'
 
-
-class MenuGroup(_ModelInitMixin, db.Model):
+class menuGroups(_ModelInitMixin, cMenu_db.Model):
     """
     Django equivalent: menuGroups
     """
-    __tablename__ = 'menu_groups'
+    __tablename__ = 'cMenu_menuGroups'
     
-    id = db.Column(db.Integer, primary_key=True)
-    group_name = db.Column(db.String(100), unique=True, nullable=False, index=True)
-    group_info = db.Column(db.String(250), default='')
+    id = cMenu_db.Column(cMenu_db.Integer, primary_key=True)
+    group_name = cMenu_db.Column(cMenu_db.String(100), unique=True, nullable=False, index=True)
+    group_info = cMenu_db.Column(cMenu_db.String(250), default='')
     
     # Relationships
-    menu_items = db.relationship('MenuItem', back_populates='menu_group', lazy='selectin')
+    menu_items = cMenu_db.relationship('MenuItem', back_populates='menu_group', lazy='selectin')
     
     def __repr__(self):
         return f'<MenuGroup {self.id} - {self.group_name}>'
@@ -50,27 +49,78 @@ class MenuGroup(_ModelInitMixin, db.Model):
     def __str__(self):
         return f'menuGroup {self.group_name}'
 
+    @classmethod
+    def _createtable(cls, engine):
+        # Create tables if they don't exist
+        cMenuBase.metadata.create_all(engine)
 
-class MenuItem(_ModelInitMixin, db.Model):
+        session = Session(engine)
+        try:
+            # Check if any group exists
+            if not session.query(cls).first():
+                # Add starter group
+                starter = cls(GroupName="Group Name", GroupInfo="Group Info")
+                session.add(starter)
+                session.commit()
+                # Add default menu items for the starter group
+                starter_id = starter.id
+                menu_items = [
+                    menuItems(
+                        MenuGroup_id=starter_id, MenuID=0, OptionNumber=0, 
+                        OptionText='New Menu', 
+                        Command=None, Argument='Default', 
+                        PWord='', TopLine=True, BottomLine=True
+                        ),
+                    menuItems(
+                        MenuGroup_id=starter_id, MenuID=0, OptionNumber=11, 
+                        OptionText='Edit Menu', 
+                        Command=COMMANDNUMBER.EditMenu, Argument='', 
+                        PWord='', TopLine=None, BottomLine=None
+                        ),
+                    menuItems(
+                        MenuGroup_id=starter_id, MenuID=0, OptionNumber=19, 
+                        OptionText='Change Password', 
+                        Command=COMMANDNUMBER.ChangePW, Argument='', 
+                        PWord='', TopLine=None, BottomLine=None
+                        ),
+                    menuItems(
+                        MenuGroup_id=starter_id, MenuID=0, OptionNumber=20, 
+                        OptionText='Go Away!', 
+                        Command=COMMANDNUMBER.ExitApplication, Argument='', 
+                        PWord='', TopLine=None, BottomLine=None
+                        ),
+                    ]
+                session.add_all(menu_items)
+                session.commit()
+            # endif no group exists
+        except IntegrityError:
+            session.rollback()
+        finally:
+            session.close()
+        # end try
+    # _createtable
+
+
+class menuItems(_ModelInitMixin, cMenu_db.Model):
     """
     Django equivalent: menuItems
     """
-    __tablename__ = 'menu_items'
+    __tablename__ = 'cMenu_menuItems'
     
-    id = db.Column(db.Integer, primary_key=True)
-    menu_group_id = db.Column(db.Integer, db.ForeignKey('menu_groups.id', ondelete='RESTRICT'), nullable=True)
-    menu_id = db.Column(db.SmallInteger, nullable=False)
-    option_number = db.Column(db.SmallInteger, nullable=False)
-    option_text = db.Column(db.String(250), nullable=False)
-    command_id = db.Column(db.Integer, db.ForeignKey('menu_commands.command', ondelete='RESTRICT'), nullable=True)
-    argument = db.Column(db.String(250), default='')
-    pword = db.Column(db.String(250), default='')
-    top_line = db.Column(db.Boolean, nullable=True)
-    bottom_line = db.Column(db.Boolean, nullable=True)
+    id = cMenu_db.Column(cMenu_db.Integer, primary_key=True)
+    menu_group_id = cMenu_db.Column(cMenu_db.Integer, cMenu_db.ForeignKey('cMenu_menuGroups.id', ondelete='RESTRICT'), nullable=True)
+    menu_id = cMenu_db.Column(cMenu_db.SmallInteger, nullable=False)
+    option_number = cMenu_db.Column(cMenu_db.SmallInteger, nullable=False)
+    option_text = cMenu_db.Column(cMenu_db.String(250), nullable=False)
+    command_id = cMenu_db.Column(cMenu_db.Integer, cMenu_db.ForeignKey('menu_commands.command', ondelete='RESTRICT'), nullable=True)
+    argument = cMenu_db.Column(cMenu_db.String(250), default='')
+    pword = cMenu_db.Column(cMenu_db.String(250), default='')
+    top_line = cMenu_db.Column(cMenu_db.Boolean, nullable=True)
+    bottom_line = cMenu_db.Column(cMenu_db.Boolean, nullable=True)
     
     # Relationships
-    menu_group = db.relationship('MenuGroup', back_populates='menu_items', lazy='joined')
-    command_obj = db.relationship('MenuCommand', back_populates='menu_items')
+    menu_group = cMenu_db.relationship('menuGroups', back_populates='menu_items', lazy='joined')
+    command_obj = cMenu_db.relationship('MenuCommand', back_populates='menu_items')
     
     # Unique constraint (Django's UniqueConstraint)
     __table_args__ = (
@@ -84,17 +134,32 @@ class MenuItem(_ModelInitMixin, db.Model):
     def __str__(self):
         return f'{self.menu_group}, {self.menu_id}/{self.option_number}, {self.option_text}'
 
+    def __init__(self, **kw: Any):
+        """
+        Initialize a new menuItems instance. If the menu table doesn't exist, it will be created.
+        If the menuGroups table doesn't exist, it will also be created, and a starter group and menu will be added.
+        :param kw: Keyword arguments for the menuItems instance.
+        """
+        inspector = inspect(get_cMenu_session().get_bind())
+        if not inspector.has_table(self.__tablename__):
+            # If the table does not exist, create it
+            cMenuBase.metadata.create_all(get_cMenu_session().get_bind())
+            # Optionally, you can also create a starter group and menu here
+            menuGroups._createtable(get_cMenu_session().get_bind())
+        #endif not inspector.has_table():
+        super().__init__(**kw)
+    # __init__
 
-class cParameters(_ModelInitMixin, db.Model):
+class cParameters(_ModelInitMixin, cMenu_db.Model):
     """
     Django equivalent: cParameters
     """
-    __tablename__ = 'parameters'
+    __tablename__ = 'cMenu_cParameters'
     
-    parm_name: str = db.Column(db.String(100), primary_key=True)
-    parm_value: str = db.Column(db.String(512), default='', nullable=False)
-    user_modifiable: bool = db.Column(db.Boolean, default=True, nullable=False)
-    comments: str = db.Column(db.String(512), default='', nullable=False)
+    parm_name: str = cMenu_db.Column(cMenu_db.String(100), primary_key=True)
+    parm_value: str = cMenu_db.Column(cMenu_db.String(512), default='', nullable=False)
+    user_modifiable: bool = cMenu_db.Column(cMenu_db.Boolean, default=True, nullable=False)
+    comments: str = cMenu_db.Column(cMenu_db.String(512), default='', nullable=False)
     
     def __repr__(self):
         return f'<Parameter {self.parm_name}>'
@@ -125,20 +190,20 @@ class cParameters(_ModelInitMixin, db.Model):
                 user_modifiable=user_modifiable,
                 comments=comments
             )
-            db.session.add(param)
+            cMenu_db.session.add(param)
         
-        db.session.commit()
+        cMenu_db.session.commit()
         return param
 
 
-class Greeting(_ModelInitMixin, db.Model):
+class Greeting(_ModelInitMixin, cMenu_db.Model):
     """
     Django equivalent: cGreetings
     """
-    __tablename__ = 'greetings'
+    __tablename__ = 'cMenu_cGreetings'
     
-    id = db.Column(db.Integer, primary_key=True)
-    greeting = db.Column(db.String(2000), nullable=False)
+    id = cMenu_db.Column(cMenu_db.Integer, primary_key=True)
+    greeting = cMenu_db.Column(cMenu_db.String(2000), nullable=False)
     
     def __repr__(self):
         return f'<Greeting {self.id}>'
@@ -154,7 +219,7 @@ class Greeting(_ModelInitMixin, db.Model):
 # USER MODEL
 # ============================================================================
 
-class User(UserMixin, db.Model):
+class User(UserMixin, cMenu_db.Model):
     """
     User model for authentication. 
     Inherit from UserMixin to get default implementations for: 
@@ -165,17 +230,17 @@ class User(UserMixin, db.Model):
     """
     __tablename__ = 'users'
 
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False, index=True)
-    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
-    password_hash = db.Column(db.String(255), nullable=False)
-    is_active = db.Column(db.Boolean, default=True, nullable=False) # type: ignore
-    is_superuser = db.Column(db.Boolean, default=False, nullable=False)
-    permissions = db.Column(db.String(1024), nullable=False)
-    menugroup = db.Column(db.Integer, db.ForeignKey(MenuGroup.id), nullable=True)
+    id = cMenu_db.Column(cMenu_db.Integer, primary_key=True)
+    username = cMenu_db.Column(cMenu_db.String(80), unique=True, nullable=False, index=True)
+    email = cMenu_db.Column(cMenu_db.String(120), unique=True, nullable=False, index=True)
+    password_hash = cMenu_db.Column(cMenu_db.String(255), nullable=False)
+    is_active = cMenu_db.Column(cMenu_db.Boolean, default=True, nullable=False) # type: ignore
+    is_superuser = cMenu_db.Column(cMenu_db.Boolean, default=False, nullable=False)
+    permissions = cMenu_db.Column(cMenu_db.String(1024), nullable=False)
+    menugroup = cMenu_db.Column(cMenu_db.Integer, cMenu_db.ForeignKey(menuGroups.id), nullable=True)
     # menugroup = db.relationship('MenuGroup', backref='users', lazy='joined')
-    date_joined = db.Column(db.DateTime, default=datetime.now, nullable=False)
-    last_login = db.Column(db.DateTime, nullable=True)
+    date_joined = cMenu_db.Column(cMenu_db.DateTime, default=datetime.now, nullable=False)
+    last_login = cMenu_db.Column(cMenu_db.DateTime, nullable=True)
 
     def set_password(self, password):
         """Hash and set the user's password."""
@@ -188,8 +253,14 @@ class User(UserMixin, db.Model):
     def update_last_login(self):
         """Update the last login timestamp."""
         self.last_login = datetime.now()
-        db.session.commit()
+        cMenu_db.session.commit()
 
     def __repr__(self):
         return f'<User {self.username}>'
 
+cMenuBase.metadata.create_all(get_cMenu_session().get_bind())
+# Ensure that the tables are created when the module is imported
+menuGroups._createtable(get_cMenu_session().get_bind())
+menuItems() #._createtable(get_cMenu_session().get_bind())
+cParameters() #._createtable(get_cMenu_session().get_bind())
+cGreetings() #._createtable(get_cMenu_session().get_bind())

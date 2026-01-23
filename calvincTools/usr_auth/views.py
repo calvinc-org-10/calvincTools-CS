@@ -8,7 +8,7 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, curren
 from flask_sqlalchemy import SQLAlchemy
 
 from ..models import User
-from ..database import db
+from ..database import cMenu_db
 # Assuming you have db instance from Flask-SQLAlchemy
 # from your_app import db
 
@@ -333,7 +333,7 @@ def change_password_view():
         
         # Update password
         current_user.set_password(new_password)
-        db.session.commit()
+        cMenu_db.session.commit()
         
         flash('Your password has been changed successfully.', 'success')
         return redirect(url_for('index'))
@@ -381,8 +381,8 @@ def register_view():
         new_user = User(username=username, email=email)      # type: ignore
         new_user.set_password(password)
         
-        db.session.add(new_user)
-        db.session.commit()
+        cMenu_db.session.add(new_user)
+        cMenu_db.session.commit()
         
         flash('Registration successful!  Please log in.', 'success')
         return redirect(url_for('auth.login'))

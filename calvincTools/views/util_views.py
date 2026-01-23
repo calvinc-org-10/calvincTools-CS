@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from sqlalchemy import text
 
-from ..database import db
+from ..database import cMenu_db
 
 from ..models import cParameters, Greeting
 from ..forms import RawSQLForm
@@ -27,7 +27,7 @@ def run_sql():
         sql_query = form.input_sql. data
         
         try:
-            result = db.session.execute(text(sql_query))
+            result = cMenu_db.session.execute(text(sql_query))
             
             if result.returns_rows:
                 # SELECT query
@@ -46,14 +46,14 @@ def run_sql():
                 return render_template('utils/show_sql_results.html', **context)
             else:
                 # INSERT/UPDATE/DELETE query
-                db.session.commit()
+                cMenu_db.session.commit()
                 flash(f'Query executed successfully.  {result.rowcount} rows affected. ', 'success')
                 context['col_names'] = f'NO RECORDS RETURNED; {result.rowcount} records affected'
                 context['num_records'] = result.rowcount
                 return render_template('utils/show_sql_results.html', **context)
                 
         except Exception as e:
-            db.session. rollback()
+            cMenu_db.session. rollback()
             flash(f'SQL Error: {str(e)}', 'danger')
             return render_template('utils/enter_sql.html', form=form)
     
@@ -76,7 +76,7 @@ def edit_parameters():
                 if param and (param.user_modifiable or current_user.is_superuser):
                     param.parm_value = value
         
-        db.session.commit()
+        cMenu_db.session.commit()
         flash('Parameters updated successfully', 'success')
         return redirect(url_for('utils.edit_parameters'))
     
@@ -96,8 +96,8 @@ def greetings():
         greeting_text = request.form.get('greeting')
         if greeting_text:
             new_greeting = Greeting(greeting=greeting_text)
-            db.session.add(new_greeting)
-            db.session.commit()
+            cMenu_db.session.add(new_greeting)
+            cMenu_db.session.commit()
             flash('Greeting added successfully', 'success')
         return redirect(url_for('utils.greetings'))
     

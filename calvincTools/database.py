@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import sessionmaker
 
-db = SQLAlchemy()
+cMenu_db = SQLAlchemy()
 
 # moved to config.py
 # rootdir = "."
