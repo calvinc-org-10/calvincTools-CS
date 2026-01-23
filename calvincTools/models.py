@@ -7,6 +7,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from calvincTools.database import cMenu_db
 from calvincTools.mixins import _ModelInitMixin
 
+from calvincTools.cMenu import MENUCOMMAND as COMMANDNUMBER
+
 # ============================================================================
 # MENU SYSTEM MODELS
 # ============================================================================
@@ -52,16 +54,15 @@ class menuGroups(_ModelInitMixin, cMenu_db.Model):
     @classmethod
     def _createtable(cls, engine):
         # Create tables if they don't exist
-        cMenuBase.metadata.create_all(engine)
+        cMenu_db.create_all()
 
-        session = Session(engine)
         try:
             # Check if any group exists
-            if not session.query(cls).first():
+            if not cMenu_db.session.query(cls).first():
                 # Add starter group
                 starter = cls(GroupName="Group Name", GroupInfo="Group Info")
-                session.add(starter)
-                session.commit()
+                cMenu_db.session.add(starter)
+                cMenu_db.session.commit()
                 # Add default menu items for the starter group
                 starter_id = starter.id
                 menu_items = [

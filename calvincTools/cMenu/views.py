@@ -2,11 +2,13 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from sqlalchemy import func
 
+from . import MENUCOMMANDDICTIONARY
+
 from ..database import cMenu_db
 
 from ..models import menuItems, menuGroups, MenuCommand
 from ..decorators import superuser_required
-from ..menucommand_constants import MENUCOMMANDDICTIONARY, MENUCOMMAND
+from . import MENUCOMMAND
 
 menu_bp = Blueprint('menu', __name__, url_prefix='/menu')
 

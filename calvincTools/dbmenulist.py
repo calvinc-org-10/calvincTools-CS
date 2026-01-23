@@ -2,7 +2,9 @@ from typing import (Any, Dict, List, Optional, )
 
 from sqlalchemy import Row, RowMapping, Select, Table, select, text
 
-from .menucommand_constants import (MENUCOMMANDDICTIONARY, MENUCOMMAND, )
+from .cMenu import MENUCOMMANDDICTIONARY
+
+from .cMenu import (MENUCOMMAND, )
 from .database import get_cMenu_session, get_cMenu_sessionmaker
 
 from .utils import (retListofQSQLRecord, recordsetList, select_with_join_excluding, )
