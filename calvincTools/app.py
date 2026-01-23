@@ -26,7 +26,7 @@ def create_app(config_name='development'):
     @flskapp.route('/')
     def index():
         mnugrp = session.get('menu_group', 1)
-        return redirect(url_for('menu.load_menu', menu_group=mnugrp))
+        return redirect(url_for('menu.load_menu', menu_group=mnugrp, menu_num=0))
         # return redirect(url_for('menu.load_menu', menu_group=1, menu_num=0))
     
     # Error handlers

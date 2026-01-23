@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 
-from .models import User
+from ..models import User
 from ..database import db
 # Assuming you have db instance from Flask-SQLAlchemy
 # from your_app import db
@@ -358,24 +358,24 @@ def register_view():
         # Validate inputs
         if not username or not email or not password or not confirm_password:
             flash('All fields are required.', 'danger')
-            return render_template('auth/register.html')
+            return render_template('auth/signup.html')
         
         if password != confirm_password:
             flash('Passwords do not match.', 'danger')
-            return render_template('auth/register.html')
+            return render_template('auth/signup.html')
         
         if len(password) < 8:
             flash('Password must be at least 8 characters long.', 'danger')
-            return render_template('auth/register.html')
+            return render_template('auth/signup.html')
         
         # Check if user already exists
         if User.query.filter_by(username=username).first():
             flash('Username already exists. ', 'danger')
-            return render_template('auth/register.html')
+            return render_template('auth/signup.html')
         
         if User.query.filter_by(email=email).first():
             flash('Email already registered.', 'danger')
-            return render_template('auth/register.html')
+            return render_template('auth/signup.html')
         
         # Create new user
         new_user = User(username=username, email=email)      # type: ignore
@@ -388,7 +388,7 @@ def register_view():
         return redirect(url_for('auth.login'))
     
     # GET request
-    return render_template('auth/register.html')
+    return render_template('auth/signup.html')
 
 
 # ============================================================================

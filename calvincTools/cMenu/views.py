@@ -71,7 +71,7 @@ def load_menu(menu_group, menu_num):
     # Build menu HTML (you might want to do this in template instead)
     menu_html = build_menu_html(menu_items, menu_group, menu_num)
     
-    return render_template('menu/display. html',
+    return render_template('menu/display.html',
                          menu_group=menu_group,
                          menu_num=menu_num,
                          menu_name=menu_name,
