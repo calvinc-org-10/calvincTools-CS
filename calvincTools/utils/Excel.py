@@ -1,19 +1,13 @@
 from typing import (Dict, List, Any, )
 
-from PySide6.QtCore import (
-    QAbstractTableModel, 
-    )
-
 from openpyxl import (Workbook, )
 from openpyxl.styles import PatternFill, Font, fills, colors
 from openpyxl.utils.datetime import from_excel, WINDOWS_EPOCH
 
-from .cQModels import (SQLAlchemyTableModel, )
-
 ExcelWorkbook_fileext = ".XLSX"
 
 
-def Excelfile_fromqs(qset:SQLAlchemyTableModel|List[Dict[str, Any]], flName:str|None = None,
+def Excelfile_fromqs(qset:List[Dict[str, Any]], flName:str|None = None,
                      freezecols:int = 0, returnFileName: bool = False) -> Workbook|str:
     """
     qset: a QAbstractTableModel or list of dictionaries
@@ -26,10 +20,7 @@ def Excelfile_fromqs(qset:SQLAlchemyTableModel|List[Dict[str, Any]], flName:str|
     """
 
     # far easier to process a list of dictionaries, so...
-    if isinstance(qset,QAbstractTableModel):
-        # make this a util
-        qlist = qset.getDataAsList()
-    elif isinstance(qset,list):
+    if isinstance(qset,list):
         qlist = qset
     else:
         return None

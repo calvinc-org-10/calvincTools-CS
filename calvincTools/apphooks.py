@@ -15,7 +15,7 @@ class cTools_apphooks:
     _ExternalWebPageURL_Map = {}
     _MUSTBEINITIALIZED: set = {
         'app_db',
-        'app_sessionmaker',
+        # 'app_sessionmaker',
         'FormNameToURL_Map', 
         'ExternalWebPageURL_Map',
         }

@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import func
 
 
-from ..database import cMenu_db
+from ..database import cTools_db
 
 from ..models import menuItems, menuGroups
 from ..decorators import superuser_required
@@ -29,7 +29,7 @@ def get_default_menu(menu_group_id):
         return None, f'MenuGroup {menu_group_id} has no menu'
     
     # Get minimum menu_id for this group with option_number=0
-    result = cMenu_db.session.query(func.min(menuItems.menu_id)).filter_by(
+    result = cTools_db.session.query(func.min(menuItems.menu_id)).filter_by(
         menu_group_id=menu_group_id,
         option_number=0
     ).scalar()
@@ -157,13 +157,13 @@ def edit_menu_init():
     Django equivalent: EditMenu_init
     """
     # Get first menu group and menu ID
-    result = cMenu_db.session.query(func.min(menuItems.menu_group_id)).filter_by(
+    result = cTools_db.session.query(func.min(menuItems.menu_group_id)).filter_by(
         option_number=0
     ).scalar()
     
     menu_grp = result if result else 1
     
-    result = cMenu_db.session.query(func.min(menuItems.menu_id)).filter_by(
+    result = cTools_db.session.query(func.min(menuItems.menu_id)).filter_by(
         menu_group_id=menu_grp,
         option_number=0
     ).scalar()
@@ -230,8 +230,8 @@ def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
     menu_group_obj = menuGroups.query.get(menu_group)
     if not menu_group_obj: 
         menu_group_obj = menuGroups(id=menu_group, group_name='New Menu Group')
-        cMenu_db.session. add(menu_group_obj)
-        cMenu_db.session.flush()
+        cTools_db.session. add(menu_group_obj)
+        cTools_db.session.flush()
     
     if from_menu is not None:
         # Copy from existing menu
@@ -252,7 +252,7 @@ def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
                 command_id=item.command_id,
                 argument=item.argument
             )
-            cMenu_db.session.add(new_item)
+            cTools_db.session.add(new_item)
     else:
         # Create new menu from scratch
         title_item = menuItems(
@@ -261,7 +261,7 @@ def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
             option_number=0,
             option_text='New Menu'
         )
-        cMenu_db.session.add(title_item)
+        cTools_db.session.add(title_item)
         
         exit_item = menuItems(
             menu_group_id=menu_group,
@@ -271,9 +271,9 @@ def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
             command_id=MENUCOMMAND.LoadMenu,
             argument='0'
         )
-        cMenu_db.session.add(exit_item)
+        cTools_db.session.add(exit_item)
     
-    cMenu_db.session.commit()
+    cTools_db.session.commit()
     flash('Menu created successfully', 'success')
     return redirect(url_for('menu.edit_menu', menu_group=menu_group, menu_num=menu_num))
 
@@ -289,6 +289,6 @@ def remove_menu(menu_group, menu_num):
         menu_id=menu_num
     ).delete()
     
-    cMenu_db.session.commit()
+    cTools_db.session.commit()
     flash('Menu removed successfully', 'success')
     return redirect(url_for('menu.edit_menu_init'))

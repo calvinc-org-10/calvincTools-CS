@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, session
 from flask_migrate import Migrate
 
-from .database import cMenu_db  
+from .database import cTools_db  
 from .models import init_cDatabase
 from .usr_auth.views import init_login_manager, register_auth_blueprint
 from .cMenu.views import menu_bp
@@ -13,7 +13,7 @@ def create_app(config_name='development'):
     flskapp.config.from_object(config.config[config_name])
     
     # Initialize extensions
-    cMenu_db.init_app(flskapp)
+    cTools_db.init_app(flskapp)
     init_cDatabase(flskapp)
     # migrate = Migrate(flskapp, cMenu_db)
     init_login_manager(flskapp)
@@ -41,7 +41,7 @@ def create_app(config_name='development'):
     
     @flskapp.errorhandler(500)
     def internal_error(error):   # pylint: disable=unused-argument
-        cMenu_db.session.rollback()
+        cTools_db.session.rollback()
         return render_template('errors/500.html'), 500
     
     return flskapp
