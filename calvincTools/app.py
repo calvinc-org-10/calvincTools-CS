@@ -1,7 +1,8 @@
 from flask import Flask, render_template, redirect, url_for, session
 from flask_migrate import Migrate
 
-from .database import cMenu_db  # , init_cDatabase      # TODO: move this to database.py?
+from .database import cMenu_db  
+from .models import init_cDatabase
 from .usr_auth.views import init_login_manager, register_auth_blueprint
 from .cMenu.views import menu_bp
 from .views.util_views import util_bp
@@ -13,7 +14,7 @@ def create_app(config_name='development'):
     
     # Initialize extensions
     cMenu_db.init_app(flskapp)
-    # init_cDatabase(db)
+    init_cDatabase(flskapp)
     # migrate = Migrate(flskapp, cMenu_db)
     init_login_manager(flskapp)
     

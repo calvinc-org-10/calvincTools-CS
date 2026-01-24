@@ -1,24 +1,4 @@
 
-from PySide6.QtCore import (
-    Qt, QMetaObject, 
-    QRect, QSize, 
-    )
-from PySide6.QtGui import (
-    QFont, 
-    )
-from PySide6.QtWidgets import (
-    QWidget, 
-    QLabel, 
-    QMessageBox, QDialog, QDialogButtonBox, 
-    )
-from PySide6.QtSvgWidgets import QSvgWidget
-
-
-# standard window and related sizes
-# copied from main app's forms module
-std_windowsize = QSize(1120,720)
-std_popdialogsize=QSize(400,300)
-
 
 # def pleaseWriteMe(parent, addlmessage):
 def pleaseWriteMe(addlmessage, parent):

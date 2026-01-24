@@ -2,13 +2,12 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from sqlalchemy import func
 
-from . import MENUCOMMANDDICTIONARY
 
 from ..database import cMenu_db
 
-from ..models import menuItems, menuGroups, MenuCommand
+from ..models import menuItems, menuGroups
 from ..decorators import superuser_required
-from . import MENUCOMMAND
+from . import (MENUCOMMAND, MENUCOMMANDDICTIONARY)
 
 menu_bp = Blueprint('menu', __name__, url_prefix='/menu')
 
@@ -95,18 +94,18 @@ def build_menu_html(menu_items, menu_group, menu_num):
             continue
         
         # Build HTML for this menu item
-        if item.command_id == MENUCOMMAND.LoadMenu. value:
+        if item.command_id == MENUCOMMAND.LoadMenu:
             href = url_for('menu.load_menu', menu_group=menu_group, menu_num=item.argument)
             target = ''
             onclick = ''
-        elif item.command_id == MENUCOMMAND.ExitApplication.value:
+        elif item.command_id == MENUCOMMAND.ExitApplication:
             href = '#'
             onclick = ' onclick="event.preventDefault(); document.getElementById(\'lgoutfm\').submit();"'
             target = ''
         else:
             arg = item.argument if item.argument else 'no-arg-no'
             href = url_for('menu.handle_command', command_num=item.command_id, command_arg=arg)
-            target = ' target="_blank"' if item.command_id != MENUCOMMAND.ExitApplication.value else ''
+            target = ' target="_blank"' if item.command_id != MENUCOMMAND.ExitApplication else ''
             onclick = ''
         
         html = f'<a href="{href}"{onclick}{target} class="btn btn-lg btn-outline-secondary mx-auto">{item.option_text}</a>'
@@ -129,26 +128,26 @@ def handle_command(command_num, command_arg):
     """
     Django equivalent: HandleMenuCommand
     """
-    command = MenuCommand.query.get(command_num)
+    command_text = MENUCOMMANDDICTIONARY.get(command_num, 'UnknownCommand')
     
-    if command_num == MENUCOMMAND.FormBrowse.value:
+    if command_num == MENUCOMMAND.FormBrowse:
         return redirect(url_for('forms.browse', formname=command_arg))
-    elif command_num == MENUCOMMAND.OpenTable.value:
+    elif command_num == MENUCOMMAND.OpenTable:
         return redirect(url_for('forms.show_table', tblname=command_arg))
-    elif command_num == MENUCOMMAND.RunSQLStatement.value:
+    elif command_num == MENUCOMMAND.RunSQLStatement:
         return redirect(url_for('utils.run_sql'))
-    elif command_num == MENUCOMMAND.ChangePW.value:
+    elif command_num == MENUCOMMAND.ChangePW:
         return redirect(url_for('auth.change_password'))
-    elif command_num == MENUCOMMAND.EditMenu.value:
+    elif command_num == MENUCOMMAND.EditMenu:
         return redirect(url_for('menu.edit_menu_init'))
-    elif command_num == MENUCOMMAND.EditParameters.value:
+    elif command_num == MENUCOMMAND.EditParameters:
         return redirect(url_for('utils.edit_parameters'))
-    elif command_num == MENUCOMMAND.EditGreetings.value:
+    elif command_num == MENUCOMMAND.EditGreetings:
         return redirect(url_for('utils.greetings'))
-    elif command_num == MENUCOMMAND.ExitApplication.value:
+    elif command_num == MENUCOMMAND.ExitApplication:
         return redirect(url_for('auth. logout'))
     else:
-        return f"Command {command} will be performed with argument {command_arg}"
+        return f"Command {command_text} ({command_num}) will be performed with argument {command_arg}"
 
 
 @menu_bp.route('/edit')
@@ -200,7 +199,8 @@ def edit_menu(menu_group, menu_num):
         return redirect(url_for('menu.edit_menu', menu_group=menu_group, menu_num=menu_num))
     
     # GET request - display form
-    command_choices = MenuCommand.query.order_by(MenuCommand.command).all()
+    # command_choices = MenuCommand.query.order_by(MenuCommand.command).all()
+    command_choices = MENUCOMMANDDICTIONARY
     
     return render_template('menu/edit. html',
                          menu_group=menu_group_obj,
@@ -268,7 +268,7 @@ def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
             menu_id=menu_num,
             option_number=20,
             option_text='Return to Main Menu',
-            command_id=MENUCOMMAND.LoadMenu.value,
+            command_id=MENUCOMMAND.LoadMenu,
             argument='0'
         )
         cMenu_db.session.add(exit_item)

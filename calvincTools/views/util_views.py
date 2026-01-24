@@ -7,7 +7,7 @@ from sqlalchemy import text
 
 from ..database import cMenu_db
 
-from ..models import cParameters, Greeting
+from ..models import cParameters, cGreetings
 from ..forms import RawSQLForm
 from ..decorators import superuser_required
 
@@ -95,11 +95,11 @@ def greetings():
         # Handle greeting submission
         greeting_text = request.form.get('greeting')
         if greeting_text:
-            new_greeting = Greeting(greeting=greeting_text)
+            new_greeting = cGreetings(greeting=greeting_text)
             cMenu_db.session.add(new_greeting)
             cMenu_db.session.commit()
             flash('Greeting added successfully', 'success')
         return redirect(url_for('utils.greetings'))
     
-    greetings = Greeting.query. all()
+    greetings = cGreetings.query. all()
     return render_template('utils/greetings.html', greetings=greetings)

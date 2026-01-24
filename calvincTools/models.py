@@ -9,33 +9,34 @@ from sqlalchemy import (
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from calvincTools.database import cMenu_db
-from calvincTools.mixins import _ModelInitMixin
+from .database import cMenu_db
+from .mixins import _ModelInitMixin
 
-from calvincTools.cMenu import MENUCOMMAND as COMMANDNUMBER
+from .cMenu import MENUCOMMAND
+from .dbmenulist import initmenu_menulist
 
 # ============================================================================
 # MENU SYSTEM MODELS
 # ============================================================================
 
 # deprecate?
-class MenuCommand(_ModelInitMixin, cMenu_db.Model):
-    """
-    Django equivalent: menuCommands
-    """
-    __tablename__ = 'menu_commands'
+# class MenuCommand(_ModelInitMixin, cMenu_db.Model):
+#     """
+#     Django equivalent: menuCommands
+#     """
+#     __tablename__ = 'menu_commands'
     
-    command = cMenu_db.Column(cMenu_db.Integer, primary_key=True)
-    command_text = cMenu_db.Column(cMenu_db.String(250), nullable=False)
+#     command = cMenu_db.Column(cMenu_db.Integer, primary_key=True)
+#     command_text = cMenu_db.Column(cMenu_db.String(250), nullable=False)
     
-    # Relationships
-    menu_items = cMenu_db.relationship('MenuItem', back_populates='command_obj', lazy='dynamic')
+#     # Relationships
+#     menu_items = cMenu_db.relationship('MenuItem', back_populates='command_obj', lazy='dynamic')
     
-    def __repr__(self):
-        return f'<MenuCommand {self.command} - {self.command_text}>'
+#     def __repr__(self):
+#         return f'<MenuCommand {self.command} - {self.command_text}>'
     
-    def __str__(self):
-        return f'{self.command} - {self.command_text}'
+#     def __str__(self):
+#         return f'{self.command} - {self.command_text}'
 
 class menuGroups(_ModelInitMixin, cMenu_db.Model):
     """
@@ -57,53 +58,56 @@ class menuGroups(_ModelInitMixin, cMenu_db.Model):
         return f'menuGroup {self.group_name}'
 
     @classmethod
-    def _createtable(cls):
-        # Create tables if they don't exist
-        cMenu_db.create_all()
+    def _createtable(cls, flskapp):
+        with flskapp.app_context():
+            # Create tables if they don't exist
+            cMenu_db.create_all()
 
-        try:
-            # Check if any group exists
-            if not cMenu_db.session.query(cls).first():
-                # Add starter group
-                starter = cls(group_name="Group Name", group_info="Group Info")
-                cMenu_db.session.add(starter)
-                cMenu_db.session.commit()
-                # Add default menu items for the starter group
-                starter_id = starter.id
-                menu_items = [
-                    menuItems(
-                        menu_group_id=starter_id, menu_id=0, option_number=0, 
-                        option_text='New Menu', 
-                        command_id=None, argument='Default', 
-                        pword='', top_line=True, bottom_line=True
-                        ),
-                    menuItems(
-                        menu_group_id=starter_id, menu_id=0, option_number=11, 
-                        option_text='Edit Menu', 
-                        command_id=COMMANDNUMBER.EditMenu, argument='', 
-                        pword='', top_line=None, bottom_line=None
-                        ),
-                    menuItems(
-                        menu_group_id=starter_id, menu_id=0, option_number=19, 
-                        option_text='Change Password', 
-                        command_id=COMMANDNUMBER.ChangePW, argument='', 
-                        pword='', top_line=None, bottom_line=None
-                        ),
-                    menuItems(
-                        menu_group_id=starter_id, menu_id=0, option_number=20, 
-                        option_text='Go Away!', 
-                        command_id=COMMANDNUMBER.ExitApplication, argument='', 
-                        pword='', top_line=None, bottom_line=None
-                        ),
-                    ]
-                cMenu_db.session.add_all(menu_items)
-                cMenu_db.session.commit()
-            # endif no group exists
-        except IntegrityError:
-            cMenu_db.session.rollback()
-        finally:
-            cMenu_db.session.close()
-        # end try
+            try:
+                # Check if any group exists
+                if not cMenu_db.session.query(cls).first():
+                    # Add starter group
+                    starter = cls(group_name="Group Name", group_info="Group Info")
+                    cMenu_db.session.add(starter)
+                    cMenu_db.session.commit()
+                    # Add default menu items for the starter group
+                    starter_id = starter.id
+                    # TODO: use dbmenulist initmenu_menulist
+                    menu_items = [
+                        menuItems(
+                            menu_group_id=starter_id, menu_id=0, option_number=0, 
+                            option_text='New Menu', 
+                            command_id=None, argument='Default', 
+                            pword='', top_line=True, bottom_line=True
+                            ),
+                        menuItems(
+                            menu_group_id=starter_id, menu_id=0, option_number=11, 
+                            option_text='Edit Menu', 
+                            command_id=MENUCOMMAND.EditMenu, argument='', 
+                            pword='', top_line=None, bottom_line=None
+                            ),
+                        menuItems(
+                            menu_group_id=starter_id, menu_id=0, option_number=19, 
+                            option_text='Change Password', 
+                            command_id=MENUCOMMAND.ChangePW, argument='', 
+                            pword='', top_line=None, bottom_line=None
+                            ),
+                        menuItems(
+                            menu_group_id=starter_id, menu_id=0, option_number=20, 
+                            option_text='Go Away!', 
+                            command_id=MENUCOMMAND.ExitApplication, argument='', 
+                            pword='', top_line=None, bottom_line=None
+                            ),
+                        ]
+                    cMenu_db.session.add_all(menu_items)
+                    cMenu_db.session.commit()
+                # endif no group exists
+            except IntegrityError:
+                cMenu_db.session.rollback()
+            finally:
+                cMenu_db.session.close()
+            # end try
+        # end with app_context
     # _createtable
 
 
@@ -151,7 +155,7 @@ class menuItems(_ModelInitMixin, cMenu_db.Model):
             # If the table does not exist, create it
             cMenu_db.create_all()
             # Optionally, you can also create a starter group and menu here
-            menuGroups._createtable()
+            # menuGroups._createtable()
         #endif not inspector.has_table():
         super().__init__(**kw)
     # __init__
@@ -202,7 +206,7 @@ class cParameters(_ModelInitMixin, cMenu_db.Model):
         return param
 
 
-class Greeting(_ModelInitMixin, cMenu_db.Model):
+class cGreetings(_ModelInitMixin, cMenu_db.Model):
     """
     Django equivalent: cGreetings
     """
@@ -276,11 +280,16 @@ class User(UserMixin, cMenu_db.Model):
         super().__init__(**kw)
     # __init__
 
+def init_cDatabase(flskapp):
+    """Create all tables in the database."""
+    with flskapp.app_context():
+        cMenu_db.create_all()
+    # Ensure that the tables are created when the module is imported
+    # nope, not when module imported. app context needed first
+    menuGroups._createtable(flskapp)
+    menuItems() #._createtable()
+    cParameters() #._createtable()
+    cGreetings() #._createtable()
+    User() #._createtable()
+# create_all_tables
 
-cMenu_db.create_all()
-# Ensure that the tables are created when the module is imported
-menuGroups._createtable()
-menuItems() #._createtable()
-cParameters() #._createtable()
-cGreetings() #._createtable()
-User() #._createtable()
