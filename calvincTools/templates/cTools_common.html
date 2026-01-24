@@ -59,5 +59,84 @@ EXAMPLES OF GETTING STATIC FILES
 
 {% block boddy %}
 {% endblock %}
+
+<dialog id="areYouSureDialog" class="p-4 rounded border-0 shadow">
+    <div class="dialog-content">
+        <h5 id="dialogTitle" class="mb-3"></h5>
+        <p id="dialogQuestion" class="mb-4"></p>
+        <div class="d-flex justify-content-end gap-2">
+            <button id="dialogNoBtn" class="btn btn-secondary" value="no">No</button>
+            <button id="dialogYesBtn" class="btn btn-primary" value="yes">Yes</button>
+        </div>
+    </div>
+</dialog>
+
+<script>
+/**
+ * Display a confirmation dialog and return the user's choice via a Promise.
+ * 
+ * @param {string} title - Title of the dialog box.
+ * @param {string} areYouSureQuestion - Question to ask the user.
+ * @param {Object} options - Optional configuration.
+ * @param {boolean} options.showYes - Show Yes button (default: true).
+ * @param {boolean} options.showNo - Show No button (default: true).
+ * @param {string} options.defaultButton - Default button: 'yes' or 'no' (default: 'no').
+ * @param {string} options.yesText - Text for Yes button (default: 'Yes').
+ * @param {string} options.noText - Text for No button (default: 'No').
+ * @returns {Promise<string>} Promise that resolves to 'yes' or 'no' based on user's choice.
+ */
+function areYouSure(title, areYouSureQuestion, options = {}) {
+    const defaults = {
+        showYes: true,
+        showNo: true,
+        defaultButton: 'no',
+        yesText: 'Yes',
+        noText: 'No'
+    };
+    const config = { ...defaults, ...options };
+    
+    return new Promise((resolve) => {
+        const dialog = document.getElementById('areYouSureDialog');
+        const dialogTitle = document.getElementById('dialogTitle');
+        const dialogQuestion = document.getElementById('dialogQuestion');
+        const yesBtn = document.getElementById('dialogYesBtn');
+        const noBtn = document.getElementById('dialogNoBtn');
+        
+        // Set content
+        dialogTitle.textContent = title;
+        dialogQuestion.textContent = areYouSureQuestion;
+        
+        // Configure buttons
+        yesBtn.textContent = config.yesText;
+        noBtn.textContent = config.noText;
+        yesBtn.style.display = config.showYes ? 'block' : 'none';
+        noBtn.style.display = config.showNo ? 'block' : 'none';
+        
+        // Set default button focus
+        if (config.defaultButton === 'yes' && config.showYes) {
+            yesBtn.focus();
+        } else if (config.showNo) {
+            noBtn.focus();
+        }
+        
+        // Handle button clicks
+        const handleClick = (result) => {
+            dialog.close();
+            resolve(result);
+            yesBtn.removeEventListener('click', yesHandler);
+            noBtn.removeEventListener('click', noHandler);
+        };
+        
+        const yesHandler = () => handleClick('yes');
+        const noHandler = () => handleClick('no');
+        
+        yesBtn.addEventListener('click', yesHandler);
+        noBtn.addEventListener('click', noHandler);
+        
+        // Show dialog
+        dialog.showModal();
+    });
+}
+</script>
 </body>
 </html>

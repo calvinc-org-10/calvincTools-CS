@@ -1,3 +1,15 @@
+/***************************************************************
+***************************************************************/
+// MESSAGEBOXES
+
+function pleaseWriteMe(addlmessage, parent) {
+// Display a message box indicating that a feature needs to be implemented.
+  let msg = "Please Write Me\n=================";
+  msg += `Calvin needs to get up off his butt and write some code\n${addlmessage}`;
+  alert(msg);
+}
+
+
 /*!
 * Serialize all form data into an object
 * (c) 2021 Chris Ferdinandi, MIT License, https://gomakethings.com
@@ -13,17 +25,10 @@ function serialize(elmnts) {
     return retStr;
 }
 
-//-------------------------------
-//-------------------------------
-//-------------------------------
 
-//-------------------------------
-
-//-------------------------------
-
-
-//-------------------------------
-
+/***************************************************************
+***************************************************************/
+// MATHEMATICAL EXPRESSION EVALUATION
 
 var _pj;
 
@@ -418,6 +423,9 @@ class MathParser {
         return ev;
     }
 
+/***************************************************************
+***************************************************************/
+// VOICE SYNTHESIS
 
 // let there be voice!!
 const synth = window.speechSynthesis;
