@@ -15,7 +15,7 @@ util_bp = Blueprint('utils', __name__, url_prefix='/utils')
 
 
 @util_bp.route('/sql', methods=['GET', 'POST'])
-@login_required
+@superuser_required
 def run_sql():
     """
     Django equivalent: fn_cRawSQL
@@ -24,12 +24,29 @@ def run_sql():
     context = {}
     
     if form.validate_on_submit():
-        sql_query = form.input_sql. data
+        sql_query = form.input_sql.data
+        try:
+            # isz there actually any SQL entered?
+            if not sql_query.strip(): # type: ignore
+                flash('Please enter a SQL query.', 'warning')
+                return render_template('utils/enter_sql.html', form=form)
+            # Basic safety check to prevent dangerous operations
+            forbidden_statements = ['DROP', 'ALTER', 'TRUNCATE', 'CREATE']
+            if any(stmt in sql_query.upper() for stmt in forbidden_statements): # type: ignore
+                flash('Forbidden SQL operation detected.', 'danger')
+                return render_template('utils/enter_sql.html', form=form)
+            if not sql_query.strip().endswith(';'): # type: ignore
+                sql_query += ';' # type: ignore
+        except Exception as e:
+            flash(f'Error processing SQL: {str(e)}', 'danger')
+            return render_template('utils/enter_sql.html', form=form)
+        # end try
+            
         
         try:
-            result = cTools_db.session.execute(text(sql_query))
+            result = cTools_db.session.execute(text(sql_query)) # type: ignore
             
-            if result.returns_rows:
+            if result.returns_rows: # type: ignore
                 # SELECT query
                 columns = result.keys()
                 rows = [dict(row._mapping) for row in result]
@@ -47,9 +64,9 @@ def run_sql():
             else:
                 # INSERT/UPDATE/DELETE query
                 cTools_db.session.commit()
-                flash(f'Query executed successfully.  {result.rowcount} rows affected. ', 'success')
-                context['col_names'] = f'NO RECORDS RETURNED; {result.rowcount} records affected'
-                context['num_records'] = result.rowcount
+                flash(f'Query executed successfully.  {result.rowcount} rows affected. ', 'success') # type: ignore
+                context['col_names'] = f'NO RECORDS RETURNED; {result.rowcount} records affected' # type: ignore
+                context['num_records'] = result.rowcount # type: ignore
                 return render_template('utils/show_sql_results.html', **context)
                 
         except Exception as e:

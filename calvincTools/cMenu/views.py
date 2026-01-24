@@ -29,7 +29,7 @@ def get_default_menu(menu_group_id):
         return None, f'MenuGroup {menu_group_id} has no menu'
     
     # Get minimum menu_id for this group with option_number=0
-    result = cTools_db.session.query(func.min(menuItems.menu_id)).filter_by(
+    result = cTools_db.session.query(func.min(menuItems.MenuID)).filter_by(
         menu_group_id=menu_group_id,
         option_number=0
     ).scalar()
@@ -65,7 +65,7 @@ def load_menu(menu_group, menu_num):
     menu_items = menuItems.query.filter_by(
         menu_group_id=menu_group,
         menu_id=menu_num
-    ).order_by(menuItems.option_number).all()
+    ).order_by(menuItems.OptionNumber).all()
     
     menu_name = next((item.option_text for item in menu_items if item.option_number == 0), 'Menu')
     
@@ -157,13 +157,13 @@ def edit_menu_init():
     Django equivalent: EditMenu_init
     """
     # Get first menu group and menu ID
-    result = cTools_db.session.query(func.min(menuItems.menu_group_id)).filter_by(
+    result = cTools_db.session.query(func.min(menuItems.MenuGroup_id)).filter_by(
         option_number=0
     ).scalar()
     
     menu_grp = result if result else 1
     
-    result = cTools_db.session.query(func.min(menuItems.menu_id)).filter_by(
+    result = cTools_db.session.query(func.min(menuItems.MenuID)).filter_by(
         menu_group_id=menu_grp,
         option_number=0
     ).scalar()
@@ -183,7 +183,7 @@ def edit_menu(menu_group, menu_num):
     menu_items = menuItems.query.filter_by(
         menu_group_id=menu_group,
         menu_id=menu_num
-    ).order_by(menuItems.option_number).all()
+    ).order_by(menuItems.OptionNumber).all()
     
     menu_group_obj = menuGroups.query.get(menu_group)
     

@@ -19,24 +19,6 @@ from .dbmenulist import initmenu_menulist
 # MENU SYSTEM MODELS
 # ============================================================================
 
-# deprecate?
-# class MenuCommand(_ModelInitMixin, cMenu_db.Model):
-#     """
-#     Django equivalent: menuCommands
-#     """
-#     __tablename__ = 'menu_commands'
-    
-#     command = cMenu_db.Column(cMenu_db.Integer, primary_key=True)
-#     command_text = cMenu_db.Column(cMenu_db.String(250), nullable=False)
-    
-#     # Relationships
-#     menu_items = cMenu_db.relationship('MenuItem', back_populates='command_obj', lazy='dynamic')
-    
-#     def __repr__(self):
-#         return f'<MenuCommand {self.command} - {self.command_text}>'
-    
-#     def __str__(self):
-#         return f'{self.command} - {self.command_text}'
 
 class menuGroups(_ModelInitMixin, cTools_db.Model):
     """
@@ -45,17 +27,17 @@ class menuGroups(_ModelInitMixin, cTools_db.Model):
     __tablename__ = 'cMenu_menuGroups'
     
     id = cTools_db.Column(cTools_db.Integer, primary_key=True)
-    group_name = cTools_db.Column(cTools_db.String(100), unique=True, nullable=False, index=True)
-    group_info = cTools_db.Column(cTools_db.String(250), default='')
+    GroupName = cTools_db.Column(cTools_db.String(100), unique=True, nullable=False, index=True)
+    GroupInfo = cTools_db.Column(cTools_db.String(250), default='')
     
     # Relationships
     menu_items = cTools_db.relationship('MenuItem', back_populates='menu_group', lazy='selectin')
     
     def __repr__(self):
-        return f'<MenuGroup {self.id} - {self.group_name}>'
+        return f'<MenuGroup {self.id} - {self.GroupName}>'
     
     def __str__(self):
-        return f'menuGroup {self.group_name}'
+        return f'menuGroup {self.GroupName}'
 
     @classmethod
     def _createtable(cls, flskapp):
@@ -67,7 +49,7 @@ class menuGroups(_ModelInitMixin, cTools_db.Model):
                 # Check if any group exists
                 if not cTools_db.session.query(cls).first():
                     # Add starter group
-                    starter = cls(group_name="Group Name", group_info="Group Info")
+                    starter = cls(GroupName="Group Name", GroupInfo="Group Info")
                     cTools_db.session.add(starter)
                     cTools_db.session.commit()
                     # Add default menu items for the starter group
@@ -75,27 +57,27 @@ class menuGroups(_ModelInitMixin, cTools_db.Model):
                     # TODO: use dbmenulist initmenu_menulist
                     menu_items = [
                         menuItems(
-                            menu_group_id=starter_id, menu_id=0, option_number=0, 
-                            option_text='New Menu', 
-                            command_id=None, argument='Default', 
+                            MenuGroup_id=starter_id, MenuID=0, OptionNumber=0, 
+                            OptionText='New Menu', 
+                            Command=None, Argument='Default', 
                             pword='', top_line=True, bottom_line=True
                             ),
                         menuItems(
-                            menu_group_id=starter_id, menu_id=0, option_number=11, 
-                            option_text='Edit Menu', 
-                            command_id=MENUCOMMAND.EditMenu, argument='', 
+                            MenuGroup_id=starter_id, MenuID=0, OptionNumber=11, 
+                            OptionText='Edit Menu', 
+                            Command=MENUCOMMAND.EditMenu, Argument='', 
                             pword='', top_line=None, bottom_line=None
                             ),
                         menuItems(
-                            menu_group_id=starter_id, menu_id=0, option_number=19, 
-                            option_text='Change Password', 
-                            command_id=MENUCOMMAND.ChangePW, argument='', 
+                            MenuGroup_id=starter_id, MenuID=0, OptionNumber=19, 
+                            OptionText='Change Password', 
+                            Command=MENUCOMMAND.ChangePW, Argument='', 
                             pword='', top_line=None, bottom_line=None
                             ),
                         menuItems(
-                            menu_group_id=starter_id, menu_id=0, option_number=20, 
-                            option_text='Go Away!', 
-                            command_id=MENUCOMMAND.ExitApplication, argument='', 
+                            MenuGroup_id=starter_id, MenuID=0, OptionNumber=20, 
+                            OptionText='Go Away!', 
+                            Command=MENUCOMMAND.ExitApplication, Argument='', 
                             pword='', top_line=None, bottom_line=None
                             ),
                         ]
@@ -118,31 +100,30 @@ class menuItems(_ModelInitMixin, cTools_db.Model):
     __tablename__ = 'cMenu_menuItems'
     
     id = cTools_db.Column(cTools_db.Integer, primary_key=True)
-    menu_group_id = cTools_db.Column(cTools_db.Integer, cTools_db.ForeignKey('cMenu_menuGroups.id', ondelete='RESTRICT'), nullable=True)
-    menu_id = cTools_db.Column(cTools_db.SmallInteger, nullable=False)
-    option_number = cTools_db.Column(cTools_db.SmallInteger, nullable=False)
-    option_text = cTools_db.Column(cTools_db.String(250), nullable=False)
-    command_id = cTools_db.Column(cTools_db.Integer, cTools_db.ForeignKey('menu_commands.command', ondelete='RESTRICT'), nullable=True)
-    argument = cTools_db.Column(cTools_db.String(250), default='')
+    MenuGroup_id = cTools_db.Column(cTools_db.Integer, cTools_db.ForeignKey('cMenu_menuGroups.id', ondelete='RESTRICT'), nullable=True)
+    MenuID = cTools_db.Column(cTools_db.SmallInteger, nullable=False)
+    OptionNumber = cTools_db.Column(cTools_db.SmallInteger, nullable=False)
+    OptionText = cTools_db.Column(cTools_db.String(250), nullable=False)
+    Command = cTools_db.Column(cTools_db.Integer, nullable=True)
+    Argument = cTools_db.Column(cTools_db.String(250), default='')
     pword = cTools_db.Column(cTools_db.String(250), default='')
     top_line = cTools_db.Column(cTools_db.Boolean, nullable=True)
     bottom_line = cTools_db.Column(cTools_db.Boolean, nullable=True)
     
     # Relationships
     menu_group = cTools_db.relationship('menuGroups', back_populates='menu_items', lazy='joined')
-    command_obj = cTools_db.relationship('MenuCommand', back_populates='menu_items')
     
     # Unique constraint (Django's UniqueConstraint)
     __table_args__ = (
-        UniqueConstraint('menu_group_id', 'menu_id', 'option_number', 
-                        name='uq_menu_group_menu_id_option_number'),
+        UniqueConstraint('MenuGroup_id', 'MenuID', 'OptionNumber', 
+                        name='uq_menu_group_MenuID_OptionNumber'),
     )
     
     def __repr__(self):
-        return f'<MenuItem {self.menu_group_id},{self.menu_id}/{self.option_number}>'
+        return f'<MenuItem {self.MenuGroup_id},{self.MenuID}/{self.OptionNumber}>'
     
     def __str__(self):
-        return f'{self.menu_group}, {self.menu_id}/{self.option_number}, {self.option_text}'
+        return f'{self.menu_group}, {self.MenuID}/{self.OptionNumber}, {self.OptionText}'
 
     def __init__(self, **kw: Any):
         """
@@ -247,7 +228,7 @@ class User(UserMixin, cTools_db.Model):
     is_active = cTools_db.Column(cTools_db.Boolean, default=True, nullable=False) # type: ignore
     is_superuser = cTools_db.Column(cTools_db.Boolean, default=False, nullable=False)
     permissions = cTools_db.Column(cTools_db.String(1024), nullable=False)
-    menugroup = cTools_db.Column(cTools_db.Integer, cTools_db.ForeignKey(menuGroups.id), nullable=True)
+    menuGroup = cTools_db.Column(cTools_db.Integer, cTools_db.ForeignKey(menuGroups.id), nullable=True)
     # menugroup = db.relationship('MenuGroup', backref='users', lazy='joined')
     date_joined = cTools_db.Column(cTools_db.DateTime, default=datetime.now, nullable=False)
     last_login = cTools_db.Column(cTools_db.DateTime, nullable=True)

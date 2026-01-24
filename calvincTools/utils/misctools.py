@@ -32,7 +32,7 @@ def show_fns(path_:str):
         node = ast.parse(file.read())
 
     # 
-    def show_fninfo(functionNode:ast.FunctionDef):
+    def show_fninfo(functionNode:ast.FunctionDef|ast.AsyncFunctionDef):
         """Format function information as a string.
         
         Args:
