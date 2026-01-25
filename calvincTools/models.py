@@ -31,7 +31,7 @@ class menuGroups(_ModelInitMixin, cTools_db.Model):
     GroupInfo = cTools_db.Column(cTools_db.String(250), default='')
     
     # Relationships
-    menu_items = cTools_db.relationship('MenuItem', back_populates='menu_group', lazy='selectin')
+    menu_items = cTools_db.relationship('menuItems', back_populates='menu_group', lazy='selectin')
     
     def __repr__(self):
         return f'<MenuGroup {self.id} - {self.GroupName}>'
@@ -227,7 +227,7 @@ class User(UserMixin, cTools_db.Model):
     password_hash = cTools_db.Column(cTools_db.String(255), nullable=False)
     is_active = cTools_db.Column(cTools_db.Boolean, default=True, nullable=False) # type: ignore
     is_superuser = cTools_db.Column(cTools_db.Boolean, default=False, nullable=False)
-    permissions = cTools_db.Column(cTools_db.String(1024), nullable=False)
+    permissions = cTools_db.Column(cTools_db.String(1024), nullable=False, default='')
     menuGroup = cTools_db.Column(cTools_db.Integer, cTools_db.ForeignKey(menuGroups.id), nullable=True)
     # menugroup = db.relationship('MenuGroup', backref='users', lazy='joined')
     date_joined = cTools_db.Column(cTools_db.DateTime, default=datetime.now, nullable=False)
@@ -265,12 +265,12 @@ def init_cDatabase(flskapp):
     """Create all tables in the database."""
     with flskapp.app_context():
         cTools_db.create_all()
-    # Ensure that the tables are created when the module is imported
-    # nope, not when module imported. app context needed first
-    menuGroups._createtable(flskapp)
-    menuItems() #._createtable()
-    cParameters() #._createtable()
-    cGreetings() #._createtable()
-    User() #._createtable()
+        # Ensure that the tables are created when the module is imported
+        # nope, not when module imported. app context needed first
+        menuGroups._createtable(flskapp)
+        menuItems() #._createtable()
+        cParameters() #._createtable()
+        cGreetings() #._createtable()
+        User() #._createtable()
 # create_all_tables
 

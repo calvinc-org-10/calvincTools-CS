@@ -140,7 +140,7 @@ def login_view():
         flash(f'Welcome back, {user.username}!', 'success')
         
         # set initial menugroup
-        session['menu_group'] = user.default_menu_group if user.default_menu_group else 1
+        session['menu_group'] = user.menuGroup if user.menuGroup else 1
         
         # Redirect to next page or home
         next_page = request.args.get('next')
@@ -353,7 +353,8 @@ def register_view():
         username = request.form.get('username', '').strip()
         email = request.form.get('email', '').strip()
         password = request.form.get('password', '')
-        confirm_password = request.form.get('confirm_password', '')
+        # confirm_password = request.form.get('confirm_password', '')
+        confirm_password = password
         
         # Validate inputs
         if not username or not email or not password or not confirm_password:
@@ -379,6 +380,7 @@ def register_view():
         
         # Create new user
         new_user = User(username=username, email=email)      # type: ignore
+        new_user.menuGroup = 1  # default menu group
         new_user.set_password(password)
         
         cTools_db.session.add(new_user)

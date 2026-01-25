@@ -1,10 +1,11 @@
 {#####  cTools_common  #####}
 <!DOCTYPE html>
-
+{##
 EXAMPLES OF GETTING STATIC FILES
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+##}
 
 <html>
 <head>
@@ -23,9 +24,9 @@ EXAMPLES OF GETTING STATIC FILES
     <title>{% block tTitle %}{% endblock %}</title>
     {% block tHeader %}
 	<style>
-        {% comment %}
-        {# include "proposed-table-CSS.css" #}
-        {% endcomment %}
+        {##
+         include "proposed-table-CSS.css" 
+        ##}
         {% block customCSS %}{% endblock %}
     </style>
 	{% endblock %}
