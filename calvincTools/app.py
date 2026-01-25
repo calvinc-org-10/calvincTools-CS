@@ -24,11 +24,10 @@ def create_app(config_name='development'):
     flskapp.register_blueprint(util_bp)
     
     # Home route
-    @flskapp.route('/')
+    @flskapp.route('/index')    # leave route('/') for caller to set
     def index():
         mnugrp = session.get('menu_group', 1)
         return redirect(url_for('menu.load_menu', menu_group=mnugrp, menu_num=0))
-        # return redirect(url_for('menu.load_menu', menu_group=1, menu_num=0))
     
     # Error handlers
     @flskapp.errorhandler(404)

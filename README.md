@@ -1,6 +1,6 @@
-# calvincTools
+# calvincTools-CS
 
-A Python package for calvincTools.
+A Python package for calvincTools. This is the client-server version, not the standalone version.
 
 ## Installation
 
@@ -72,5 +72,5 @@ Calvin C - calvinc404@gmail.com
 
 ## Changelog
 
-### 1.2.0 (2025-12-01)
+### 1.0.0 (2026-02-01)
 - Initial release

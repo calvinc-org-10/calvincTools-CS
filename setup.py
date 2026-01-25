@@ -5,19 +5,19 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 # from calvincTools import (__version__, __author__, __email__, )
 # sorry, build will fail with the above line, so manually set them here
-__version__ = "1.6.3"
+__version__ = "1.0.0"
 __author__ = "Calvin C"
 __email__ = "calvinc404@gmail.com"
 
 setup(
-    name="calvincTools",
+    name="calvincTools-CS",
     version=__version__,
     author=__author__,
     author_email=__email__,
     description="A Python package for calvincTools",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/calvinc-org-10/calvincTools",
+    url="https://github.com/calvinc-org-10/calvincTools-CS",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -33,14 +33,16 @@ setup(
     install_requires=[
         # Add your package dependencies here
         # e.g., "numpy>=1.20.0",
-        "PySide6==6.10.1",
-        "PySide6_Addons==6.10.1",
-        "PySide6_Essentials==6.10.1",
+        "Flask",
+        "Jinja2",
+        "Flask-WTF",
+        "Flask-SQLAlchemy",
+        "Flask-Migrate",
+        "Flask-Login",
         "typing_extensions==4.12.2",
         "et_xmlfile==2.0.0",
         "openpyxl==3.1.5",
         "qtawesome==1.4.0",
-        "shiboken6==6.10.1",
         "SQLAlchemy==2.0.36",
         "sqlparse==0.5.3",
         "python-dateutil==2.9.0.post0",

@@ -2,17 +2,19 @@
 
 class cTools_apphooks:
     """
-    A Singleton class to hold application-specific hooks and resources
+    A Singleton class to hold caller application-specific hooks and resources
     for the calvinctools toolkit, such as database sessionmakers.
 
     This acts as a Service Locator for external dependencies.
     """
     _instance = None
+    
     _app_sessionmaker = None
     _app_db = None
     _appver = ''
     _FormNameToURL_Map = {}
     _ExternalWebPageURL_Map = {}
+
     _MUSTBEINITIALIZED: set = {
         'app_db',
         # 'app_sessionmaker',
@@ -23,6 +25,9 @@ class cTools_apphooks:
     def __new__(cls):
         # Implement the Singleton pattern: always return the same instance
         if cls._instance is None:
+            # this is where calvincTools-CS should be registered with Flask & Co, right?
+            # check if already registered?
+            # create_app = __import__('calvincTools.app').create_app
             cls._instance = super(cTools_apphooks, cls).__new__(cls)
         return cls._instance
 

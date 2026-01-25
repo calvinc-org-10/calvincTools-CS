@@ -3,10 +3,10 @@ calvincTools - A Python package
 """
 
 _pkgname='Calvin C Tools'+' Client-Server Version'
-_base_ver_major=2
+_base_ver_major=1
 _base_ver_minor=0
 _base_ver_patch='0'
-_ver_date='2026-01-11'
+_ver_date='2026-02-01'
 _base_ver = f'{_base_ver_major}.{_base_ver_minor}.{_base_ver_patch}'
 __version__ = _base_ver
 sysver = {
@@ -20,7 +20,32 @@ sysver_key = 'DEV'
 __author__ = "Calvin C"
 __email__ = "calvinc404@gmail.com"
 
-# Change Log:
+# PLANNED CHANGES
+# =================
+# refactor app.py and call create_app from apphooks.py
+# do edit menu
+# do user edit page
+# do all menu commands
+    # 11: 'FormBrowse',
+    # 15: 'OpenTable',
+    # 21: 'RunCode',
+    # 31: 'RunSQLStatement',
+    # 32: 'ConstructSQLStatement',
+    # 36: 'LoadExtWebPage',
+    # 51: 'ChangePW',
+    # 62: 'ChangeUser',
+    # 63: 'ChangeMenuGroup',
+    # 91: 'EditMenu',
+    # 92: 'EditParameters',
+    # 93: 'EditGreetings',
+
+
+# Changelog:
+# Version - Date - Description
+# 1.0.0 - 2026-02-01 - Initial version. conversion  of calvincTools (standalone vertsion) to calvincTools-CS (client-server)
+
+
+# Change Log for original calvincTools package:
 # 2.0.0 - 2026-01-?? - Major overhaul to support client-server architecture
 # 1.6.3 - 2026-01-11 - require python 3.10+; fixed code so pytest finally passes
 # 1.6.2 - 2026-01-11 - modifications made to calvincTools/utils/misctools.py and corresponding tests

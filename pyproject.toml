@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "calvincTools"
-version = "1.6.3"
+version = "1.0.0"
 description = "A Python package for calvincTools"
 readme = "README.md"
 authors = [
@@ -24,9 +24,12 @@ classifiers = [
 requires-python = ">=3.10"
 dependencies = [
     # Add your package dependencies here
-    "PySide6==6.10.1",
-    "PySide6_Addons==6.10.1",
-    "PySide6_Essentials==6.10.1",
+    "Flask",
+    "Jinja2",
+    "Flask-WTF",
+    "Flask-SQLAlchemy",
+    "Flask-Migrate",
+    "Flask-Login",
     "typing_extensions==4.12.2",
     "et_xmlfile==2.0.0",
     "openpyxl==3.1.5",
@@ -49,9 +52,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/calvinc-org-10/calvincTools"
-Repository = "https://github.com/calvinc-org-10/calvincTools"
-"Bug Tracker" = "https://github.com/calvinc-org-10/calvincTools/issues"
+Homepage = "https://github.com/calvinc-org-10/calvincTools-CS"
+Repository = "https://github.com/calvinc-org-10/calvincTools-CS"
+"Bug Tracker" = "https://github.com/calvinc-org-10/calvincTools/issues-CS"
 
 [tool.black]
 line-length = 100
