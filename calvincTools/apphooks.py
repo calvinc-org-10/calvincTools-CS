@@ -25,10 +25,11 @@ class cTools_apphooks:
     def __new__(cls):
         # Implement the Singleton pattern: always return the same instance
         if cls._instance is None:
+            cls._instance = super(cTools_apphooks, cls).__new__(cls)
             # this is where calvincTools-CS should be registered with Flask & Co, right?
+            # cls._instance must be created first, since package uses it
             # check if already registered?
             # create_app = __import__('calvincTools.app').create_app
-            cls._instance = super(cTools_apphooks, cls).__new__(cls)
         return cls._instance
 
     @classmethod

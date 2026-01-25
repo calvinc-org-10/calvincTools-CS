@@ -80,3 +80,30 @@ __email__ = "calvinc404@gmail.com"
 
 # Import main modules here as needed
 # from .module import function
+
+
+from .blueprints import ctools_bp
+from calvincTools.config import CToolsDefaults
+
+class CTools:
+    def __init__(self, app=None):
+        if app is not None:
+            self.init_app(app)
+
+    def init_app(self, app):
+        # 1. Apply default configs if not already set by the user
+        for key, value in CToolsDefaults.__dict__.items():
+            if not key.startswith('__'):
+                app.config.setdefault(key, value)
+
+        # 2. Register Blueprints
+        # This keeps cTools routes separate from the app routes
+        app.register_blueprint(ctools_bp, url_prefix='/ctools')
+
+        # 3. Attach cTools to the app extensions (optional but recommended)
+        if not hasattr(app, 'extensions'):
+            app.extensions = {}
+        app.extensions['ctools'] = self
+    # init_app
+# CTools
+
