@@ -3,6 +3,10 @@ from typing import Any
 from datetime import datetime
 
 from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Integer, String, ForeignKey, SmallInteger, Boolean, DateTime
+from sqlalchemy.orm import relationship
+
 from flask_login import UserMixin
 from sqlalchemy import (
     UniqueConstraint,
@@ -30,9 +34,9 @@ class menuGroups(_ModelInitMixin, cToolsdbBase):
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_menuGroups'
     
-    id = Column(Integer, primary_key=True)
-    GroupName = Column(String(100), unique=True, nullable=False, index=True)
-    GroupInfo = Column(String(250), default='')
+    id = mapped_column(Integer, primary_key=True)
+    GroupName = mapped_column(String(100), unique=True, nullable=False, index=True)
+    GroupInfo = mapped_column(String(250), default='')
     
     # Relationships
     menu_items = relationship('menuItems', back_populates='menu_group', lazy='selectin')
@@ -104,16 +108,16 @@ class menuItems(_ModelInitMixin, cToolsdbBase): # type: ignore
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_menuItems'
     
-    id = Column(Integer, primary_key=True)
-    MenuGroup_id = Column(Integer, ForeignKey('cMenu_menuGroups.id', ondelete='RESTRICT'), nullable=True)
-    MenuID = Column(SmallInteger, nullable=False)
-    OptionNumber = Column(SmallInteger, nullable=False)
-    OptionText = Column(String(250), nullable=False)
-    Command = Column(Integer, nullable=True)
-    Argument = Column(String(250), default='')
-    pword = Column(String(250), default='')
-    top_line = Column(Boolean, nullable=True)
-    bottom_line = Column(Boolean, nullable=True)
+    id = mapped_column(Integer, primary_key=True)
+    MenuGroup_id = mapped_column(Integer, ForeignKey('cMenu_menuGroups.id', ondelete='RESTRICT'), nullable=True)
+    MenuID = mapped_column(SmallInteger, nullable=False)
+    OptionNumber = mapped_column(SmallInteger, nullable=False)
+    OptionText = mapped_column(String(250), nullable=False)
+    Command = mapped_column(Integer, nullable=True)
+    Argument = mapped_column(String(250), default='')
+    pword = mapped_column(String(250), default='')
+    top_line = mapped_column(Boolean, nullable=True)
+    bottom_line = mapped_column(Boolean, nullable=True)
     
     # Relationships
     menu_group = relationship('menuGroups', back_populates='menu_items', lazy='joined')
@@ -153,10 +157,10 @@ class cParameters(_ModelInitMixin, cToolsdbBase): # type: ignore
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_cParameters'
     
-    parm_name: str = Column(String(100), primary_key=True)
-    parm_value: str = Column(String(512), default='', nullable=False)
-    user_modifiable: bool = Column(Boolean, default=True, nullable=False)
-    comments: str = Column(String(512), default='', nullable=False)
+    parm_name: Mapped[str] = mapped_column(String(100), primary_key=True)
+    parm_value: Mapped[str] = mapped_column(String(512), default='', nullable=False)
+    user_modifiable: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    comments: Mapped[str] = mapped_column(String(512), default='', nullable=False)
     
     def __repr__(self):
         return f'<Parameter {self.parm_name}>'
@@ -200,8 +204,8 @@ class cGreetings(_ModelInitMixin, cToolsdbBase): # type: ignore
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_cGreetings'
     
-    id = Column(Integer, primary_key=True)
-    greeting = Column(String(2000), nullable=False)
+    id = mapped_column(Integer, primary_key=True)
+    greeting = mapped_column(String(2000), nullable=False)
     
     def __repr__(self):
         return f'<Greeting {self.id}>'
@@ -229,17 +233,17 @@ class User(UserMixin, cToolsdbBase): # type: ignore
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True)
-    username = Column(String(80), unique=True, nullable=False, index=True)
-    email = Column(String(120), unique=True, nullable=False, index=True)
-    password_hash = Column(String(255), nullable=False)
-    is_active = Column(Boolean, default=True, nullable=False) # type: ignore
-    is_superuser = Column(Boolean, default=False, nullable=False)
-    permissions = Column(String(1024), nullable=False, default='')
-    menuGroup = Column(Integer, ForeignKey(menuGroups.id), nullable=True)
+    id = mapped_column(Integer, primary_key=True)
+    username = mapped_column(String(80), unique=True, nullable=False, index=True)
+    email = mapped_column(String(120), unique=True, nullable=False, index=True)
+    password_hash = mapped_column(String(255), nullable=False)
+    is_active = mapped_column(Boolean, default=True, nullable=False) # type: ignore
+    is_superuser = mapped_column(Boolean, default=False, nullable=False)
+    permissions = mapped_column(String(1024), nullable=False, default='')
+    menuGroup = mapped_column(Integer, ForeignKey(menuGroups.id), nullable=True)
     # menugroup = db.relationship('MenuGroup', backref='users', lazy='joined')
-    date_joined = Column(DateTime, default=datetime.now, nullable=False)
-    last_login = Column(DateTime, nullable=True)
+    date_joined = mapped_column(DateTime, default=datetime.now, nullable=False)
+    last_login = mapped_column(DateTime, nullable=True)
 
     def set_password(self, password):
         """Hash and set the user's password."""
