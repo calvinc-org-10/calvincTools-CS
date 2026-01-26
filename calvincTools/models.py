@@ -40,7 +40,7 @@ class menuGroups(_ModelInitMixin, cTools_db.Model):
         return f'menuGroup {self.GroupName}'
 
     @classmethod
-    def _createtable(cls, flskapp):
+    def createtable(cls, flskapp):
         with flskapp.app_context():
             # Create tables if they don't exist
             cTools_db.create_all()
@@ -267,7 +267,7 @@ def init_cDatabase(flskapp):
         cTools_db.create_all()
         # Ensure that the tables are created when the module is imported
         # nope, not when module imported. app context needed first
-        menuGroups._createtable(flskapp)
+        menuGroups.createtable(flskapp)
         menuItems() #._createtable()
         cParameters() #._createtable()
         cGreetings() #._createtable()
