@@ -86,7 +86,7 @@ def build_menu_html(menu_items, menu_group, menu_num):
     Helper to build menu HTML. 
     Django equivalent: inline logic in LoadMenu
     """
-    from flask import url_for
+    # from flask import url_for
     
     # Initialize 20 empty slots
     menu_list = ['<span class="btn btn-lg btn-outline-transparent mx-auto"></span>'] * 20

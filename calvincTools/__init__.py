@@ -81,11 +81,17 @@ __email__ = "calvinc404@gmail.com"
 # Import main modules here as needed
 # from .module import function
 
-
+from flask import Flask, render_template, redirect, url_for, session
+from flask_migrate import Migrate
 from .blueprints import ctools_bp
+from .database import cTools_db  
 from calvincTools.config import CToolsDefaults
+from .models import init_cDatabase
+from .usr_auth.views import init_login_manager, register_auth_blueprint
+from .cMenu.views import menu_bp
+from .views.util_views import util_bp
 
-class CTools:
+class calvinCTools:
     def __init__(self, app=None):
         if app is not None:
             self.init_app(app)
@@ -100,10 +106,41 @@ class CTools:
         # This keeps cTools routes separate from the app routes
         app.register_blueprint(ctools_bp, url_prefix='/ctools')
 
+        # Initialize extensions
+        cTools_db.init_app(app)
+        init_cDatabase(app)
+        # migrate = Migrate(app, cMenu_db)
+        init_login_manager(app)
+        
+        # Register blueprints
+        register_auth_blueprint(app)
+        app.register_blueprint(menu_bp)
+        app.register_blueprint(util_bp)
+        
+        # Home route
+        @app.route('/index')    # leave route('/') for caller to set
+        def index():
+            mnugrp = session.get('menu_group', 1)
+            return redirect(url_for('menu.load_menu', menu_group=mnugrp, menu_num=0))
+        
+        # Error handlers
+        @app.errorhandler(404)
+        def not_found(error):   # pylint: disable=unused-argument
+            return render_template('errors/404.html'), 404
+        
+        @app.errorhandler(403)
+        def forbidden(error):   # pylint: disable=unused-argument
+            return render_template('errors/403.html'), 403
+        
+        @app.errorhandler(500)
+        def internal_error(error):   # pylint: disable=unused-argument
+            cTools_db.session.rollback()
+            return render_template('errors/500.html'), 500
+
         # 3. Attach cTools to the app extensions (optional but recommended)
         if not hasattr(app, 'extensions'):
             app.extensions = {}
         app.extensions['ctools'] = self
     # init_app
-# CTools
+# calvinCTools
 
