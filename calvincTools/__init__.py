@@ -107,7 +107,8 @@ class calvinCTools:
         app.register_blueprint(ctools_bp, url_prefix='/ctools')
 
         # Initialize extensions
-        cTools_db.init_app(app)
+        global cTools_db
+        cTools_db = app.extensions.get('sqlalchemy')    # snag the app's SQLAlchemy instance
         init_cDatabase(app)
         # migrate = Migrate(app, cMenu_db)
         init_login_manager(app)

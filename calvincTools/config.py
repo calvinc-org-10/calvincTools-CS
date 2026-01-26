@@ -4,6 +4,17 @@ class CToolsDefaults:
     CTOOLS_API_KEY = "defaultT-keyK"
     CTOOLS_ENABLE_LOGGING = True
 
+    root_path = "."
+    # root_path = os.path.abspath(os.path.dirname(__file__))
+    cMenu_dbPath = f"{root_path}\\cMenudb.sqlite"
+    
+    # isolate calvincTools db
+    SQLALCHEMY_BINDS = {
+    'cToolsdb': f'sqlite:///{cMenu_dbPath}'
+    }
+
+
+
 class cToolsConfig: 
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -16,24 +27,20 @@ class cToolsConfig:
     SESSION_COOKIE_SAMESITE = 'Lax'
     PERMANENT_SESSION_LIFETIME = 3600  # 1 hour
 
-    # calvincTools specific
-    root_path = "."
-    # root_path = os.path.abspath(os.path.dirname(__file__))
-    cMenu_dbPath = f"{root_path}\\cMenudb.sqlite"
 
 class cToolsDevelopmentConfig(cToolsConfig):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-        f'sqlite:///{cToolsConfig.cMenu_dbPath}'
-        # 'sqlite:///dev_database.db'
+    # SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
+    #     f'sqlite:///{cToolsConfig.cMenu_dbPath}'
+    #     # 'sqlite:///dev_database.db'
     SQLALCHEMY_ECHO = True
 
 
 class cToolsProductionConfig(cToolsConfig):
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os. environ.get('DATABASE_URL') or \
-        f'sqlite:///{cToolsConfig.cMenu_dbPath}'
-        # 'sqlite:///prod_database.db'
+    # SQLALCHEMY_DATABASE_URI = os. environ.get('DATABASE_URL') or \
+    #     f'sqlite:///{cToolsConfig.cMenu_dbPath}'
+    #     # 'sqlite:///prod_database.db'
     
     # Enhanced security for production
     SESSION_COOKIE_SECURE = True  # HTTPS only
@@ -41,7 +48,7 @@ class cToolsProductionConfig(cToolsConfig):
 
 class cToolsTestingConfig(cToolsConfig):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     WTF_CSRF_ENABLED = False
 
 

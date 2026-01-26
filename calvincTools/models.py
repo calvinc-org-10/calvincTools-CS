@@ -24,6 +24,7 @@ class menuGroups(_ModelInitMixin, cTools_db.Model):
     """
     Django equivalent: menuGroups
     """
+    __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_menuGroups'
     
     id = cTools_db.Column(cTools_db.Integer, primary_key=True)
@@ -97,6 +98,7 @@ class menuItems(_ModelInitMixin, cTools_db.Model):
     """
     Django equivalent: menuItems
     """
+    __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_menuItems'
     
     id = cTools_db.Column(cTools_db.Integer, primary_key=True)
@@ -145,6 +147,7 @@ class cParameters(_ModelInitMixin, cTools_db.Model):
     """
     Django equivalent: cParameters
     """
+    __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_cParameters'
     
     parm_name: str = cTools_db.Column(cTools_db.String(100), primary_key=True)
@@ -191,6 +194,7 @@ class cGreetings(_ModelInitMixin, cTools_db.Model):
     """
     Django equivalent: cGreetings
     """
+    __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_cGreetings'
     
     id = cTools_db.Column(cTools_db.Integer, primary_key=True)
@@ -219,6 +223,7 @@ class User(UserMixin, cTools_db.Model):
     - is_anonymous
     - get_id()
     """
+    __bind_key__ = 'cToolsdb'
     __tablename__ = 'users'
 
     id = cTools_db.Column(cTools_db.Integer, primary_key=True)
@@ -264,7 +269,7 @@ class User(UserMixin, cTools_db.Model):
 def init_cDatabase(flskapp):
     """Create all tables in the database."""
     with flskapp.app_context():
-        cTools_db.create_all()
+        cTools_db.create_all(bind_key='cToolsdb')
         # Ensure that the tables are created when the module is imported
         # nope, not when module imported. app context needed first
         menuGroups.createtable(flskapp)
