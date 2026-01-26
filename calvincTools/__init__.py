@@ -81,12 +81,11 @@ __email__ = "calvinc404@gmail.com"
 # Import main modules here as needed
 # from .module import function
 
-from flask import Flask, render_template, redirect, url_for, session
+from flask import Flask, app, render_template, redirect, url_for, session
 from flask_migrate import Migrate
 from .blueprints import ctools_bp
 from .database import cTools_db  
 from calvincTools.config import CToolsDefaults
-from .models import init_cDatabase
 from .usr_auth.views import init_login_manager, register_auth_blueprint
 from .cMenu.views import menu_bp
 from .views.util_views import util_bp
@@ -109,6 +108,7 @@ class calvinCTools:
         # Initialize extensions
         global cTools_db
         cTools_db = app.extensions.get('sqlalchemy')    # snag the app's SQLAlchemy instance
+        from .models import init_cDatabase
         init_cDatabase(app)
         # migrate = Migrate(app, cMenu_db)
         init_login_manager(app)
