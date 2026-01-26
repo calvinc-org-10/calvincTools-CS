@@ -23,7 +23,7 @@ from .dbmenulist import initmenu_menulist
 assert cTools_db is not None, "cTools_db must be initialized before defining models."
 assert isinstance(cTools_db, SQLAlchemy), "cTools_db must be an instance of SQLAlchemy."
 
-class menuGroups(_ModelInitMixin, cTools_db.Model): # type: ignore
+class menuGroups(_ModelInitMixin, cTools_db.Model):
     """
     Django equivalent: menuGroups
     """
