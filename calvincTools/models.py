@@ -1,6 +1,7 @@
 from typing import Any
 from datetime import datetime
 
+from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from sqlalchemy import (
     UniqueConstraint,
@@ -19,8 +20,10 @@ from .dbmenulist import initmenu_menulist
 # MENU SYSTEM MODELS
 # ============================================================================
 
+assert cTools_db is not None, "cTools_db must be initialized before defining models."
+assert isinstance(cTools_db, SQLAlchemy), "cTools_db must be an instance of SQLAlchemy."
 
-class menuGroups(_ModelInitMixin, cTools_db.Model):
+class menuGroups(_ModelInitMixin, cTools_db.Model): # type: ignore
     """
     Django equivalent: menuGroups
     """
@@ -94,7 +97,7 @@ class menuGroups(_ModelInitMixin, cTools_db.Model):
     # _createtable
 
 
-class menuItems(_ModelInitMixin, cTools_db.Model):
+class menuItems(_ModelInitMixin, cTools_db.Model): # type: ignore
     """
     Django equivalent: menuItems
     """
@@ -143,7 +146,7 @@ class menuItems(_ModelInitMixin, cTools_db.Model):
         super().__init__(**kw)
     # __init__
 
-class cParameters(_ModelInitMixin, cTools_db.Model):
+class cParameters(_ModelInitMixin, cTools_db.Model): # type: ignore
     """
     Django equivalent: cParameters
     """
@@ -190,7 +193,7 @@ class cParameters(_ModelInitMixin, cTools_db.Model):
         return param
 
 
-class cGreetings(_ModelInitMixin, cTools_db.Model):
+class cGreetings(_ModelInitMixin, cTools_db.Model): # type: ignore
     """
     Django equivalent: cGreetings
     """
@@ -214,7 +217,7 @@ class cGreetings(_ModelInitMixin, cTools_db.Model):
 # USER MODEL
 # ============================================================================
 
-class User(UserMixin, cTools_db.Model):
+class User(UserMixin, cTools_db.Model): # type: ignore
     """
     User model for authentication. 
     Inherit from UserMixin to get default implementations for: 

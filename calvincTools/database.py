@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import sessionmaker
 
-cTools_db: SQLAlchemy
+cTools_db = None  # will be initialized in __init__.py
 
 # moved to config.py
 # rootdir = "."
@@ -27,8 +27,12 @@ def get_cTools_db():
 # get_cTools_db
 
 def get_cMenu_session():
+    if cTools_db is None:
+        raise RuntimeError("cTools_db is not initialized.")
     return cTools_db.session
 def get_cMenu_sessionmaker():
+    if cTools_db is None:
+        raise RuntimeError("cTools_db is not initialized.")
     return cTools_db.sessionmaker
 
 ##########################################################

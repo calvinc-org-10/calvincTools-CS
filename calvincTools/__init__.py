@@ -135,7 +135,8 @@ class calvinCTools:
         
         @app.errorhandler(500)
         def internal_error(error):   # pylint: disable=unused-argument
-            cTools_db.session.rollback()
+            if cTools_db is not None:
+                cTools_db.session.rollback()
             return render_template('errors/500.html'), 500
 
         # 3. Attach cTools to the app extensions (optional but recommended)
