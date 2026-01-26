@@ -23,19 +23,19 @@ from .dbmenulist import initmenu_menulist
 # This does not need 'db' yet
 cToolsdbBase = declarative_base()
 
-class menuGroups(_ModelInitMixin, cToolsdbBase.Model):
+class menuGroups(_ModelInitMixin, cToolsdbBase):
     """
     Django equivalent: menuGroups
     """
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_menuGroups'
     
-    id = cToolsdbBase.Column(cToolsdbBase.Integer, primary_key=True)
-    GroupName = cToolsdbBase.Column(cToolsdbBase.String(100), unique=True, nullable=False, index=True)
-    GroupInfo = cToolsdbBase.Column(cToolsdbBase.String(250), default='')
+    id = Column(Integer, primary_key=True)
+    GroupName = Column(String(100), unique=True, nullable=False, index=True)
+    GroupInfo = Column(String(250), default='')
     
     # Relationships
-    menu_items = cToolsdbBase.relationship('menuItems', back_populates='menu_group', lazy='selectin')
+    menu_items = relationship('menuItems', back_populates='menu_group', lazy='selectin')
     
     def __repr__(self):
         return f'<MenuGroup {self.id} - {self.GroupName}>'
@@ -97,26 +97,26 @@ class menuGroups(_ModelInitMixin, cToolsdbBase.Model):
     # _createtable
 
 
-class menuItems(_ModelInitMixin, cToolsdbBase.Model): # type: ignore
+class menuItems(_ModelInitMixin, cToolsdbBase): # type: ignore
     """
     Django equivalent: menuItems
     """
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_menuItems'
     
-    id = cToolsdbBase.Column(cToolsdbBase.Integer, primary_key=True)
-    MenuGroup_id = cToolsdbBase.Column(cToolsdbBase.Integer, cToolsdbBase.ForeignKey('cMenu_menuGroups.id', ondelete='RESTRICT'), nullable=True)
-    MenuID = cToolsdbBase.Column(cToolsdbBase.SmallInteger, nullable=False)
-    OptionNumber = cToolsdbBase.Column(cToolsdbBase.SmallInteger, nullable=False)
-    OptionText = cToolsdbBase.Column(cToolsdbBase.String(250), nullable=False)
-    Command = cToolsdbBase.Column(cToolsdbBase.Integer, nullable=True)
-    Argument = cToolsdbBase.Column(cToolsdbBase.String(250), default='')
-    pword = cToolsdbBase.Column(cToolsdbBase.String(250), default='')
-    top_line = cToolsdbBase.Column(cToolsdbBase.Boolean, nullable=True)
-    bottom_line = cToolsdbBase.Column(cToolsdbBase.Boolean, nullable=True)
+    id = Column(Integer, primary_key=True)
+    MenuGroup_id = Column(Integer, ForeignKey('cMenu_menuGroups.id', ondelete='RESTRICT'), nullable=True)
+    MenuID = Column(SmallInteger, nullable=False)
+    OptionNumber = Column(SmallInteger, nullable=False)
+    OptionText = Column(String(250), nullable=False)
+    Command = Column(Integer, nullable=True)
+    Argument = Column(String(250), default='')
+    pword = Column(String(250), default='')
+    top_line = Column(Boolean, nullable=True)
+    bottom_line = Column(Boolean, nullable=True)
     
     # Relationships
-    menu_group = cToolsdbBase.relationship('menuGroups', back_populates='menu_items', lazy='joined')
+    menu_group = relationship('menuGroups', back_populates='menu_items', lazy='joined')
     
     # Unique constraint (Django's UniqueConstraint)
     __table_args__ = (
@@ -146,17 +146,17 @@ class menuItems(_ModelInitMixin, cToolsdbBase.Model): # type: ignore
         super().__init__(**kw)
     # __init__
 
-class cParameters(_ModelInitMixin, cToolsdbBase.Model): # type: ignore
+class cParameters(_ModelInitMixin, cToolsdbBase): # type: ignore
     """
     Django equivalent: cParameters
     """
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_cParameters'
     
-    parm_name: str = cToolsdbBase.Column(cToolsdbBase.String(100), primary_key=True)
-    parm_value: str = cToolsdbBase.Column(cToolsdbBase.String(512), default='', nullable=False)
-    user_modifiable: bool = cToolsdbBase.Column(cToolsdbBase.Boolean, default=True, nullable=False)
-    comments: str = cToolsdbBase.Column(cToolsdbBase.String(512), default='', nullable=False)
+    parm_name: str = Column(String(100), primary_key=True)
+    parm_value: str = Column(String(512), default='', nullable=False)
+    user_modifiable: bool = Column(Boolean, default=True, nullable=False)
+    comments: str = Column(String(512), default='', nullable=False)
     
     def __repr__(self):
         return f'<Parameter {self.parm_name}>'
@@ -193,15 +193,15 @@ class cParameters(_ModelInitMixin, cToolsdbBase.Model): # type: ignore
         return param
 
 
-class cGreetings(_ModelInitMixin, cToolsdbBase.Model): # type: ignore
+class cGreetings(_ModelInitMixin, cToolsdbBase): # type: ignore
     """
     Django equivalent: cGreetings
     """
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_cGreetings'
     
-    id = cToolsdbBase.Column(cToolsdbBase.Integer, primary_key=True)
-    greeting = cToolsdbBase.Column(cToolsdbBase.String(2000), nullable=False)
+    id = Column(Integer, primary_key=True)
+    greeting = Column(String(2000), nullable=False)
     
     def __repr__(self):
         return f'<Greeting {self.id}>'
@@ -217,7 +217,7 @@ class cGreetings(_ModelInitMixin, cToolsdbBase.Model): # type: ignore
 # USER MODEL
 # ============================================================================
 
-class User(UserMixin, cToolsdbBase.Model): # type: ignore
+class User(UserMixin, cToolsdbBase): # type: ignore
     """
     User model for authentication. 
     Inherit from UserMixin to get default implementations for: 
@@ -229,17 +229,17 @@ class User(UserMixin, cToolsdbBase.Model): # type: ignore
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'users'
 
-    id = cToolsdbBase.Column(cToolsdbBase.Integer, primary_key=True)
-    username = cToolsdbBase.Column(cToolsdbBase.String(80), unique=True, nullable=False, index=True)
-    email = cToolsdbBase.Column(cToolsdbBase.String(120), unique=True, nullable=False, index=True)
-    password_hash = cToolsdbBase.Column(cToolsdbBase.String(255), nullable=False)
-    is_active = cToolsdbBase.Column(cToolsdbBase.Boolean, default=True, nullable=False) # type: ignore
-    is_superuser = cToolsdbBase.Column(cToolsdbBase.Boolean, default=False, nullable=False)
-    permissions = cToolsdbBase.Column(cToolsdbBase.String(1024), nullable=False, default='')
-    menuGroup = cToolsdbBase.Column(cToolsdbBase.Integer, cToolsdbBase.ForeignKey(menuGroups.id), nullable=True)
+    id = Column(Integer, primary_key=True)
+    username = Column(String(80), unique=True, nullable=False, index=True)
+    email = Column(String(120), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False) # type: ignore
+    is_superuser = Column(Boolean, default=False, nullable=False)
+    permissions = Column(String(1024), nullable=False, default='')
+    menuGroup = Column(Integer, ForeignKey(menuGroups.id), nullable=True)
     # menugroup = db.relationship('MenuGroup', backref='users', lazy='joined')
-    date_joined = cToolsdbBase.Column(cToolsdbBase.DateTime, default=datetime.now, nullable=False)
-    last_login = cToolsdbBase.Column(cToolsdbBase.DateTime, nullable=True)
+    date_joined = Column(DateTime, default=datetime.now, nullable=False)
+    last_login = Column(DateTime, nullable=True)
 
     def set_password(self, password):
         """Hash and set the user's password."""
