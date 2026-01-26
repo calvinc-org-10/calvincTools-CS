@@ -81,10 +81,10 @@ __email__ = "calvinc404@gmail.com"
 # Import main modules here as needed
 # from .module import function
 
-from flask import Flask, app, render_template, redirect, url_for, session
+from flask import Flask, render_template, redirect, url_for, session
 from flask_migrate import Migrate
 from .blueprints import ctools_bp
-from .database import cTools_db  
+from . import database
 from calvincTools.config import CToolsDefaults
 from .usr_auth.views import init_login_manager, register_auth_blueprint
 from .cMenu.views import menu_bp
@@ -109,8 +109,7 @@ class calvinCTools:
         app.register_blueprint(ctools_bp, url_prefix='/ctools')
 
         # Initialize extensions
-        global cTools_db
-        cTools_db = app_db    # snag the app's SQLAlchemy instance
+        database.cTools_db = app_db    # snag the app's SQLAlchemy instance
         from .models import init_cDatabase
         init_cDatabase(app)
         # migrate = Migrate(app, cMenu_db)
@@ -138,8 +137,8 @@ class calvinCTools:
         
         @app.errorhandler(500)
         def internal_error(error):   # pylint: disable=unused-argument
-            if cTools_db is not None:
-                cTools_db.session.rollback()
+            if database.cTools_db is not None:
+                database.cTools_db.session.rollback()
             return render_template('errors/500.html'), 500
 
         # 3. Attach cTools to the app extensions (optional but recommended)

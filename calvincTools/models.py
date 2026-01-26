@@ -1,7 +1,8 @@
+
 from typing import Any
 from datetime import datetime
 
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import declarative_base
 from flask_login import UserMixin
 from sqlalchemy import (
     UniqueConstraint,
@@ -10,7 +11,6 @@ from sqlalchemy import (
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .database import cTools_db
 from .mixins import _ModelInitMixin
 
 from .cMenu import MENUCOMMAND
@@ -20,22 +20,22 @@ from .dbmenulist import initmenu_menulist
 # MENU SYSTEM MODELS
 # ============================================================================
 
-assert cTools_db is not None, "cTools_db must be initialized before defining models."
-assert isinstance(cTools_db, SQLAlchemy), "cTools_db must be an instance of SQLAlchemy."
+# This does not need 'db' yet
+cToolsdbBase = declarative_base()
 
-class menuGroups(_ModelInitMixin, cTools_db.Model):
+class menuGroups(_ModelInitMixin, cToolsdbBase.Model):
     """
     Django equivalent: menuGroups
     """
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_menuGroups'
     
-    id = cTools_db.Column(cTools_db.Integer, primary_key=True)
-    GroupName = cTools_db.Column(cTools_db.String(100), unique=True, nullable=False, index=True)
-    GroupInfo = cTools_db.Column(cTools_db.String(250), default='')
+    id = cToolsdbBase.Column(cToolsdbBase.Integer, primary_key=True)
+    GroupName = cToolsdbBase.Column(cToolsdbBase.String(100), unique=True, nullable=False, index=True)
+    GroupInfo = cToolsdbBase.Column(cToolsdbBase.String(250), default='')
     
     # Relationships
-    menu_items = cTools_db.relationship('menuItems', back_populates='menu_group', lazy='selectin')
+    menu_items = cToolsdbBase.relationship('menuItems', back_populates='menu_group', lazy='selectin')
     
     def __repr__(self):
         return f'<MenuGroup {self.id} - {self.GroupName}>'
@@ -47,15 +47,15 @@ class menuGroups(_ModelInitMixin, cTools_db.Model):
     def createtable(cls, flskapp):
         with flskapp.app_context():
             # Create tables if they don't exist
-            cTools_db.create_all()
+            cToolsdbBase.create_all()
 
             try:
                 # Check if any group exists
-                if not cTools_db.session.query(cls).first():
+                if not cToolsdbBase.session.query(cls).first():
                     # Add starter group
                     starter = cls(GroupName="Group Name", GroupInfo="Group Info")
-                    cTools_db.session.add(starter)
-                    cTools_db.session.commit()
+                    cToolsdbBase.session.add(starter)
+                    cToolsdbBase.session.commit()
                     # Add default menu items for the starter group
                     starter_id = starter.id
                     # TODO: use dbmenulist initmenu_menulist
@@ -85,38 +85,38 @@ class menuGroups(_ModelInitMixin, cTools_db.Model):
                             pword='', top_line=None, bottom_line=None
                             ),
                         ]
-                    cTools_db.session.add_all(menu_items)
-                    cTools_db.session.commit()
+                    cToolsdbBase.session.add_all(menu_items)
+                    cToolsdbBase.session.commit()
                 # endif no group exists
             except IntegrityError:
-                cTools_db.session.rollback()
+                cToolsdbBase.session.rollback()
             finally:
-                cTools_db.session.close()
+                cToolsdbBase.session.close()
             # end try
         # end with app_context
     # _createtable
 
 
-class menuItems(_ModelInitMixin, cTools_db.Model): # type: ignore
+class menuItems(_ModelInitMixin, cToolsdbBase.Model): # type: ignore
     """
     Django equivalent: menuItems
     """
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_menuItems'
     
-    id = cTools_db.Column(cTools_db.Integer, primary_key=True)
-    MenuGroup_id = cTools_db.Column(cTools_db.Integer, cTools_db.ForeignKey('cMenu_menuGroups.id', ondelete='RESTRICT'), nullable=True)
-    MenuID = cTools_db.Column(cTools_db.SmallInteger, nullable=False)
-    OptionNumber = cTools_db.Column(cTools_db.SmallInteger, nullable=False)
-    OptionText = cTools_db.Column(cTools_db.String(250), nullable=False)
-    Command = cTools_db.Column(cTools_db.Integer, nullable=True)
-    Argument = cTools_db.Column(cTools_db.String(250), default='')
-    pword = cTools_db.Column(cTools_db.String(250), default='')
-    top_line = cTools_db.Column(cTools_db.Boolean, nullable=True)
-    bottom_line = cTools_db.Column(cTools_db.Boolean, nullable=True)
+    id = cToolsdbBase.Column(cToolsdbBase.Integer, primary_key=True)
+    MenuGroup_id = cToolsdbBase.Column(cToolsdbBase.Integer, cToolsdbBase.ForeignKey('cMenu_menuGroups.id', ondelete='RESTRICT'), nullable=True)
+    MenuID = cToolsdbBase.Column(cToolsdbBase.SmallInteger, nullable=False)
+    OptionNumber = cToolsdbBase.Column(cToolsdbBase.SmallInteger, nullable=False)
+    OptionText = cToolsdbBase.Column(cToolsdbBase.String(250), nullable=False)
+    Command = cToolsdbBase.Column(cToolsdbBase.Integer, nullable=True)
+    Argument = cToolsdbBase.Column(cToolsdbBase.String(250), default='')
+    pword = cToolsdbBase.Column(cToolsdbBase.String(250), default='')
+    top_line = cToolsdbBase.Column(cToolsdbBase.Boolean, nullable=True)
+    bottom_line = cToolsdbBase.Column(cToolsdbBase.Boolean, nullable=True)
     
     # Relationships
-    menu_group = cTools_db.relationship('menuGroups', back_populates='menu_items', lazy='joined')
+    menu_group = cToolsdbBase.relationship('menuGroups', back_populates='menu_items', lazy='joined')
     
     # Unique constraint (Django's UniqueConstraint)
     __table_args__ = (
@@ -136,27 +136,27 @@ class menuItems(_ModelInitMixin, cTools_db.Model): # type: ignore
         If the menuGroups table doesn't exist, it will also be created, and a starter group and menu will be added.
         :param kw: Keyword arguments for the menuItems instance.
         """
-        inspector = inspect(cTools_db.engine)
+        inspector = inspect(cToolsdbBase.engine)
         if not inspector.has_table(self.__tablename__):
             # If the table does not exist, create it
-            cTools_db.create_all()
+            cToolsdbBase.create_all()
             # Optionally, you can also create a starter group and menu here
             # menuGroups._createtable()
         #endif not inspector.has_table():
         super().__init__(**kw)
     # __init__
 
-class cParameters(_ModelInitMixin, cTools_db.Model): # type: ignore
+class cParameters(_ModelInitMixin, cToolsdbBase.Model): # type: ignore
     """
     Django equivalent: cParameters
     """
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_cParameters'
     
-    parm_name: str = cTools_db.Column(cTools_db.String(100), primary_key=True)
-    parm_value: str = cTools_db.Column(cTools_db.String(512), default='', nullable=False)
-    user_modifiable: bool = cTools_db.Column(cTools_db.Boolean, default=True, nullable=False)
-    comments: str = cTools_db.Column(cTools_db.String(512), default='', nullable=False)
+    parm_name: str = cToolsdbBase.Column(cToolsdbBase.String(100), primary_key=True)
+    parm_value: str = cToolsdbBase.Column(cToolsdbBase.String(512), default='', nullable=False)
+    user_modifiable: bool = cToolsdbBase.Column(cToolsdbBase.Boolean, default=True, nullable=False)
+    comments: str = cToolsdbBase.Column(cToolsdbBase.String(512), default='', nullable=False)
     
     def __repr__(self):
         return f'<Parameter {self.parm_name}>'
@@ -187,21 +187,21 @@ class cParameters(_ModelInitMixin, cTools_db.Model): # type: ignore
                 user_modifiable=user_modifiable,
                 comments=comments
             )
-            cTools_db.session.add(param)
+            cToolsdbBase.session.add(param)
         
-        cTools_db.session.commit()
+        cToolsdbBase.session.commit()
         return param
 
 
-class cGreetings(_ModelInitMixin, cTools_db.Model): # type: ignore
+class cGreetings(_ModelInitMixin, cToolsdbBase.Model): # type: ignore
     """
     Django equivalent: cGreetings
     """
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_cGreetings'
     
-    id = cTools_db.Column(cTools_db.Integer, primary_key=True)
-    greeting = cTools_db.Column(cTools_db.String(2000), nullable=False)
+    id = cToolsdbBase.Column(cToolsdbBase.Integer, primary_key=True)
+    greeting = cToolsdbBase.Column(cToolsdbBase.String(2000), nullable=False)
     
     def __repr__(self):
         return f'<Greeting {self.id}>'
@@ -217,7 +217,7 @@ class cGreetings(_ModelInitMixin, cTools_db.Model): # type: ignore
 # USER MODEL
 # ============================================================================
 
-class User(UserMixin, cTools_db.Model): # type: ignore
+class User(UserMixin, cToolsdbBase.Model): # type: ignore
     """
     User model for authentication. 
     Inherit from UserMixin to get default implementations for: 
@@ -229,17 +229,17 @@ class User(UserMixin, cTools_db.Model): # type: ignore
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'users'
 
-    id = cTools_db.Column(cTools_db.Integer, primary_key=True)
-    username = cTools_db.Column(cTools_db.String(80), unique=True, nullable=False, index=True)
-    email = cTools_db.Column(cTools_db.String(120), unique=True, nullable=False, index=True)
-    password_hash = cTools_db.Column(cTools_db.String(255), nullable=False)
-    is_active = cTools_db.Column(cTools_db.Boolean, default=True, nullable=False) # type: ignore
-    is_superuser = cTools_db.Column(cTools_db.Boolean, default=False, nullable=False)
-    permissions = cTools_db.Column(cTools_db.String(1024), nullable=False, default='')
-    menuGroup = cTools_db.Column(cTools_db.Integer, cTools_db.ForeignKey(menuGroups.id), nullable=True)
+    id = cToolsdbBase.Column(cToolsdbBase.Integer, primary_key=True)
+    username = cToolsdbBase.Column(cToolsdbBase.String(80), unique=True, nullable=False, index=True)
+    email = cToolsdbBase.Column(cToolsdbBase.String(120), unique=True, nullable=False, index=True)
+    password_hash = cToolsdbBase.Column(cToolsdbBase.String(255), nullable=False)
+    is_active = cToolsdbBase.Column(cToolsdbBase.Boolean, default=True, nullable=False) # type: ignore
+    is_superuser = cToolsdbBase.Column(cToolsdbBase.Boolean, default=False, nullable=False)
+    permissions = cToolsdbBase.Column(cToolsdbBase.String(1024), nullable=False, default='')
+    menuGroup = cToolsdbBase.Column(cToolsdbBase.Integer, cToolsdbBase.ForeignKey(menuGroups.id), nullable=True)
     # menugroup = db.relationship('MenuGroup', backref='users', lazy='joined')
-    date_joined = cTools_db.Column(cTools_db.DateTime, default=datetime.now, nullable=False)
-    last_login = cTools_db.Column(cTools_db.DateTime, nullable=True)
+    date_joined = cToolsdbBase.Column(cToolsdbBase.DateTime, default=datetime.now, nullable=False)
+    last_login = cToolsdbBase.Column(cToolsdbBase.DateTime, nullable=True)
 
     def set_password(self, password):
         """Hash and set the user's password."""
@@ -252,7 +252,7 @@ class User(UserMixin, cTools_db.Model): # type: ignore
     def update_last_login(self):
         """Update the last login timestamp."""
         self.last_login = datetime.now()
-        cTools_db.session.commit()
+        cToolsdbBase.session.commit()
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -261,10 +261,10 @@ class User(UserMixin, cTools_db.Model): # type: ignore
         """
         Initialize a user instance. If the user table doesn't exist, it will be created.
         """
-        inspector = inspect(cTools_db.engine)
+        inspector = inspect(cToolsdbBase.engine)
         if not inspector.has_table(self.__tablename__):
             # If the table does not exist, create it
-            cTools_db.create_all()
+            cToolsdbBase.create_all()
         #endif not inspector.has_table():
         super().__init__(**kw)
     # __init__
@@ -272,7 +272,7 @@ class User(UserMixin, cTools_db.Model): # type: ignore
 def init_cDatabase(flskapp):
     """Create all tables in the database."""
     with flskapp.app_context():
-        cTools_db.create_all(bind_key='cToolsdb')
+        cToolsdbBase.create_all(bind_key='cToolsdb')
         # Ensure that the tables are created when the module is imported
         # nope, not when module imported. app context needed first
         menuGroups.createtable(flskapp)
