@@ -85,7 +85,7 @@ from flask import Flask, render_template, redirect, url_for, session
 from flask_migrate import Migrate
 from .blueprints import ctools_bp
 from . import database
-from calvincTools.config import CToolsDefaults
+from calvincTools.config import cTools_config
 from .usr_auth.views import init_login_manager, register_auth_blueprint
 from .cMenu.views import menu_bp
 from .views.util_views import util_bp
@@ -100,9 +100,7 @@ class calvinCTools:
 
     def init_app(self, app, app_db):
         # 1. Apply default configs if not already set by the user
-        for key, value in CToolsDefaults.__dict__.items():
-            if not key.startswith('__'):
-                app.config.setdefault(key, value)
+        cTools_config(app)
 
         # 2. Register Blueprints
         # This keeps cTools routes separate from the app routes
