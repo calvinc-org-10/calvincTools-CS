@@ -110,8 +110,9 @@ class calvinCTools:
 
         # Initialize extensions
         database.cTools_db = app_db    # snag the app's SQLAlchemy instance
+        print (f'[calvinCTools] Initializing cTools database...\n{app_db=}\n{database.cTools_db=}')
         from .models import init_cDatabase
-        init_cDatabase(app)
+        init_cDatabase(app, app_db)
         # migrate = Migrate(app, cMenu_db)
         init_login_manager(app)
         

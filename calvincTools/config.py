@@ -4,15 +4,6 @@ class CToolsDefaults:
     CTOOLS_API_KEY = "defaultT-keyK"
     CTOOLS_ENABLE_LOGGING = True
 
-    root_path = "."
-    # root_path = os.path.abspath(os.path.dirname(__file__))
-    cMenu_dbPath = f"{root_path}\\cMenudb.sqlite"
-    
-    # isolate calvincTools db
-    SQLALCHEMY_BINDS = {
-    'cToolsdb': f'sqlite:///{cMenu_dbPath}'
-    }
-
 
 
 class cToolsConfig: 
@@ -51,10 +42,18 @@ class cToolsTestingConfig(cToolsConfig):
     # SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     WTF_CSRF_ENABLED = False
 
-
-cTools_config = {
-    'development': cToolsDevelopmentConfig,
-    'production': cToolsProductionConfig,
-    'testing': cToolsTestingConfig,
-    'default': cToolsDevelopmentConfig
-}
+from flask import Flask
+def cTools_config(app:Flask):
+    """Apply default configuration to the Flask app."""
+    for key, value in CToolsDefaults.__dict__.items():
+        if not key.startswith('__'):
+            app.config.setdefault(key, value)
+    
+    
+    root_path = "."
+    # root_path = os.path.abspath(os.path.dirname(__file__))
+    cMenu_dbPath = f"{root_path}\\cMenudb.sqlite"
+    
+    # isolate calvincTools db
+    app.config.setdefault('SQLALCHEMY_BINDS', {})
+    app.config['SQLALCHEMY_BINDS']['cToolsdb'] = f'sqlite:///{cMenu_dbPath}'    

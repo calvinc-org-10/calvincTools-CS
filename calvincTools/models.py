@@ -273,10 +273,11 @@ class User(UserMixin, cToolsdbBase): # type: ignore
         super().__init__(**kw)
     # __init__
 
-def init_cDatabase(flskapp):
+def init_cDatabase(flskapp, db):
     """Create all tables in the database."""
     with flskapp.app_context():
-        cToolsdbBase.create_all(bind_key='cToolsdb')
+    
+        db.create_all(bind_key='cToolsdb') # type: ignore
         # Ensure that the tables are created when the module is imported
         # nope, not when module imported. app context needed first
         menuGroups.createtable(flskapp)
