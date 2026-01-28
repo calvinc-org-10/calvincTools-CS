@@ -27,7 +27,7 @@ from .dbmenulist import initmenu_menulist
 # This does not need 'db' yet
 cToolsdbBase = declarative_base()
 
-class menuGroups(_ModelInitMixin, cToolsdbBase):
+class menuGroups(_ModelInitMixin, cTools_db.Model): # type: ignore
     """
     Django equivalent: menuGroups
     """

@@ -91,14 +91,11 @@ from .cMenu.views import menu_bp
 from .views.util_views import util_bp
 
 class calvinCTools:
-    def __init__(self, app=None, app_db=None):
-        if all([
-            app is not None,
-            app_db is not None
-        ]):
-            self.init_app(app, app_db)
+    def __init__(self, app=None):
+        if app is not None:
+            self.init_app(app)
 
-    def init_app(self, app, app_db):
+    def init_app(self, app):
         # 1. Apply default configs if not already set by the user
         cTools_config(app)
 
@@ -107,8 +104,8 @@ class calvinCTools:
         app.register_blueprint(ctools_bp, url_prefix='/ctools')
 
         # Initialize extensions
-        database.cTools_db = app_db    # snag the app's SQLAlchemy instance
-        print (f'[calvinCTools] Initializing cTools database...\n{app_db=}\n{database.cTools_db=}')
+        global cTools_db
+        cTools_db = app.extensions.get('sqlalchemy')    # snag the app's SQLAlchemy instance
         from .models import init_cDatabase
         init_cDatabase(app, app_db)
         # migrate = Migrate(app, cMenu_db)
