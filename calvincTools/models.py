@@ -42,64 +42,15 @@ class menuGroups(_ModelInitMixin):
     __tablename__ = 'cMenu_menuGroups'
     
     def __repr__(self):
-        return f'<MenuGroup {self.id} - {self.GroupName}>'
+        ...
     
     def __str__(self):
-        return f'menuGroup {self.GroupName}'
+        ...
 
     @classmethod
     def createtable(cls, flskapp):
         """Create the table and populate with initial data if empty."""
-        with flskapp.app_context():
-            # Create tables if they don't exist
-            db.create_all()
-
-            try:
-                # Check if any group exists
-                if not db.session.query(cls).first():
-                    # Add starter group
-                    starter = cls(GroupName="Group Name", GroupInfo="Group Info")
-                    db.session.add(starter)
-                    db.session.commit()
-                    # Add default menu items for the starter group
-                    starter_id = starter.id
-                    # TODO: use dbmenulist initmenu_menulist
-                    menu_items = [
-                        menuItems(
-                            MenuGroup_id=starter_id, MenuID=0, OptionNumber=0, 
-                            OptionText='New Menu', 
-                            Command=None, Argument='Default', 
-                            pword='', top_line=True, bottom_line=True
-                            ),
-                        menuItems(
-                            MenuGroup_id=starter_id, MenuID=0, OptionNumber=11, 
-                            OptionText='Edit Menu', 
-                            Command=MENUCOMMAND.EditMenu, Argument='', 
-                            pword='', top_line=None, bottom_line=None
-                            ),
-                        menuItems(
-                            MenuGroup_id=starter_id, MenuID=0, OptionNumber=19, 
-                            OptionText='Change Password', 
-                            Command=MENUCOMMAND.ChangePW, Argument='', 
-                            pword='', top_line=None, bottom_line=None
-                            ),
-                        menuItems(
-                            MenuGroup_id=starter_id, MenuID=0, OptionNumber=20, 
-                            OptionText='Go Away!', 
-                            Command=MENUCOMMAND.ExitApplication, Argument='', 
-                            pword='', top_line=None, bottom_line=None
-                            ),
-                        ]
-                    db.session.add_all(menu_items)
-                    db.session.commit()
-                # endif no group exists
-            except IntegrityError:
-                db.session.rollback()
-            finally:
-                db.session.close()
-            # end try
-        # end with app_context
-
+        ...
 
 class menuItems(_ModelInitMixin):
     """
@@ -112,21 +63,16 @@ class menuItems(_ModelInitMixin):
     __tablename__ = 'cMenu_menuItems'
     
     def __repr__(self):
-        return f'<MenuItem {self.MenuGroup_id},{self.MenuID}/{self.OptionNumber}>'
+        ...
     
     def __str__(self):
-        return f'{self.menu_group}, {self.MenuID}/{self.OptionNumber}, {self.OptionText}'
+        ...
 
     def __init__(self, **kw: Any):
         """
         Initialize a new menuItems instance. If the menu table doesn't exist, it will be created.
         """
-        inspector = inspect(db.engine)
-        if not inspector.has_table(self.__tablename__):
-            # If the table does not exist, create it
-            db.create_all()
-        super().__init__(**kw)
-
+        ...
 
 class cParameters(_ModelInitMixin):
     """
@@ -139,34 +85,20 @@ class cParameters(_ModelInitMixin):
     __tablename__ = 'cMenu_cParameters'
     
     def __repr__(self):
-        return f'<Parameter {self.parm_name}>'
+        ...
     
     def __str__(self):
-        return f'{self.parm_name} ({self.parm_value})'
+        ...
     
     @classmethod
     def get_parameter(cls, parm_name: str, default: str = '') -> str:
         """Django equivalent: getcParm"""
-        param = cls.query.filter_by(parm_name=parm_name).first()
-        return param.parm_value if param else default
+        ...
     
     @classmethod
     def set_parameter(cls, parm_name: str, parm_value: str, user_modifiable: bool = True, comments: str = ''):
         """Django equivalent: setcParm"""
-        param = cls.query.filter_by(parm_name=parm_name).first()
-        if param:
-            param.parm_value = parm_value
-        else:
-            param = cls(
-                parm_name=parm_name,
-                parm_value=parm_value,
-                user_modifiable=user_modifiable,
-                comments=comments
-            )
-            db.session.add(param)
-        
-        db.session.commit()
-        return param
+        ...
 
 
 class cGreetings(_ModelInitMixin):
@@ -180,10 +112,10 @@ class cGreetings(_ModelInitMixin):
     __tablename__ = 'cMenu_cGreetings'
     
     def __repr__(self):
-        return f'<Greeting {self.id}>'
+        ...
     
     def __str__(self):
-        return f'{self.greeting} (ID: {self.id})'
+        ...
 
 
 # ============================================================================
@@ -207,27 +139,22 @@ class User(UserMixin):
 
     def set_password(self, password):
         """Hash and set the user's password."""
-        self.password_hash = generate_password_hash(password)
+        ...
 
     def check_password(self, password):
         """Check if the provided password matches the hash."""
-        return check_password_hash(self.password_hash, password)
+        ...
 
     def update_last_login(self):
         """Update the last login timestamp."""
-        self.last_login = datetime.now()
-        db.session.commit()
+        ...
 
     def __repr__(self):
-        return f'<User {self.username}>'
+        ...
 
     def __init__(self, **kw: Any):
         """Initialize a user instance. If the user table doesn't exist, it will be created."""
-        inspector = inspect(db.engine)
-        if not inspector.has_table(self.__tablename__):
-            # If the table does not exist, create it
-            db.create_all()
-        super().__init__(**kw)
+        ...
 
 
 # ============================================================================
