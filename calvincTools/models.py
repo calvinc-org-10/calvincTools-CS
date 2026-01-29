@@ -41,10 +41,10 @@ class menuGroups(_ModelInitMixin):
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_menuGroups'
     
-    def __repr__(self):
+    def __repr__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
         ...
     
-    def __str__(self):
+    def __str__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
         ...
 
     @classmethod
@@ -62,10 +62,10 @@ class menuItems(_ModelInitMixin):
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_menuItems'
     
-    def __repr__(self):
+    def __repr__(self):         # pyright: ignore[reportIncompatibleMethodOverride]
         ...
     
-    def __str__(self):
+    def __str__(self):      # pyright: ignore[reportIncompatibleMethodOverride]
         ...
 
     def __init__(self, **kw: Any):      # pylint: disable=unused-argument, super-init-not-called
@@ -85,10 +85,10 @@ class cParameters(_ModelInitMixin):
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_cParameters'
     
-    def __repr__(self):
+    def __repr__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
         ...
     
-    def __str__(self):
+    def __str__(self):      # pyright: ignore[reportIncompatibleMethodOverride]
         ...
     
     @classmethod
@@ -112,10 +112,10 @@ class cGreetings(_ModelInitMixin):
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_cGreetings'
     
-    def __repr__(self):
+    def __repr__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
         ...
     
-    def __str__(self):
+    def __str__(self):          # pyright: ignore[reportIncompatibleMethodOverride]
         ...
 
 
@@ -150,7 +150,7 @@ class User(UserMixin):
         """Update the last login timestamp."""
         ...
 
-    def __repr__(self):
+    def __repr__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
         ...
 
     def __init__(self, **kw: Any):
