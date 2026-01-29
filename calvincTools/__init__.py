@@ -85,26 +85,27 @@ from flask import Flask, render_template, redirect, url_for, session
 from flask_migrate import Migrate
 from .blueprints import ctools_bp
 from . import database
-from calvincTools.config import cTools_config
+# from calvincTools.config import cTools_config
 from .usr_auth.views import init_login_manager, register_auth_blueprint
 from .cMenu.views import menu_bp
 from .views.util_views import util_bp
 
-class calvinCTools:
+class calvinCTools_init:
     def __init__(self, app=None, app_db=None):
         if app is not None:
-            self.init_app(app)
+            self.init_app(app, app_db)
 
-    def init_app(self, app):
-        # 1. Apply default configs if not already set by the user
-        cTools_config(app)
+    def init_app(self, app, app_db):
+        # 1. configs should be already set by the user
+        #    later, we will be procs to add/modify configs
+        #    db configs MUST be set before app_db init, but app_db init MUST precede db init here
 
         # 2. Register Blueprints
         # This keeps cTools routes separate from the app routes
         app.register_blueprint(ctools_bp, url_prefix='/ctools')
 
         # Initialize extensions
-        from .models import init_cDatabase
+        from .models import init_cDatabase      # can I move this back to main imports?
         init_cDatabase(app, app_db)
         # migrate = Migrate(app, cMenu_db)
         init_login_manager(app)
@@ -131,8 +132,8 @@ class calvinCTools:
         
         @app.errorhandler(500)
         def internal_error(error):   # pylint: disable=unused-argument
-            if database.cTools_db is not None:
-                database.cTools_db.session.rollback()
+            if models.db is not None:
+                models.db.session.rollback()
             return render_template('errors/500.html'), 500
 
         # 3. Attach cTools to the app extensions (optional but recommended)
