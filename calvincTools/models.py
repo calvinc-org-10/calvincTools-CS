@@ -48,9 +48,9 @@ class menuGroups(_ModelInitMixin):
         ...
 
     @classmethod
-    def createtable(cls, flskapp):
+    def createtable(cls, flskapp):      # pylint: disable=unused-argument
         """Create the table and populate with initial data if empty."""
-        ...
+        ...         # pylint: disable=unnecessary-ellipsis
 
 class menuItems(_ModelInitMixin):
     """
@@ -68,11 +68,12 @@ class menuItems(_ModelInitMixin):
     def __str__(self):
         ...
 
-    def __init__(self, **kw: Any):
+    def __init__(self, **kw: Any):      # pylint: disable=unused-argument, super-init-not-called
         """
         Initialize a new menuItems instance. If the menu table doesn't exist, it will be created.
         """
-        ...
+        ...     # pylint: disable=unnecessary-ellipsis
+
 
 class cParameters(_ModelInitMixin):
     """
