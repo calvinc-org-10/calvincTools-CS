@@ -1,14 +1,20 @@
 from datetime import datetime
 from functools import wraps
 
-from flask import render_template, redirect, url_for, flash, request, session
+from flask import (
+    render_template, redirect, url_for, flash, 
+    request, session, 
+    )
 from flask.views import MethodView
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 
-from ..models import User
-from ..database import cTools_db
+from ..models import (
+    db,
+    User, 
+    )
+# from ..database import cTools_db
 # Assuming you have db instance from Flask-SQLAlchemy
 # from your_app import db
 
@@ -178,7 +184,7 @@ def login_view():
 import unicodedata
 from urllib.parse import (
     ParseResult, SplitResult, 
-    _coerce_args, _splitnetloc, _splitparams,
+    _coerce_args, _splitnetloc, _splitparams, # type: ignore
     scheme_chars, urlencode as original_urlencode, uses_params,
 )
 def url_has_allowed_host_and_scheme(url, allowed_hosts, require_https=False):
@@ -333,7 +339,8 @@ def change_password_view():
         
         # Update password
         current_user.set_password(new_password)
-        cTools_db.session.commit()
+        
+        db.session.commit()
         
         flash('Your password has been changed successfully.', 'success')
         return redirect(url_for('index'))
@@ -383,8 +390,8 @@ def register_view():
         new_user.menuGroup = 1  # default menu group
         new_user.set_password(password)
         
-        cTools_db.session.add(new_user)
-        cTools_db.session.commit()
+        db.session.add(new_user)
+        db.session.commit()
         
         flash('Registration successful!  Please log in.', 'success')
         return redirect(url_for('auth.login'))

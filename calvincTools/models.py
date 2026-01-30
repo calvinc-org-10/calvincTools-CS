@@ -7,6 +7,10 @@ from sqlalchemy import (
     UniqueConstraint,
     inspect,
     )
+from sqlalchemy.orm import (
+    declarative_base,
+    Mapped, mapped_column,
+    )
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.local import LocalProxy
@@ -27,11 +31,13 @@ def get_db():
 # Create a LocalProxy that will always point to the current db
 db = LocalProxy(get_db)
 
+SkeletonModelBase = declarative_base()
+
 # ============================================================================
 # MENU SYSTEM MODELS
 # ============================================================================
 
-class menuGroups(_ModelInitMixin):
+class menuGroups(_ModelInitMixin, SkeletonModelBase):
     """
     Django equivalent: menuGroups
     
@@ -41,6 +47,13 @@ class menuGroups(_ModelInitMixin):
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_menuGroups'
     
+    #######################################
+    ##  except for __bind_key__ and __tablename__, only method stubs and properties
+    ##  necassary for other code to compile are defined here. 
+    ##  The actual columns will be added dynamically.
+    #######################################
+    id: Mapped[int] = mapped_column(primary_key=True)
+
     def __repr__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
         ...
     
@@ -52,7 +65,7 @@ class menuGroups(_ModelInitMixin):
         """Create the table and populate with initial data if empty."""
         ...         # pylint: disable=unnecessary-ellipsis
 
-class menuItems(_ModelInitMixin):
+class menuItems(_ModelInitMixin, SkeletonModelBase):
     """
     Django equivalent: menuItems
     
@@ -62,6 +75,13 @@ class menuItems(_ModelInitMixin):
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_menuItems'
     
+    #######################################
+    ##  except for __bind_key__ and __tablename__, only method stubs and properties
+    ##  necassary for other code to compile are defined here. 
+    ##  The actual columns will be added dynamically.
+    #######################################
+    id: Mapped[int] = mapped_column(primary_key=True)
+
     def __repr__(self):         # pyright: ignore[reportIncompatibleMethodOverride]
         ...
     
@@ -75,7 +95,7 @@ class menuItems(_ModelInitMixin):
         ...     # pylint: disable=unnecessary-ellipsis
 
 
-class cParameters(_ModelInitMixin):
+class cParameters(_ModelInitMixin, SkeletonModelBase):
     """
     Django equivalent: cParameters
     
@@ -85,6 +105,13 @@ class cParameters(_ModelInitMixin):
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_cParameters'
     
+    #######################################
+    ##  except for __bind_key__ and __tablename__, only method stubs and properties
+    ##  necassary for other code to compile are defined here. 
+    ##  The actual columns will be added dynamically.
+    #######################################
+    id: Mapped[int] = mapped_column(primary_key=True)
+
     def __repr__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
         ...
     
@@ -102,7 +129,7 @@ class cParameters(_ModelInitMixin):
         ...
 
 
-class cGreetings(_ModelInitMixin):
+class cGreetings(_ModelInitMixin, SkeletonModelBase):
     """
     Django equivalent: cGreetings
     
@@ -112,6 +139,13 @@ class cGreetings(_ModelInitMixin):
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_cGreetings'
     
+    #######################################
+    ##  except for __bind_key__ and __tablename__, only method stubs and properties
+    ##  necassary for other code to compile are defined here. 
+    ##  The actual columns will be added dynamically.
+    #######################################
+    id: Mapped[int] = mapped_column(primary_key=True)
+
     def __repr__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
         ...
     
@@ -123,7 +157,7 @@ class cGreetings(_ModelInitMixin):
 # USER MODEL
 # ============================================================================
 
-class User(UserMixin):
+class User(UserMixin, SkeletonModelBase):
     """
     User model for authentication. 
     Inherit from UserMixin to get default implementations for: 
@@ -137,6 +171,13 @@ class User(UserMixin):
     """
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'users'
+    
+    #######################################
+    ##  except for __bind_key__ and __tablename__, only method stubs and properties
+    ##  necassary for other code to compile are defined here. 
+    ##  The actual columns will be added dynamically.
+    #######################################
+    id: Mapped[int] = mapped_column(primary_key=True)
 
     def set_password(self, password):
         """Hash and set the user's password."""
@@ -370,10 +411,13 @@ def init_cDatabase(flskapp, db_instance):
         is_superuser = db_instance.Column(db_instance.Boolean, default=False, nullable=False)
         permissions = db_instance.Column(db_instance.String(1024), nullable=False, default='')
         menuGroup = db_instance.Column(db_instance.Integer, db_instance.ForeignKey(menuGroups.id), nullable=True)
-        # menugroup = db_instance.relationship('MenuGroup', backref='users', lazy='joined')
         date_joined = db_instance.Column(db_instance.DateTime, default=datetime.now, nullable=False)
         last_login = db_instance.Column(db_instance.DateTime, nullable=True)
 
+        @property
+        def is_active(self):
+            return self.is_active
+        
         def set_password(self, password):
             """Hash and set the user's password."""
             self.password_hash = generate_password_hash(password)

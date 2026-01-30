@@ -3,7 +3,6 @@ from typing import (Any, Dict, List, Optional, )
 from sqlalchemy import Row, RowMapping, Select, Table, select, text
 
 from .cMenu import (MENUCOMMANDDICTIONARY, MENUCOMMAND, )
-from .database import get_cTools_db
 
 from .utils import (retListofQSQLRecord, recordsetList, select_with_join_excluding, )
 
