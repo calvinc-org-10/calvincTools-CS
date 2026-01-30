@@ -34,7 +34,24 @@ db = LocalProxy(get_db)
 
 class SkeletonModelBase:
     """A skeleton base class for models before db is initialized."""
-    pass
+
+    #######################################
+    ##  except for __bind_key__ and __tablename__, only method stubs and properties
+    ##  necassary for other code to compile are defined here. 
+    ##  The actual columns will be added dynamically.
+    #######################################
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    def __repr__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
+        ...
+    
+    def __str__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
+        ...
+
+    class query():
+        
+        def get(self, *args, **kwargs):
+            ...
 
 # ============================================================================
 # MENU SYSTEM MODELS
@@ -50,19 +67,6 @@ class menuGroups(_ModelInitMixin, SkeletonModelBase):
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_menuGroups'
     
-    #######################################
-    ##  except for __bind_key__ and __tablename__, only method stubs and properties
-    ##  necassary for other code to compile are defined here. 
-    ##  The actual columns will be added dynamically.
-    #######################################
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    def __repr__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
-        ...
-    
-    def __str__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
-        ...
-
     @classmethod
     def createtable(cls, flskapp):      # pylint: disable=unused-argument
         """Create the table and populate with initial data if empty."""
@@ -78,24 +82,11 @@ class menuItems(_ModelInitMixin, SkeletonModelBase):
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_menuItems'
     
-    #######################################
-    ##  except for __bind_key__ and __tablename__, only method stubs and properties
-    ##  necassary for other code to compile are defined here. 
-    ##  The actual columns will be added dynamically.
-    #######################################
-    id: Mapped[int] = mapped_column(primary_key=True)
-
     def __repr__(self):         # pyright: ignore[reportIncompatibleMethodOverride]
         ...
     
     def __str__(self):      # pyright: ignore[reportIncompatibleMethodOverride]
         ...
-
-    def __init__(self, **kw: Any):      # pylint: disable=unused-argument, super-init-not-called
-        """
-        Initialize a new menuItems instance. If the menu table doesn't exist, it will be created.
-        """
-        ...     # pylint: disable=unnecessary-ellipsis
 
 
 class cParameters(_ModelInitMixin, SkeletonModelBase):
@@ -107,13 +98,6 @@ class cParameters(_ModelInitMixin, SkeletonModelBase):
     """
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_cParameters'
-    
-    #######################################
-    ##  except for __bind_key__ and __tablename__, only method stubs and properties
-    ##  necassary for other code to compile are defined here. 
-    ##  The actual columns will be added dynamically.
-    #######################################
-    id: Mapped[int] = mapped_column(primary_key=True)
 
     def __repr__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
         ...
@@ -142,13 +126,6 @@ class cGreetings(_ModelInitMixin, SkeletonModelBase):
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_cGreetings'
     
-    #######################################
-    ##  except for __bind_key__ and __tablename__, only method stubs and properties
-    ##  necassary for other code to compile are defined here. 
-    ##  The actual columns will be added dynamically.
-    #######################################
-    id: Mapped[int] = mapped_column(primary_key=True)
-
     def __repr__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
         ...
     
@@ -175,13 +152,6 @@ class User(UserMixin, SkeletonModelBase):
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'users'
     
-    #######################################
-    ##  except for __bind_key__ and __tablename__, only method stubs and properties
-    ##  necassary for other code to compile are defined here. 
-    ##  The actual columns will be added dynamically.
-    #######################################
-    id: Mapped[int] = mapped_column(primary_key=True)
-
     def set_password(self, password):
         """Hash and set the user's password."""
         ...
