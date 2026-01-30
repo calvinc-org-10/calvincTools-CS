@@ -1,3 +1,4 @@
+#pylint: disable=missing-module-docstring, missing-class-docstring, missing-function-docstring, unnecessary-pass, unnecessary-ellipsis, unused-argument
 from typing import Any
 from datetime import datetime
 
@@ -31,7 +32,9 @@ def get_db():
 # Create a LocalProxy that will always point to the current db
 db = LocalProxy(get_db)
 
-SkeletonModelBase = declarative_base()
+class SkeletonModelBase:
+    """A skeleton base class for models before db is initialized."""
+    pass
 
 # ============================================================================
 # MENU SYSTEM MODELS
@@ -229,7 +232,7 @@ def init_cDatabase(flskapp, db_instance):
     # Create enhanced model classes that inherit from db.Model
     # These will replace the placeholder classes defined above
     
-    class menuGroups(_ModelInitMixin, db_instance.Model):
+    class menuGroups(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
         """Menu groups model with database columns."""
         __bind_key__ = 'cToolsdb'
         __tablename__ = 'cMenu_menuGroups'
@@ -301,7 +304,7 @@ def init_cDatabase(flskapp, db_instance):
                     db_instance.session.close()
                 # end try
 
-    class menuItems(_ModelInitMixin, db_instance.Model):
+    class menuItems(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
         """Menu items model with database columns."""
         __bind_key__ = 'cToolsdb'
         __tablename__ = 'cMenu_menuItems'
@@ -340,7 +343,7 @@ def init_cDatabase(flskapp, db_instance):
                 db_instance.create_all()
             super().__init__(**kw)
 
-    class cParameters(_ModelInitMixin, db_instance.Model):
+    class cParameters(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
         """Parameters model with database columns."""
         __bind_key__ = 'cToolsdb'
         __tablename__ = 'cMenu_cParameters'
@@ -380,7 +383,7 @@ def init_cDatabase(flskapp, db_instance):
             db_instance.session.commit()
             return param
 
-    class cGreetings(_ModelInitMixin, db_instance.Model):
+    class cGreetings(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
         """Greetings model with database columns."""
         __bind_key__ = 'cToolsdb'
         __tablename__ = 'cMenu_cGreetings'
@@ -394,7 +397,7 @@ def init_cDatabase(flskapp, db_instance):
         def __str__(self):
             return f'{self.greeting} (ID: {self.id})'
 
-    class User(UserMixin, db_instance.Model):
+    class User(UserMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
         """
         User model for authentication with database columns.
         Inherit from UserMixin to get default implementations for:
@@ -407,7 +410,7 @@ def init_cDatabase(flskapp, db_instance):
         username = db_instance.Column(db_instance.String(80), unique=True, nullable=False, index=True)
         email = db_instance.Column(db_instance.String(120), unique=True, nullable=False, index=True)
         password_hash = db_instance.Column(db_instance.String(255), nullable=False)
-        is_active = db_instance.Column(db_instance.Boolean, default=True, nullable=False)
+        FLDis_active = db_instance.Column(db_instance.Boolean, default=True, nullable=False)
         is_superuser = db_instance.Column(db_instance.Boolean, default=False, nullable=False)
         permissions = db_instance.Column(db_instance.String(1024), nullable=False, default='')
         menuGroup = db_instance.Column(db_instance.Integer, db_instance.ForeignKey(menuGroups.id), nullable=True)
@@ -416,7 +419,7 @@ def init_cDatabase(flskapp, db_instance):
 
         @property
         def is_active(self):
-            return self.is_active
+            return self.FLDis_active
         
         def set_password(self, password):
             """Hash and set the user's password."""
