@@ -2,11 +2,8 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from sqlalchemy import func
 
+# db and models imported in each method so that the initalized versions are used
 
-from ..models import (
-    db,
-    menuItems, menuGroups,
-    )
 from ..decorators import superuser_required
 from . import (MENUCOMMAND, MENUCOMMANDDICTIONARY)
 
@@ -17,6 +14,7 @@ def get_default_menu(MenuGroup_id):
     """
     Django equivalent: DefaultMenu
     """
+    from ..models import ( db, menuItems, menuGroups, )
     menu_group = menuGroups.query.get(MenuGroup_id)
     if not menu_group: 
         return None, f'No such MenuGroup as {MenuGroup_id}'
@@ -45,6 +43,8 @@ def load_menu(menu_group, menu_num):
     Django equivalent:  LoadMenu
     Displays a menu to the user. 
     """
+    from ..models import ( db, menuItems, menuGroups, )
+
     # Check if menu exists
     menu_items_query = menuItems.query.filter_by(
         MenuGroup_id=menu_group,
@@ -160,6 +160,8 @@ def edit_menu_init():
     Django equivalent: EditMenu_init
     """
     # Get first menu group and menu ID
+    from ..models import ( db, menuItems, menuGroups, )
+
     result = db.session.query(func.min(menuItems.MenuGroup_id)).filter_by(
         OptionNumber=0
     ).scalar()
@@ -183,6 +185,8 @@ def edit_menu(menu_group, menu_num):
     Django equivalent: EditMenu
     This is a complex view - simplified version shown
     """
+    from ..models import ( db, menuItems, menuGroups, )
+
     menu_items = menuItems.query.filter_by(
         MenuGroup_id=menu_group,
         MenuID=menu_num
@@ -220,6 +224,8 @@ def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
     Django equivalent:  MenuCreate
     """
     # Check if menu already exists
+    from ..models import ( db, menuItems, menuGroups, )
+
     existing = menuItems.query.filter_by(
         MenuGroup_id=menu_group,
         MenuID=menu_num
@@ -287,6 +293,8 @@ def remove_menu(menu_group, menu_num):
     """
     Django equivalent: MenuRemove
     """
+    from ..models import ( db, menuItems, menuGroups, )
+
     menuItems.query.filter_by(
         MenuGroup_id=menu_group,
         MenuID=menu_num

@@ -5,10 +5,8 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from sqlalchemy import text
 
-from ..models import (
-    db, 
-    cParameters, cGreetings,
-    )
+# db and models imported in each method so that the initalized versions are used
+
 from ..forms import RawSQLForm
 from ..decorators import superuser_required
 
@@ -21,6 +19,8 @@ def run_sql():
     """
     Django equivalent: fn_cRawSQL
     """
+    from ..models import ( db, cParameters, cGreetings, )
+    
     form = RawSQLForm()
     context = {}
     
@@ -84,6 +84,8 @@ def edit_parameters():
     """
     Django equivalent: fncParmForm
     """
+    from ..models import ( db, cParameters, )
+    
     if request.method == 'POST': 
         # Handle form submission
         # Process parameter updates
@@ -109,6 +111,8 @@ def greetings():
     """
     Django equivalent:  fn_cGreetings
     """
+    from ..models import ( db, cGreetings, )
+    
     if request.method == 'POST':
         # Handle greeting submission
         greeting_text = request.form.get('greeting')

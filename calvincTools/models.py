@@ -451,7 +451,8 @@ def init_cDatabase(flskapp, db_instance):
 
         def check_password(self, password):
             """Check if the provided password matches the hash."""
-            return check_password_hash(self.password_hash, password)
+            verdict = check_password_hash(self.password_hash, password)
+            return verdict
 
         def update_last_login(self):
             """Update the last login timestamp."""
@@ -478,7 +479,8 @@ def init_cDatabase(flskapp, db_instance):
     
     # Create all tables in the database
     with flskapp.app_context():
-        db_instance.create_all(bind_key='cToolsdb')
+        # db_instance.create_all(bind_key='cToolsdb')
+        db_instance.create_all()    # create ALL binds, even the caller's
         # Initialize tables with default data
         menuGroups.createtable(flskapp)
         menuItems()

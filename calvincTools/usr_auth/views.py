@@ -10,11 +10,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 
-from ..models import (
-    db,
-    User, 
-    )
-# from ..database import cTools_db
+# db and models imported in each method so that the initalized versions are used
+
 # Assuming you have db instance from Flask-SQLAlchemy
 # from your_app import db
 
@@ -32,6 +29,7 @@ def init_login_manager(app):
     
     @login_manager.user_loader
     def load_user(user_id):
+        from ..models import User
         """Load user by ID for Flask-Login."""
         return User.query.get(int(user_id))
     
@@ -116,6 +114,8 @@ def login_view():
     """
     Handle user login (GET and POST).
     """
+    from ..models import User, db
+    
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     
@@ -311,6 +311,8 @@ def change_password_view():
     """
     Handle password change for authenticated users.
     """
+    from ..models import db
+    
     if not current_user.is_authenticated:
         flash('You must be logged in to change your password.', 'warning')
         return redirect(url_for('auth.login'))
@@ -353,6 +355,8 @@ def register_view():
     """
     Handle user registration (optional - if you want self-registration).
     """
+    from ..models import User, db
+    
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     
@@ -433,7 +437,8 @@ class LoginView(MethodView):
         return render_template('auth/login.html')
     
     def post(self):
-        username = request.form.get('username', '').strip()
+        from ..models import User, db
+        username = request.form.get('susername', '').strip()
         password = request.form.get('password', '')
         remember = request.form.get('remember', False)
         
