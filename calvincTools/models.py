@@ -32,6 +32,48 @@ def get_db():
 # Create a LocalProxy that will always point to the current db
 db = LocalProxy(get_db)
 
+# Vanilla model definitions
+class MockQuery:
+    """Mimics the Flask-SQLAlchemy query object interface."""
+    
+    # fake attributes used in the codebase
+    username: str
+    menuGroup:int
+    parm_name: str
+    parm_value: str
+    user_modifiable: bool
+    
+    def get(self, *args, **kwargs):
+        return self  # Or return an instance of the model if needed
+
+    def order_by(self, *args, **kwargs):
+        return self
+
+    def filter_by(self, *args, **kwargs):
+        return self
+
+    def all(self):
+        return []
+    
+    def first(self):
+        return self
+    
+    def delete(self):
+        return
+    
+    def check_password(self, password):
+        """Check if the provided password matches the hash."""
+        ...
+
+    def is_active(self):
+        """Check if the provided password matches the hash."""
+        ...
+
+    def update_last_login(self):
+        """Check if the provided password matches the hash."""
+        ...
+
+
 class SkeletonModelBase:
     """A skeleton base class for models before db is initialized."""
 
@@ -40,18 +82,17 @@ class SkeletonModelBase:
     ##  necassary for other code to compile are defined here. 
     ##  The actual columns will be added dynamically.
     #######################################
-    id: Mapped[int] = mapped_column(primary_key=True)
+    # id: Mapped[int] = mapped_column(primary_key=True)
+    id: Any
 
+    query = MockQuery()
+    
     def __repr__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
         ...
     
     def __str__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
         ...
 
-    class query():
-        
-        def get(self, *args, **kwargs):
-            ...
 
 # ============================================================================
 # MENU SYSTEM MODELS
@@ -81,6 +122,13 @@ class menuItems(_ModelInitMixin, SkeletonModelBase):
     """
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_menuItems'
+
+    MenuGroup_id: int
+    MenuID: int
+    OptionNumber: int
+    OptionText:str
+    # Command = db_instance.Column(db_instance.Integer, nullable=True)
+    # Argument = db_instance.Column(db_instance.String(250), default='')
     
     def __repr__(self):         # pyright: ignore[reportIncompatibleMethodOverride]
         ...
@@ -98,6 +146,10 @@ class cParameters(_ModelInitMixin, SkeletonModelBase):
     """
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'cMenu_cParameters'
+    
+    parm_name: str
+    parm_value: str
+    user_modifiable: bool
 
     def __repr__(self):     # pyright: ignore[reportIncompatibleMethodOverride]
         ...
@@ -151,6 +203,8 @@ class User(UserMixin, SkeletonModelBase):
     """
     __bind_key__ = 'cToolsdb'
     __tablename__ = 'users'
+    
+    menuGroup:int
     
     def set_password(self, password):
         """Hash and set the user's password."""
