@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>500 | Internal server error</title>
 
+  <!-- Include the Temporal Polyfill -->
+  <script src="https://cdn.jsdelivr.net"></script>
+  <style>
+    #currentnow {
+        font-family: monospace;
+        padding: 10px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+    }
+  </style>
+
   <style type="text/css">
     body {
       padding: 30px 20px;
@@ -77,6 +88,8 @@
   <div class="container">
     <a href="/" class="brand"><img src="http://via.placeholder.com/360x200?text=Your+Logo" width="180" height="100"></a>
 
+    <div id="currentnow">Loading...</div>
+
     <h2>500</h2>
     <h1>Internal Server Error.</h1>
 
@@ -84,6 +97,37 @@
 
     <span class="go-back"><a href="/">Go back</a></span>
   </div>
+
+    <script>
+        /**
+         * Gets the current date and time using the Temporal API and displays it in a specified div.
+         */
+        function placeCurrentDateTimeTemporal() {
+            if (typeof Temporal === 'undefined') {
+                document.getElementById('currentnow').textContent = "Temporal API not supported. Check console for details.";
+                console.error("Temporal API is not available. Ensure the polyfill script is loaded.");
+                return;
+            }
+
+            try {
+                const now = Temporal.Now.instant();
+                const timeZone = Temporal.Now.timeZone();
+                const zonedNow = now.toZonedDateTimeISO(timeZone);
+                const targetDiv = document.getElementById('currentnow');
+
+                if (targetDiv) {
+                    targetDiv.textContent = zonedNow.toString();
+                } else {
+                    console.error("Element with id 'currentnow' not found.");
+                }
+            } catch (error) {
+                console.error("An error occurred while trying to get or display the time:", error);
+            }
+        }
+
+        // Call the function when the page loads
+        document.addEventListener('DOMContentLoaded', placeCurrentDateTimeTemporal);
+    </script>
 
 </body>
 </html>
