@@ -82,7 +82,7 @@ def load_menu(menu_group, menu_num):
                          )
 
 
-def build_menu_html(menu_items, menu_group, menu_num):
+def build_menu_html(menu_items, menu_group, menu_num):  # pylint: disable=unused-argument
     """
     Helper to build menu HTML. 
     Django equivalent: inline logic in LoadMenu

@@ -1,4 +1,4 @@
-from .app_secrets import * # type: ignore
+from .app_secrets import * #pylint: disable=wildcard-import, unused-wildcard-import
 
 calvincTools_config = {
     'SQLALCHEMY_BINDS': {'cToolsdb': f'{proddbtype}:///{cMenu_dbPath}'}
