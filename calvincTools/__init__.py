@@ -34,7 +34,7 @@ class calvinCTools_init:
         
         # Create default Calvin user if not exists
         # R E M O V E   I N   P R O D U C T I O N   ! ! !
-        self.create_calvin(app)
+        # self.create_calvin(app)
         
         # Register blueprints
         register_auth_blueprint(app)

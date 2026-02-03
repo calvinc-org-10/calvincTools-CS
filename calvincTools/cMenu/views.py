@@ -125,7 +125,7 @@ def build_menu_html(menu_items, menu_group, menu_num):  # pylint: disable=unused
     return full_html
 
 
-@menu_bp. route('/command/<int:command_num>/<command_arg>')
+@menu_bp.route('/command/<int:command_num>/<command_arg>')
 @login_required
 def handle_command(command_num, command_arg):
     """
@@ -148,12 +148,12 @@ def handle_command(command_num, command_arg):
     elif command_num == MENUCOMMAND.EditGreetings:
         return redirect(url_for('utils.greetings'))
     elif command_num == MENUCOMMAND.ExitApplication:
-        return redirect(url_for('auth. logout'))
+        return redirect(url_for('auth.logout'))
     else:
         return f"Command {command_text} ({command_num}) will be performed with argument {command_arg}"
 
 
-@menu_bp.route('/edit')
+@menu_bp.route('/editmenu')
 @superuser_required
 def edit_menu_init():
     """

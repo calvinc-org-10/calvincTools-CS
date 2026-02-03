@@ -3,7 +3,7 @@ _pkgname='Calvin C Tools'+' Client-Server Version'
 _base_ver_major=1
 _base_ver_minor=0
 _base_ver_patch='0'
-_ver_date='2026-02-01'
+_ver_date='2026-02-21'
 _base_ver = f'{_base_ver_major}.{_base_ver_minor}.{_base_ver_patch}'
 __version__ = _base_ver
 sysver = {
@@ -22,6 +22,7 @@ __email__ = "calvinc404@gmail.com"
 # refactor app.py and call create_app from apphooks.py
 # do edit menu
 # do user edit page
+# add flash messages to ALL templates
 # do all menu commands
     # 11: 'FormBrowse',
     # 15: 'OpenTable',
