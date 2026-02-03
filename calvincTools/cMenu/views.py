@@ -184,8 +184,8 @@ def edit_menu(menu_group, menu_num):
     Django equivalent: EditMenu
     """
     # things go bonkers if these are strings
-    menuGroup = int(menu_group)
-    menuNum = int(menu_num)
+    menu_group = int(menu_group)
+    menu_num = int(menu_num)
 
     from ..models import ( db, menuItems, menuGroups, )
 
@@ -199,28 +199,32 @@ def edit_menu(menu_group, menu_num):
             commandchoices_html += ">" + chtext + "</option>"
         return commandchoices_html
     # commandchoiceHTML
-   
-   RESTART HERE RESTART HERE
 
     menu_items = menuItems.query.filter_by(
         MenuGroup_id=menu_group,
         MenuID=menu_num
     ).order_by(menuItems.OptionNumber).all()
-    
     menu_group_obj = menuGroups.query.get(menu_group)
     
     if not menu_items:
         flash(f'Menu {menu_group},{menu_num} does not exist', 'error')
         return redirect(url_for('menu.edit_menu_init'))
     
+    mnItem_list = [{'OptionText':'',
+                    'Command':'',
+                    'Argument':''}
+            for i in range(20)]
+    changed_data = ''
+
     if request.method == 'POST': 
         # Handle form submission
-        # Process POST data similar to Django version
-        # This would be quite long - simplified here
+
         flash('Menu updated successfully', 'success')
         return redirect(url_for('menu.edit_menu', menu_group=menu_group, menu_num=menu_num))
-    
-    # GET request - display form
+    else:   # request.method == 'GET'
+        # GET request - display form
+        pass
+    # endif POST/GET
     
     return render_template('menu/edit. html',
                          menu_group=menu_group_obj,
