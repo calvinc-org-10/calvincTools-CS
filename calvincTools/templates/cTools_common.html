@@ -47,13 +47,16 @@ EXAMPLES OF GETTING STATIC FILES
 			{% block wait_spinner_msgs %}
 			{% endblock %}
 		</div>
-        {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
 		{% block statusMsgs %}<!-- extra status messages should be div's -->{% endblock %}
     </div> <!-- row -->
 </div> <!-- container -->

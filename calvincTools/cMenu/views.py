@@ -162,17 +162,16 @@ def edit_menu_init():
     # Get first menu group and menu ID
     from ..models import ( db, menuItems, menuGroups, )
 
+    # initial menu group will be the lowest numbered one
     result = db.session.query(func.min(menuItems.MenuGroup_id)).filter_by(
         OptionNumber=0
     ).scalar()
-    
     menu_grp = result if result else 1
-    
+    # similarly for menu number
     result = db.session.query(func.min(menuItems.MenuID)).filter_by(
         MenuGroup_id=menu_grp,
         OptionNumber=0
     ).scalar()
-    
     menu_num = result if result else 0
     
     return redirect(url_for('menu.edit_menu', menu_group=menu_grp, menu_num=menu_num))
@@ -183,9 +182,25 @@ def edit_menu_init():
 def edit_menu(menu_group, menu_num):
     """
     Django equivalent: EditMenu
-    This is a complex view - simplified version shown
     """
+    # things go bonkers if these are strings
+    menuGroup = int(menu_group)
+    menuNum = int(menu_num)
+
     from ..models import ( db, menuItems, menuGroups, )
+
+    command_choices = MENUCOMMANDDICTIONARY
+
+    def commandchoiceHTML(passedcommand):
+        commandchoices_html = ""
+        for ch, chtext in command_choices.items():
+            commandchoices_html += "<option value=" + str(ch)
+            if ch == passedcommand: commandchoices_html += " selected"
+            commandchoices_html += ">" + chtext + "</option>"
+        return commandchoices_html
+    # commandchoiceHTML
+   
+   RESTART HERE RESTART HERE
 
     menu_items = menuItems.query.filter_by(
         MenuGroup_id=menu_group,
@@ -206,8 +221,6 @@ def edit_menu(menu_group, menu_num):
         return redirect(url_for('menu.edit_menu', menu_group=menu_group, menu_num=menu_num))
     
     # GET request - display form
-    # command_choices = MenuCommand.query.order_by(MenuCommand.command).all()
-    command_choices = MENUCOMMANDDICTIONARY
     
     return render_template('menu/edit. html',
                          menu_group=menu_group_obj,

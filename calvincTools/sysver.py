@@ -40,6 +40,7 @@ __email__ = "calvinc404@gmail.com"
 
 # Changelog:
 # Version - Date - Description
+# 1.0.0 - 2026-02-03 - Added flash message support to templates
 # 1.0.0 - 2026-02-01 - Initial version. conversion  of calvincTools (standalone vertsion) to calvincTools-CS (client-server)
 
 
