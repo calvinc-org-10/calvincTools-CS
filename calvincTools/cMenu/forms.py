@@ -26,3 +26,9 @@ class MenuGroupForm(Form):
     id = HiddenField()
     GroupName = StringField()
     GroupInfo = StringField()
+
+class MenuEditForm(FlaskForm):
+    ### CHANGE ME!! CHANGE ME!!
+    menu_group = FormField(MenuGroupForm)
+    menu_items = FieldList(FormField(MenuItemForm), min_entries=20, max_entries=20)
+    submit = SubmitField('Save Menu')
