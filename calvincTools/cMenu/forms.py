@@ -9,6 +9,11 @@ from wtforms.validators import DataRequired
 from . import (MENUCOMMAND, MENUCOMMANDDICTIONARY)
 
 
+class menuGoto():
+    menuGroup: int
+    menuGroup_choices: list[tuple[int, str]]
+    menuID: int
+    menuID_choices: list[tuple[int, str]]
 
 class MenuItemForm(Form):
     id = HiddenField()
