@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField, SubmitField, Form, FormField, FieldList, IntegerField, HiddenField, BooleanField,
@@ -9,6 +11,7 @@ from wtforms.validators import DataRequired
 from . import (MENUCOMMAND, MENUCOMMANDDICTIONARY)
 
 
+@dataclass
 class menuGoto():
     menuGroup: int
     menuGroup_choices: list[tuple[int, str]]
@@ -33,7 +36,7 @@ class MenuGroupForm(Form):
     GroupInfo = StringField()
 
 class MenuEditForm(FlaskForm):
-    ### CHANGE ME!! CHANGE ME!!
+    ### CHANGE ME??
     menu_group = FormField(MenuGroupForm)
     menu_items = FieldList(FormField(MenuItemForm), min_entries=20, max_entries=20)
     submit = SubmitField('Save Menu')

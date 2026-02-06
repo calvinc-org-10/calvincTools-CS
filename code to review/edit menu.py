@@ -16,6 +16,8 @@ def edit_menu(group_id, menu_id):
         else:
             # Entry for unused option numbers
             form_init_data.append({'OptionNumber': i, 'id': None, 'MenuGroup_id': group_id, 'MenuID': menu_id})
+        #endif 
+    #endfor    
 
     # Initialize form with the group and the list of items
     form = MenuEditForm(obj=group, menu_items=form_init_data)
@@ -41,6 +43,8 @@ def edit_menu(group_id, menu_id):
                 for key, value in entry.items():
                     if key != 'id': # Don't overwrite the PK
                         setattr(db_item, key, value)
+            # endif db_item vs entry
+        # endfor menu_items.data
 
         db.session.commit()
         return redirect(url_for('some_success_view'))

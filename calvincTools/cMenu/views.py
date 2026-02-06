@@ -6,6 +6,7 @@ from sqlalchemy import func
 
 from ..decorators import superuser_required
 from . import (MENUCOMMAND, MENUCOMMANDDICTIONARY)
+from .forms import MenuEditForm
 
 menu_bp = Blueprint('menu', __name__, url_prefix='/menu')
 
@@ -177,61 +178,119 @@ def edit_menu_init():
     return redirect(url_for('menu.edit_menu', menu_group=menu_grp, menu_num=menu_num))
 
 
-@menu_bp.route('/edit/<int:menu_group>/<int:menu_num>', methods=['GET', 'POST'])
+@menu_bp.route('/edit/<int:group_id>/<int:menu_id>', methods=['GET', 'POST'])
 @superuser_required
-def edit_menu(menu_group, menu_num):
-    """
-    Django equivalent: EditMenu
-    """
-    # things go bonkers if these are strings
-    menu_group = int(menu_group)
-    menu_num = int(menu_num)
-
-    from ..models import ( db, menuItems, menuGroups, )
-
-    command_choices = MENUCOMMANDDICTIONARY
-
-    def commandchoiceHTML(passedcommand):
-        commandchoices_html = ""
-        for ch, chtext in command_choices.items():
-            commandchoices_html += "<option value=" + str(ch)
-            if ch == passedcommand: commandchoices_html += " selected"
-            commandchoices_html += ">" + chtext + "</option>"
-        return commandchoices_html
-    # commandchoiceHTML
-
-    menu_items = menuItems.query.filter_by(
-        MenuGroup_id=menu_group,
-        MenuID=menu_num
-    ).order_by(menuItems.OptionNumber).all()
-    menu_group_obj = menuGroups.query.get(menu_group)
+def edit_menu(group_id, menu_id):
+    # import the initialized models
+    from ..models import (
+        db,
+        menuItems, menuGroups,
+        )
     
-    if not menu_items:
-        flash(f'Menu {menu_group},{menu_num} does not exist', 'error')
-        return redirect(url_for('menu.edit_menu_init'))
+    # 1. Fetch group and existing items
+    group = menuGroups.query.get_or_404(group_id) # type: ignore
+    existing_items = menuItems.query.filter_by(MenuGroup_id=group_id, MenuID=menu_id).all()
     
-    mnItem_list = [{'OptionText':'',
-                    'Command':'',
-                    'Argument':''}
-            for i in range(20)]
-    changed_data = ''
-
-    if request.method == 'POST': 
-        # Handle form submission
-
-        flash('Menu updated successfully', 'success')
-        return redirect(url_for('menu.edit_menu', menu_group=menu_group, menu_num=menu_num))
-    else:   # request.method == 'GET'
-        # GET request - display form
-        pass
-    # endif POST/GET
+    # 2. Build the {optionNumber: menuItem} dict as requested
+    # We use a dict for quick lookup during POST comparison
+    db_items_dict = {item.OptionNumber: item for item in existing_items}
     
-    return render_template('menu/edit. html',
-                         menu_group=menu_group_obj,
-                         menu_num=menu_num,
-                         menu_items=menu_items,
-                         command_choices=command_choices)
+    # 3. Create a list of 20 items for the FieldList (1-indexed based on OptionNumber)
+    form_init_data = []
+    for i in range(1, 21):
+        if i in db_items_dict:
+            form_init_data.append(db_items_dict[i].__dict__) # Simple way to map model to form
+        else:
+            # Entry for unused option numbers
+            form_init_data.append({'OptionNumber': i, 'id': None, 'MenuGroup_id': group_id, 'MenuID': menu_id})
+        #endif 
+    #endfor    
 
+    # Initialize form with the group and the list of items
+    form = MenuEditForm(obj=group, menu_items=form_init_data)
+
+    if form.validate_on_submit():
+        # 4. Handle POST logic: Compare form data to db_items_dict
+        for entry in form.menu_items.data:
+            opt_num = entry['OptionNumber']
+            db_item = db_items_dict.get(opt_num)
+            
+            # Case A: User entered text for an empty slot -> CREATE
+            if not db_item and entry['OptionText']:
+                new_item = menuItems(**entry)
+                db.session.add(new_item)
+                
+            # Case B: Slot was occupied but user cleared text -> DELETE
+            elif db_item and not entry['OptionText']:
+                db.session.delete(db_item)
+                
+            # Case C: Slot occupied and text changed -> UPDATE
+            elif db_item and entry['OptionText'] != db_item.OptionText:
+                # Update all relevant fields from the form entry
+                for key, value in entry.items():
+                    if key != 'id': # Don't overwrite the PK
+                        setattr(db_item, key, value)
+            # endif db_item vs entry
+        # endfor menu_items.data
+
+        db.session.commit()
+        # return redirect(url_for('some_success_view'))
+
+    return render_template('menu/edit_menu.html', form=form)
+###################### start of first attempt ##########################
+# def edit_menu(menu_group, menu_num):
+#     """
+#     Django equivalent: EditMenu
+#     """
+#     # things go bonkers if these are strings
+#     menu_group = int(menu_group)
+#     menu_num = int(menu_num)
+
+#     from ..models import ( db, menuItems, menuGroups, )
+
+#     command_choices = MENUCOMMANDDICTIONARY
+
+#     def commandchoiceHTML(passedcommand):
+#         commandchoices_html = ""
+#         for ch, chtext in command_choices.items():
+#             commandchoices_html += "<option value=" + str(ch)
+#             if ch == passedcommand: commandchoices_html += " selected"
+#             commandchoices_html += ">" + chtext + "</option>"
+#         return commandchoices_html
+#     # commandchoiceHTML
+
+#     menu_items = menuItems.query.filter_by(
+#         MenuGroup_id=menu_group,
+#         MenuID=menu_num
+#     ).order_by(menuItems.OptionNumber).all()
+#     menu_group_obj = menuGroups.query.get(menu_group)
+    
+#     if not menu_items:
+#         flash(f'Menu {menu_group},{menu_num} does not exist', 'error')
+#         return redirect(url_for('menu.edit_menu_init'))
+    
+#     mnItem_list = [{'OptionText':'',
+#                     'Command':'',
+#                     'Argument':''}
+#             for i in range(20)]
+#     changed_data = ''
+
+#     if request.method == 'POST': 
+#         # Handle form submission
+
+#         flash('Menu updated successfully', 'success')
+#         return redirect(url_for('menu.edit_menu', menu_group=menu_group, menu_num=menu_num))
+#     else:   # request.method == 'GET'
+#         # GET request - display form
+#         pass
+#     # endif POST/GET
+    
+#     return render_template('menu/edit. html',
+#                          menu_group=menu_group_obj,
+#                          menu_num=menu_num,
+#                          menu_items=menu_items,
+#                          command_choices=command_choices)
+###################### end of first attempt ##########################
 
 @menu_bp.route('/create/<int:menu_group>/<int:menu_num>')
 @menu_bp.route('/create/<int:menu_group>/<int:menu_num>/<int:from_group>/<int:from_menu>')

@@ -1,0 +1,24 @@
+<form method="POST">
+    {{ form.hidden_tag() }}
+    
+    <!-- Render Group Fields -->
+    <div>
+        {{ form.menu_group.GroupName.label }} {{ form.menu_group.GroupName() }}
+        {{ form.menu_group.GroupInfo.label }} {{ form.menu_group.GroupInfo() }}
+    </div>
+
+    <table>
+        {% for i in range(10) %}
+        <tr>
+            <td>
+                {{ form.menu_items[i].form }}
+            </td>
+            <td>
+                {{ form.menu_items[i + 10].form }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    {{ form.submit() }}
+</form>
