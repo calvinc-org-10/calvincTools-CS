@@ -175,7 +175,7 @@ def edit_menu_init():
     ).scalar()
     menu_num = result if result else 0
     
-    return redirect(url_for('menu.edit_menu', menu_group=menu_grp, menu_num=menu_num))
+    return redirect(url_for('menu.edit_menu', group_id=menu_grp, menu_id=menu_num))
 
 
 @menu_bp.route('/edit/<int:group_id>/<int:menu_id>', methods=['GET', 'POST'])
