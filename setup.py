@@ -3,11 +3,11 @@ from setuptools import setup, find_packages
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-from calvincTools.sysver import (__version__, __author__, __email__, )
+# from calvincTools.sysver import (__version__, __author__, __email__, )
 # sorry, build will fail with the above line, so manually set them here
-# __version__ = "1.0.0"
-# __author__ = "Calvin C"
-# __email__ = "calvinc404@gmail.com"
+__version__ = "1.0.0"
+__author__ = "Calvin C"
+__email__ = "calvinc404@gmail.com"
 
 setup(
     name="calvincTools-CS",
