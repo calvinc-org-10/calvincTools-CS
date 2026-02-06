@@ -188,7 +188,7 @@ def edit_menu(group_id, menu_id):
         )
     
     # 1. Fetch group and existing items
-    group = menuGroups.query.get_or_404(group_id) # type: ignore
+    group = menuGroups.query.get_or_404(group_id)   #pylint: disable=no-member   # type: ignore
     existing_items = menuItems.query.filter_by(MenuGroup_id=group_id, MenuID=menu_id).all()
     
     # 2. Build the {optionNumber: menuItem} dict as requested
