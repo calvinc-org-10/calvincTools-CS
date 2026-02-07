@@ -1,6 +1,11 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_required, current_user
-from sqlalchemy import func
+
+from sqlalchemy import (
+    select, union_all, literal, case, cast, Integer, String, Boolean,
+    func,
+)
+from sqlalchemy.orm import aliased
 
 # db and models imported in each method so that the initalized versions are used
 
@@ -175,12 +180,10 @@ def edit_menu_init():
     ).scalar()
     menu_num = result if result else 0
     
-    return redirect(url_for('menu.edit_menu', group_id=menu_grp, menu_id=menu_num))
+    return redirect(url_for('menu.edit_menu', group_id=menu_grp, menu_num=menu_num))
 
 
-@menu_bp.route('/edit/<int:group_id>/<int:menu_id>', methods=['GET', 'POST'])
-@superuser_required
-def edit_menu(group_id, menu_id):
+def edit_menuNOPE(group_id, menu_id):
     # import the initialized models
     from ..models import (
         db,
@@ -197,27 +200,62 @@ def edit_menu(group_id, menu_id):
     
     # 1. Fetch group and existing items
     group = menuGroups.query.get_or_404(group_id)   #pylint: disable=no-member   # type: ignore
-    existing_items = menuItems.query.filter_by(MenuGroup_id=group_id, MenuID=menu_id).all()
+    # existing_items = menuItems.query.filter_by(MenuGroup_id=group_id, MenuID=menu_id).all()
     
     # 2. Build the {optionNumber: menuItem} dict as requested
     # We use a dict for quick lookup during POST comparison
-    db_items_dict = {item.OptionNumber: item for item in existing_items}
+    # db_items_dict = {item.OptionNumber: item for item in existing_items}
     
     # 3. Create a list of 20 items for the FieldList (1-indexed based on OptionNumber)
-    form_init_data = []
-    for i in range(1, 21):
-        if i in db_items_dict:
-            form_init_data.append(db_items_dict[i].__dict__) # Simple way to map model to form
-        else:
-            # Entry for unused option numbers
-            form_init_data.append({'OptionNumber': i, 'id': None, 'MenuGroup_id': group_id, 'MenuID': menu_id})
-        #endif 
-    #endfor    
+    # form_init_data = []
+    # for i in range(1, 21):
+    #     if i in db_items_dict:
+    #         form_init_data.append(db_items_dict[i].__dict__) # Simple way to map model to form
+    #     else:
+    #         # Entry for unused option numbers
+    #         form_init_data.append({'OptionNumber': i, 'id': None, 'MenuGroup_id': group_id, 'MenuID': menu_id})
+    #     #endif 
+    # #endfor    
+
+    # construct the query to get all 20 options with left join to menuItems
+    # 1. Define the Recursive CTE (Numbers)
+    numbers_cte = select(literal(1).label("n")).cte(name="Numbers", recursive=True)
+    numbers_cte = numbers_cte.union_all(
+        select(numbers_cte.c.n + 1).where(numbers_cte.c.n < 20)
+    )
+    # 2. Setup the join and logic
+    # We alias the model to make the join clear
+    mnuItm = aliased(menuItems)
+    stmt = (
+        select(
+            numbers_cte.c.n.label("OptionNumber"),                                                      # type: ignore
+            mnuItm.id,
+            # Use coalesce logic similar to the SQL fix provided earlier
+            # (many errors suppressed here due to the placeholder vs actual runtime models)
+            case((mnuItm.MenuGroup_id != None, mnuItm.MenuGroup_id), else_=0).label("MenuGroup_id"),    # type: ignore
+            case((mnuItm.MenuID != None, mnuItm.MenuID), else_=0).label("MenuID"),                      # type: ignore
+            case((mnuItm.OptionText != None, mnuItm.OptionText), else_="").label("OptionText"),         # type: ignore
+            mnuItm.Command,                                                                             # type: ignore
+            case((mnuItm.Argument != None, mnuItm.Argument), else_="").label("Argument"),               # type: ignore
+            case((mnuItm.pword != None, mnuItm.pword), else_="").label("pword"),                        # type: ignore
+            case((mnuItm.top_line != None, mnuItm.top_line), else_=False).label("top_line"),            # type: ignore
+            case((mnuItm.bottom_line != None, mnuItm.bottom_line), else_=False).label("bottom_line"),   # type: ignore
+        )
+        .select_from(numbers_cte)
+        .outerjoin(
+            mnuItm,
+            (numbers_cte.c.n == mnuItm.OptionNumber) & 
+            (mnuItm.MenuGroup_id == 1) & 
+            (mnuItm.MenuID == 0)
+        )
+        .order_by(numbers_cte.c.n)
+    )
+
+    db_items_dict = db.session.execute(stmt).fetchall()
+    form_init_data = [dict(row._mapping) for row in db_items_dict]
 
     # Initialize form with the group and the list of items
     # form = MenuEditForm(obj=group, menu_items=form_init_data)
-    form_init_data.sort(key=lambda x: x['OptionNumber'])  # Ensure correct order for FieldList
-    D = form_init_data
     form = MenuEditForm(obj=group, menu_items=form_init_data)
 
     if form.validate_on_submit():
@@ -249,52 +287,119 @@ def edit_menu(group_id, menu_id):
 
     return render_template('menu/edit_menu.html', form=form)
 ###################### start of first attempt ##########################
-# def edit_menu(menu_group, menu_num):
-#     """
-#     Django equivalent: EditMenu
-#     """
-#     # things go bonkers if these are strings
-#     menu_group = int(menu_group)
-#     menu_num = int(menu_num)
-
-#     from ..models import ( db, menuItems, menuGroups, )
-
-#     command_choices = MENUCOMMANDDICTIONARY
-
-#     def commandchoiceHTML(passedcommand):
-#         commandchoices_html = ""
-#         for ch, chtext in command_choices.items():
-#             commandchoices_html += "<option value=" + str(ch)
-#             if ch == passedcommand: commandchoices_html += " selected"
-#             commandchoices_html += ">" + chtext + "</option>"
-#         return commandchoices_html
-#     # commandchoiceHTML
-
-#     menu_items = menuItems.query.filter_by(
-#         MenuGroup_id=menu_group,
-#         MenuID=menu_num
-#     ).order_by(menuItems.OptionNumber).all()
-#     menu_group_obj = menuGroups.query.get(menu_group)
+@menu_bp.route('/edit/<int:group_id>/<int:menu_num>', methods=['GET', 'POST'])
+@superuser_required
+def edit_menu(group_id, menu_num):
+    """
+    Django equivalent: EditMenu
+    """
+    #########################
+    #### NOTE:
+    #### I build the HTML form here in the view function because I cannot 
+    #### get the menu items to sort on OptionNumber correctly
+    ####
+    #### Ideally this should be done in the template using Jinja2, but noone - 
+    #### not Python, not Jinja2 - will sort the menu items correctly based on OptionNumber.
+    ####
     
-#     if not menu_items:
-#         flash(f'Menu {menu_group},{menu_num} does not exist', 'error')
-#         return redirect(url_for('menu.edit_menu_init'))
+    # things go bonkers if these are strings
+    group_id = int(group_id)
+    menu_num = int(menu_num)
+
+    from ..models import ( db, menuItems, menuGroups, )
+
+    # 1. Fetch group and existing items
+    group = menuGroups.query.get_or_404(group_id)   #pylint: disable=no-member   # type: ignore
+
+    command_choices = MENUCOMMANDDICTIONARY
+
+    def commandchoiceHTML(passedcommand):
+        commandchoices_html = ""
+        for ch, chtext in command_choices.items():
+            commandchoices_html += "<option value=" + str(ch)
+            if ch == passedcommand: commandchoices_html += " selected"
+            commandchoices_html += ">" + chtext + "</option>"
+        return commandchoices_html
+    # commandchoiceHTML
+
+    # construct the query to get all 20 options with left join to menuItems
+    # 1. Define the Recursive CTE (Numbers)
+    numbers_cte = select(literal(1).label("n")).cte(name="Numbers", recursive=True)
+    numbers_cte = numbers_cte.union_all(
+        select(numbers_cte.c.n + 1).where(numbers_cte.c.n < 20)
+    )
+    # 2. Setup the join and logic
+    # We alias the model to make the join clear
+    mnuItm = aliased(menuItems)
+    stmt = (
+        select(
+            numbers_cte.c.n.label("OptionNumber"),                                                      # type: ignore
+            mnuItm.id,
+            # Use coalesce logic similar to the SQL fix provided earlier
+            # (many errors suppressed here due to the placeholder vs actual runtime models)
+            case((mnuItm.MenuGroup_id != None, mnuItm.MenuGroup_id), else_=group_id).label("MenuGroup_id"),    # type: ignore
+            case((mnuItm.MenuID != None, mnuItm.MenuID), else_=menu_num).label("MenuID"),                      # type: ignore
+            case((mnuItm.OptionText != None, mnuItm.OptionText), else_="").label("OptionText"),         # type: ignore
+            mnuItm.Command,                                                                             # type: ignore
+            case((mnuItm.Argument != None, mnuItm.Argument), else_="").label("Argument"),               # type: ignore
+            case((mnuItm.pword != None, mnuItm.pword), else_="").label("pword"),                        # type: ignore
+            case((mnuItm.top_line != None, mnuItm.top_line), else_=False).label("top_line"),            # type: ignore
+            case((mnuItm.bottom_line != None, mnuItm.bottom_line), else_=False).label("bottom_line"),   # type: ignore
+        )
+        .select_from(numbers_cte)
+        .outerjoin(
+            mnuItm,
+            (numbers_cte.c.n == mnuItm.OptionNumber) & 
+            (mnuItm.MenuGroup_id == group_id) & 
+            (mnuItm.MenuID == menu_num)
+        )
+        .order_by(numbers_cte.c.n)
+    )
+    menu_items = [dict(row._mapping) for row in db.session.execute(stmt).fetchall()]
+
+    if not any(item['id'] for item in menu_items):
+        flash(f'Menu {group_id},{menu_num} does not exist', 'error')
+        return redirect(url_for('menu.edit_menu_init'))
     
-#     mnItem_list = [{'OptionText':'',
-#                     'Command':'',
-#                     'Argument':''}
-#             for i in range(20)]
-#     changed_data = ''
+    # Initialize form with explicit data so FieldList gets all 20 entries
+    menu_group_data = {
+        "id": group.id,
+        "GroupName": group.GroupName,
+        "GroupInfo": group.GroupInfo,
+    }
+    form = MenuEditForm(formdata=None, data={
+        "menu_group": menu_group_data,
+        "menu_items": menu_items,
+    })
 
-#     if request.method == 'POST': 
-#         # Handle form submission
+    if form.validate_on_submit():
+        # 4. Handle POST logic: Compare form data to db_items_dict
+        for entry in form.menu_items.data:
+            opt_num = entry['OptionNumber']
+            db_item = menu_items[opt_num]
+            
+            # Case A: User entered text for an empty slot -> CREATE
+            if not db_item and entry['OptionText']:
+                new_item = menuItems(**entry)
+                db.session.add(new_item)
+                
+            # Case B: Slot was occupied but user cleared text -> DELETE
+            elif db_item and not entry['OptionText']:
+                db.session.delete(db_item)
+                
+            # Case C: Slot occupied and text changed -> UPDATE
+            elif db_item and entry['OptionText'] != db_item.OptionText:
+                # Update all relevant fields from the form entry
+                for key, value in entry.items():
+                    if key != 'id': # Don't overwrite the PK
+                        setattr(db_item, key, value)
+            # endif db_item vs entry
+        # endfor menu_items.data
 
-#         flash('Menu updated successfully', 'success')
-#         return redirect(url_for('menu.edit_menu', menu_group=menu_group, menu_num=menu_num))
-#     else:   # request.method == 'GET'
-#         # GET request - display form
-#         pass
-#     # endif POST/GET
+        db.session.commit()
+        # return redirect(url_for('some_success_view'))
+
+    return render_template('menu/edit_menu.html', form=form)
     
 #     return render_template('menu/edit. html',
 #                          menu_group=menu_group_obj,

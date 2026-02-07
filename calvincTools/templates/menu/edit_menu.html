@@ -49,6 +49,10 @@
             </td>
             <td>
                 {{ form.menu_items[i + 10].form }}
+                <div class='row'>
+                    {{ mItem_i10.OptionNumber.data }}
+                    {{ mItem_i10.OptionText }}
+                </div>
                 {#
                 fullMenuHTML += "<div class='col m-1'> " + i2str + " "
                 fullMenuHTML += "<input type='text' size='20' name='OptionText-" + i2str + "'"
