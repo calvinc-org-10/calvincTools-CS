@@ -37,7 +37,7 @@ EXAMPLES OF GETTING STATIC FILES
     <div class="row">   <!-- WICS Logo, FormName and username -->
 		<div class="col-6 fs-3 text-center">{% block formName %}{% endblock %}</div>
         <div class="col-4 fs-2 text-start">{# <img src={% static 'WICS-Logo.png' %} width="150" height="75"> #}</div>
-        <div class="col-2 text-end"> {{ user.get_full_name }} </div>
+        <div class="col-2 text-end"> {{ current_user.username }} </div>
     </div>
     {% endblock %}
     <div class="row"> <!-- status messages -->

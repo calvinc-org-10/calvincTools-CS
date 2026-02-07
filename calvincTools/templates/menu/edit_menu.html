@@ -1,3 +1,7 @@
+{% extends "cTools_common.html" %}
+
+{% block formName %}Edit Menu{% endblock %}
+{% block boddy %}
 <form method="POST">
     {{ form.hidden_tag() }}
     
@@ -6,21 +10,21 @@
         {{ form.menu_group.GroupName.label }} {{ form.menu_group.GroupName() }}
         {{ form.menu_group.GroupInfo.label }} {{ form.menu_group.GroupInfo() }}
     </div>
-    
-    <table>
+    <hr>
+    {{form.menu_items[0].object_data.__dict__}}
+    <hr>
+    <table class="container">
         {% for i in range(10) %}
+        {% set mItem_i = form.menu_items[i].form %}
+        {% set mItem_i10 = form.menu_items[i+10].form %}
         <tr>
             <td>
-                {{ form.menu_items[i].form }}
+                {{ form.menu_items[i].form | pprint }}
+                <div class='row'>
+                    {{ mItem_i.OptionNumber.data }}
+                    {{ mItem_i.OptionText }}
+                </div>
                 {#
-                    fullMenuHTML += "<div class='row'>"
-                        fullMenuHTML += "<div class='col m-1'> " + istr + " "
-                            fullMenuHTML += "<input type='text' size='20' name='OptionText-" + istr + "'"
-                            if mnItem_list[i_0based]['OptionText']: fullMenuHTML += " value = '" + mnItem_list[i_0based]['OptionText'] + "'"
-                            fullMenuHTML += "></input></div>"
-                            fullMenuHTML += "</div>"
-                            #}
-                            {#
                 fullMenuHTML += "<div class='row'>"
                 fullMenuHTML += "<div class='col m-1'> Command: "
                 fullMenuHTML += "<select style='width:10em' name='Command-" + istr + "'>"
@@ -83,3 +87,4 @@
 
     {{ form.submit() }}
 </form>
+{% endblock %}

@@ -1,0 +1,62 @@
+WITH Numbers(n) AS (
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM Numbers WHERE n < 20
+)
+SELECT 
+  cmmi.id,
+  COALESCE(cmmi.MenuGroup_id, 0) as MenuGroup_id,
+  COALESCE(cmmi.MenuID, 0) as MenuID,
+  n as OptionNumber,
+  COALESCE(cmmi.OptionText, '') as OptionText,
+  cmmi.Command,
+  COALESCE(cmmi.Argument, '') as Argument,
+  COALESCE(cmmi.pword, '') as pword,
+  COALESCE(cmmi.top_line, 0) as top_line,
+  COALESCE(cmmi.bottom_line, 0) as bottom_line
+FROM Numbers
+LEFT JOIN cMenu_menuItems cmmi 
+  ON n = cmmi.OptionNumber 
+  AND cmmi.MenuGroup_id = 1 
+  AND cmmi.MenuID = 0
+ORDER BY n;
+
+##########################################################
+
+from sqlalchemy import select, union_all, literal, case, cast, Integer, String, Boolean
+from sqlalchemy.orm import aliased
+
+# 1. Define the Recursive CTE (Numbers)
+numbers_cte = select(literal(1).label("n")).cte(name="Numbers", recursive=True)
+numbers_cte = numbers_cte.union_all(
+    select(numbers_cte.c.n + 1).where(numbers_cte.c.n < 20)
+)
+
+# 2. Setup the join and logic
+# We alias the model to make the join clear
+cmmi = aliased(CMenuMenuItem)
+
+stmt = (
+    select(
+        cmmi.id,
+        # Use coalesce logic similar to the SQL fix provided earlier
+        case((cmmi.MenuGroup_id != None, cmmi.MenuGroup_id), else_=0).label("MenuGroup_id"),
+        case((cmmi.MenuID != None, cmmi.MenuID), else_=0).label("MenuID"),
+        numbers_cte.c.n.label("OptionNumber"),
+        case((cmmi.OptionText != None, cmmi.OptionText), else_="").label("OptionText"),
+        cmmi.Command,
+        case((cmmi.Argument != None, cmmi.Argument), else_="").label("Argument"),
+        case((cmmi.pword != None, cmmi.pword), else_="").label("pword"),
+        case((cmmi.top_line != None, cmmi.top_line), else_=False).label("top_line"),
+        case((cmmi.bottom_line != None, cmmi.bottom_line), else_=False).label("bottom_line"),
+    )
+    .select_from(numbers_cte)
+    .outerjoin(
+        cmmi,
+        (numbers_cte.c.n == cmmi.OptionNumber) & 
+        (cmmi.MenuGroup_id == 1) & 
+        (cmmi.MenuID == 0)
+    )
+    .order_by(numbers_cte.c.n)
+)
+

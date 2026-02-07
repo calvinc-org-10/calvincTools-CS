@@ -186,6 +186,14 @@ def edit_menu(group_id, menu_id):
         db,
         menuItems, menuGroups,
         )
+    #########################
+    #### NOTE:
+    #### I build the HTML form here in the view function because I cannot 
+    #### get the menu items to sort on OptionNumber correctly
+    ####
+    #### Ideally this should be done in the template using Jinja2, but noone - 
+    #### not Python, not Jinja2 - will sort the menu items correctly based on OptionNumber.
+    ####
     
     # 1. Fetch group and existing items
     group = menuGroups.query.get_or_404(group_id)   #pylint: disable=no-member   # type: ignore
@@ -207,6 +215,9 @@ def edit_menu(group_id, menu_id):
     #endfor    
 
     # Initialize form with the group and the list of items
+    # form = MenuEditForm(obj=group, menu_items=form_init_data)
+    form_init_data.sort(key=lambda x: x['OptionNumber'])  # Ensure correct order for FieldList
+    D = form_init_data
     form = MenuEditForm(obj=group, menu_items=form_init_data)
 
     if form.validate_on_submit():

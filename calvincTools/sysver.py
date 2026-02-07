@@ -21,6 +21,7 @@ __email__ = "calvinc404@gmail.com"
 # =================
 # refactor app.py and call create_app from apphooks.py
 # do edit menu
+# add firstname, lastname fields to user table
 # do user edit page
 # add flash messages to ALL templates
 # do all menu commands
