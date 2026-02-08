@@ -1,5 +1,17 @@
 {% extends "cTools_common.html" %}
 
+{% block customCSS %}
+    td {
+        border: solid;
+        /*
+        border-collapse: separate;
+        border-spacing: 5px;
+        */
+        padding: 1em;
+    }
+{% endblock %}
+
+
 {% block formName %}Edit Menu{% endblock %}
 {% block boddy %}
 <form method="POST">
@@ -10,19 +22,20 @@
         {{ form.menu_group.GroupName.label }} {{ form.menu_group.GroupName() }}
         {{ form.menu_group.GroupInfo.label }} {{ form.menu_group.GroupInfo() }}
     </div>
-    <hr>
-    {{form.menu_items[0].object_data.__dict__}}
-    <hr>
     <table class="container">
         {% for i in range(10) %}
         {% set mItem_i = form.menu_items[i].form %}
         {% set mItem_i10 = form.menu_items[i+10].form %}
         <tr>
             <td>
-                {{ form.menu_items[i].form | pprint }}
-                <div class='row'>
+                <span class='row'>
                     {{ mItem_i.OptionNumber.data }}
-                    {{ mItem_i.OptionText }}
+                    {% if mItem_i.id.data is not none %}(id {{ mItem_i.id.data }}){% endif %}
+                    {{+ mItem_i.OptionText(style="width: 400px;") }}
+                </span>
+                <div class="row">
+                    Command:  {{ mItem_i.Command(style="width: 150px;") }}
+                    Argument: {{ mItem_i.Argument(style="width: 250px;") }}
                 </div>
                 {#
                 fullMenuHTML += "<div class='row'>"
@@ -35,6 +48,9 @@
                 fullMenuHTML += "></input>"
                 fullMenuHTML += "</div>"
                 #}
+                <div class="row">
+                    Copy, Move | Remove go here
+                </div>
                 {#
                 fullMenuHTML += "<div class='row'>"
                 fullMenuHTML += "<div class='col m-1'>"
@@ -48,10 +64,14 @@
                 {##}
             </td>
             <td>
-                {{ form.menu_items[i + 10].form }}
-                <div class='row'>
+                <span class='row'>
                     {{ mItem_i10.OptionNumber.data }}
-                    {{ mItem_i10.OptionText }}
+                    {% if mItem_i10.id.data is not none %}(id {{ mItem_i10.id.data }}){% endif %}
+                    {{+ mItem_i10.OptionText(style="width: 400px;") }}
+                </span>
+                <div class="row">
+                    Command:  {{ mItem_i10.Command(style="width: 150px;") }}
+                    Argument: {{ mItem_i10.Argument(style="width: 250px;") }}
                 </div>
                 {#
                 fullMenuHTML += "<div class='col m-1'> " + i2str + " "
@@ -71,6 +91,8 @@
                 fullMenuHTML += "</div>"
                 fullMenuHTML += "</div>"
                 #}
+                <div class="row">
+                    Copy, Move | Remove go here
                 {#
                 fullMenuHTML += "<div class='col m-1'>"
                 fullMenuHTML += " Copy<input type='radio' name='CopyTo-" + i2str + "' value='copy'>"
