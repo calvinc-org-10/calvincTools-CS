@@ -196,8 +196,9 @@ def edit_menu(group_id, menu_num):
 
     from ..models import ( db, menuItems, menuGroups, )
 
-    # 1. Fetch group and existing items
-    group = menuGroups.query.get_or_404(group_id)   #pylint: disable=no-member   # type: ignore
+    thisMenu = menuItems.query.filter_by(MenuGroup_id=group_id, MenuID=menu_num, OptionNumber=0).first()
+    menuName = thisMenu.OptionText if thisMenu else ""          # type: ignore
+    group = thisMenu.menu_group                                 # type: ignore
 
     # construct the query to get all 20 options with left join to menuItems
     # 1. Define the Recursive CTE (Numbers)
@@ -249,6 +250,7 @@ def edit_menu(group_id, menu_num):
         "menu_items": menu_items,
     })
 
+    changed_data = {}
     if form.validate_on_submit():
         flag_Group_updated = False
         # 4a. Handle POST logic: Update menu group info if changed
@@ -285,29 +287,42 @@ def edit_menu(group_id, menu_num):
         db.session.commit()
         # return redirect(url_for('some_success_view'))
 
-    # mnuGoto = {'menuGroup':menuGroup,
-    #             'menuGroup_choices': menuGroups.objects.all(),
-    #             'menuID':menuNum,
-    #             'menuID_choices':menuItems.objects.filter(MenuGroup=menuGroup,OptionNumber=0)
-    #             }
+    mnuGoto = {
+        'menuGroup':group.GroupName,
+        'menuGroup_choices': menuGroups.query.all(),
+        'menuID':menu_num,
+        'menuID_choices':menuItems.query.filter_by(MenuGroup_id=group_id, OptionNumber=0).all(),
+        }
 
-    # cntext = {
-    #     'menuGroupName': mnuGroupRec.GroupName,   ## in form
-    #     'menuName':mnItem_qset.get(OptionNumber=0).OptionText,    ## in form
-    #     # build this: 'menuGoto':mnuGoto,
-    #     'menuContents':fullMenuHTML,  ## in form
-    #     # build this: 'changed_data': changed_data,
-    #     }
-    # templt = "cMenuEdit.html"
+    cntext = {
+        'form': form,
+        # 'menuGroupName': mnuGroupRec.GroupName,   ## in form
+        # 'menuContents':fullMenuHTML,              ## in form
+        'menuName':menuName,
+        'menuGoto':mnuGoto,
+        'changed_data': changed_data,
+        }
+    templt = "menu/edit_menu.html"
     # return render(req, templt, context=cntext)
-    return render_template('menu/edit_menu.html', form=form)
+    return render_template(templt, **cntext)
     
 #     return render_template('menu/edit. html',
 #                          menu_group=menu_group_obj,
 #                          menu_num=menu_num,
 #                          menu_items=menu_items,
 #                          command_choices=command_choices)
-###################### end of first attempt ##########################
+
+# from sqlalchemy import select
+
+# # Filtered List
+# stmt = select(menuItems).filter_by(MenuGroup_id=group_id, OptionNumber=0)
+# menuID_choices = db_instance.session.execute(stmt).scalars().all()
+
+# # Single Item
+# stmt = select(menuItems).filter_by(MenuGroup_id=group_id, MenuID=menu_id, OptionNumber=0)
+# menuName_obj = db_instance.session.execute(stmt).scalar_one_or_none()
+
+# edit_menu
 
 @menu_bp.route('/create/<int:menu_group>/<int:menu_num>')
 @menu_bp.route('/create/<int:menu_group>/<int:menu_num>/<int:from_group>/<int:from_menu>')
