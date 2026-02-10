@@ -27,6 +27,7 @@
             >{{ ch }}</option>"
         {% endfor %}
         </select>  <small>{{ menuGoto.menuGroup }}</small>
+        <button type="button" id="NewMenuGroup">New Mnu Grp</button>
         <br>
         Menu <select id="menuID" onchange="loadNewMenu(false);">
         {% for ch in menuGoto.menuID_choices %}
@@ -47,7 +48,6 @@
         MenuName:  <input type="text" name="menuName" form="menueditForm" value="{{ menuName }}" size="15">
     </div>
     <div class="col-2">
-        <button type="button" id="NewMenuGroup">New Mnu Grp</button>
         <button type="button" id="CopyMenu">Copy Menu</button>
         <button type="button" id="NewMenu">New Menu</button>
         <button type="button" id="RemvMenu">Remv Menu</button>
@@ -121,66 +121,96 @@
     </table>
     
     {#
-        {{ form.submit() }} should I use this or button below?
-        #}
-        <!-- form footer -->
-        <br>
-        <div class="container">
-            <div class="row mx-auto max-width=100%">
-                <div class="col-4">
-                    <button id="save_btn" type="submit">
-                        <img src="{{ url_for('ctools.static', filename='svg/poem-poetry-icon.svg') }}" width="20" height="20"></img>
-                        Save changes
-                    </button>
-                </div>
-                <div class="col-6"></div>
-                <div class="col">
-                    <button id="close_btn" type="button" onclick="window.close();">
-                        <img src="{{ url_for('ctools.static', filename='svg/stop-road-sign-icon.svg') }}" width="20" height="20"></img>
-                        Close Form
-                    </button>
-                </div>
+    {{ form.submit() }} should I use this or button below?
+    #}
+    <!-- form footer -->
+    <br>
+    <div class="container">
+        <div class="row mx-auto max-width=100%">
+            <div class="col-4">
+                <button id="save_btn" type="submit">
+                    <img src="{{ url_for('ctools.static', filename='svg/poem-poetry-icon.svg') }}" width="20" height="20"></img>
+                    Save changes
+                </button>
+            </div>
+            <div class="col-6"></div>
+            <div class="col">
+                <button id="close_btn" type="button" onclick="window.close();">
+                    <img src="{{ url_for('ctools.static', filename='svg/stop-road-sign-icon.svg') }}" width="20" height="20"></img>
+                    Close Form
+                </button>
             </div>
         </div>
-        
-    </form>
-    
-    <dialog id="get-MenuID-dialog">
-        <form method="dialog" id="menuForm">
-            <fieldset>
-                <legend>New Menu Group/ID</legend>
-                
-                <label for="NewMnuGroup">Menu Group</label>
-                <input type="number" name="NewMnuGroup" id="NewMnuGroup">
-                
-                <label for="NewMnuID">Menu ID</label>
-                <input type="number" name="NewMnuID" id="NewMnuID">
-                
-                <div style="margin-top:1em;">
-                    <button type="button" id="menu-ok">OK</button>
-                    <button type="button" id="menu-cancel">Cancel</button>
-                </div>
-    </fieldset>
+    </div>
 </form>
+    
+<dialog id="get-MenuID-dialog">
+    <form method="dialog" id="menuForm">
+        <fieldset>
+            <legend>New Menu Group/ID</legend>
+            
+            <label for="NewMnuGroup">Menu Group</label>
+            <input type="number" name="NewMnuGroup" id="NewMnuGroup">
+            
+            <label for="NewMnuID">Menu ID</label>
+            <input type="number" name="NewMnuID" id="NewMnuID">
+            
+            <div style="margin-top:1em;">
+                <button type="button" id="menu-ok">OK</button>
+                <button type="button" id="menu-cancel">Cancel</button>
+            </div>
+        </fieldset>
+    </form>
+</dialog>
+<dialog id="get-GroupID-dialog">
+    <form method="dialog" id="groupForm">
+        <fieldset>
+            <legend>New Menu Group</legend>
+            
+            <label for="NewMnuGroup_G">Menu Group</label>
+            <input type="number" name="NewMnuGroup" id="NewMnuGroup_G">
+            
+            <label for="NewMnuGroupName_G">Menu Group Name</label>
+            <input type="text" name="NewMnuGroupName" id="NewMnuGroupName_G">
+            
+            <label for="NewMnuGroupDesc_G">Menu Group Description</label>
+            <input type="text" name="NewMnuGroupDesc" id="NewMnuGroupDesc_G">
+            
+            <div style="margin-top:1em;">
+                <button type="button" id="group-ok">OK</button>
+                <button type="button" id="group-cancel">Cancel</button>
+            </div>
+        </fieldset>
+    </form>
 </dialog>
 
 <script>
     
-let CopyORNew = ''
+let CopyORNew = ''      // menu copy type used by NewMenu procs
+
+// buttons and dialog elements
+const newGroupBtn = document.getElementById("NewMenuGroup");
+const copyBtn = document.getElementById("CopyMenu");
+const newBtn  = document.getElementById("NewMenu");
+const remvBtn = document.getElementById("RemvMenu");
 
 const getMenuIDdialog = document.getElementById("get-MenuID-dialog");
 const menuIDdlg_okBtn = document.getElementById("menu-ok");
 const menuIDdlg_cancelBtn = document.getElementById("menu-cancel");
-const copyBtn = document.getElementById("CopyMenu");
-const newBtn  = document.getElementById("NewMenu");
+const getGroupIDdialog = document.getElementById("get-GroupID-dialog");
+const groupIDdlg_okBtn = document.getElementById("group-ok");
+const groupIDdlg_cancelBtn = document.getElementById("group-cancel");
+
+// event listeners
+newGroupBtn.addEventListener("click", () => openNewGroupDialog());
+copyBtn.addEventListener("click", () => openMenuDialog("copy"));
+newBtn.addEventListener("click",  () => openMenuDialog("new"));
+remvBtn.addEventListener("click", () => { });
 
 function openMenuDialog(mode) {
     CopyORNew = mode;
     getMenuIDdialog.showModal();
 }
-
-copyBtn.addEventListener("click", () => openMenuDialog("copy"));
-newBtn.addEventListener("click",  () => openMenuDialog("new"));
 
 // disable Escape key (closeOnEscape:false)
 getMenuIDdialog.addEventListener("cancel", function (e) {
@@ -211,6 +241,10 @@ function NewMenuID_chosen() {
     window.location = newRec;
 }
 
+function openNewGroupDialog() {
+    // similar to openMenuDialog but only asks for new group number
+    getGroupIDdialog.showModal();
+}
 
 $("#RemvMenu").on("click", function() {
     // are you sure?    {# use areYouSure() (in cTools_common.html) #}
