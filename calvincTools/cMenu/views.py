@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_required, current_user
 
@@ -233,7 +234,7 @@ def edit_menu(group_id, menu_num):
         )
         .order_by(numbers_cte.c.n)
     )
-    menu_items = [dict(row._mapping) for row in db.session.execute(stmt).fetchall()]
+    menu_items = [dict(row._mapping) for row in db.session.execute(stmt).fetchall()]    # type: ignore      # pylint: disable=protected-access
 
     if not any(item['id'] for item in menu_items):
         flash(f'Menu {group_id},{menu_num} does not exist', 'error')

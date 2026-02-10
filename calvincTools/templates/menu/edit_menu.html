@@ -227,23 +227,45 @@ menuIDdlg_cancelBtn.addEventListener("click", function () {
 function NewMenuID_chosen() {
     var newRec
 
+    valNewMnuGrp = document.getElementById('NewMnuGroup').value
+    valNewMnuID = document.getElementById('NewMnuID').value
+    valFromMnuGrp = document.getElementById('menuGroup').value
+    valFromMnuID = document.getElementById('menuID').value
+    
     if (CopyORNew == 'copy') {
-        newRec = "" {# "{% url 'MenuCreate' 'menuGroup' 'menuNum' 'fromGroup' 'fromMenu' %}" #}
+        newRec = "{{ url_for('menu.create_menu', menu_group=valNewMnuGrp, menu_num=valNewMnuID, from_group=valFromMnuGrp, from_menu=valFromMnuID) }}";
     } else if (CopyORNew == 'new') {
-        newRec = "" {# "{% url 'MenuCreate' 'menuGroup' 'menuNum' %}" #}
+        newRec = "{{ url_for('menu.create_menu', menu_group=valNewMnuGrp, menu_num=valNewMnuID) }}";
     } else {
         // something is wrong
     }
-    newRec = newRec.replace('/menuGroup','/'+$('#NewMnuGroup').val())
-    newRec = newRec.replace('/menuNum','/'+$('#NewMnuID').val())
-    newRec = newRec.replace('/fromGroup','/'+$('#menuGroup').val())
-    newRec = newRec.replace('/fromMenu','/'+$('#menuID').val())
     window.location = newRec;
 }
 
 function openNewGroupDialog() {
     // similar to openMenuDialog but only asks for new group number
     getGroupIDdialog.showModal();
+}
+
+// disable Escape key (closeOnEscape:false)
+getGroupIDdialog.addEventListener("cancel", function (e) {
+    e.preventDefault();
+});
+groupIDdlg_okBtn.addEventListener("click", function () {
+    NewMenuGroup_chosen();
+    dialog.close();
+});
+groupIDdlg_cancelBtn.addEventListener("click", function () {
+    dialog.close();
+});
+
+function NewMenuGroup_chosen() {
+// REVIEW ME!!
+    var newRec = "" {# "{% url 'MenuGroupCreate' 'menuGroup' 'groupName' 'groupDesc' %}" #}
+    newRec = newRec.replace('/menuGroup','/'+$('#NewMnuGroup_G').val())
+    newRec = newRec.replace('/groupName','/'+$('#NewMnuGroupName_G').val())
+    newRec = newRec.replace('/groupDesc','/'+$('#NewMnuGroupDesc_G').val())
+    window.location = newRec;
 }
 
 $("#RemvMenu").on("click", function() {
