@@ -171,26 +171,82 @@ let CopyORNew = ''
 const getMenuIDdialog = document.getElementById("get-MenuID-dialog");
 const menuIDdlg_okBtn = document.getElementById("menu-ok");
 const menuIDdlg_cancelBtn = document.getElementById("menu-cancel");
+const copyBtn = document.getElementById("CopyMenu");
+const newBtn  = document.getElementById("NewMenu");
 
-// equivalent to autoOpen:false
-function openMenuDialog() {
+function openMenuDialog(mode) {
+    CopyORNew = mode;
     getMenuIDdialog.showModal();
 }
+
+copyBtn.addEventListener("click", () => openMenuDialog("copy"));
+newBtn.addEventListener("click",  () => openMenuDialog("new"));
 
 // disable Escape key (closeOnEscape:false)
 getMenuIDdialog.addEventListener("cancel", function (e) {
     e.preventDefault();
 });
-
 menuIDdlg_okBtn.addEventListener("click", function () {
     NewMenuID_chosen();
     dialog.close();
 });
-
 menuIDdlg_cancelBtn.addEventListener("click", function () {
     dialog.close();
 });
-   
+
+function NewMenuID_chosen() {
+    var newRec
+
+    if (CopyORNew == 'copy') {
+        newRec = "" {# "{% url 'MenuCreate' 'menuGroup' 'menuNum' 'fromGroup' 'fromMenu' %}" #}
+    } else if (CopyORNew == 'new') {
+        newRec = "" {# "{% url 'MenuCreate' 'menuGroup' 'menuNum' %}" #}
+    } else {
+        // something is wrong
+    }
+    newRec = newRec.replace('/menuGroup','/'+$('#NewMnuGroup').val())
+    newRec = newRec.replace('/menuNum','/'+$('#NewMnuID').val())
+    newRec = newRec.replace('/fromGroup','/'+$('#menuGroup').val())
+    newRec = newRec.replace('/fromMenu','/'+$('#menuID').val())
+    window.location = newRec;
+}
+
+
+$("#RemvMenu").on("click", function() {
+    // are you sure?    {# use areYouSure() (in cTools_common.html) #}
+    $("#yesno-dialog-text").html("Are you <b>SURE</b> you want to remove this menu?")  // is there a way I can pass this to the dialog object?
+    $("#yesno-dialog").dialog("open")
+});    
+
+function yesno_chosen(yesnoVal) {
+    if (yesnoVal) {
+        //OK, kill this menu
+        newRec = "" {# "{% url 'MenuRemove' 'menuGroup' 'menuNum' %}" #}
+        newRec = newRec.replace('/menuGroup','/'+$('#menuGroup').val())
+        newRec = newRec.replace('/menuNum','/'+$('#menuID').val())
+        window.location = newRec;
+
+    } else {
+        // nope, don't really wanna destroy this menu; carry on
+    }
+}
+  
+function loadNewMenu(newGrp) {
+    var newRec = "" {# "{% url 'EditMenu' 'mGrp' 'mItm' %}" #}
+    newRec = newRec.replace('/mGrp','/'+$('#menuGroup').val())
+    if (newGrp) {
+        newRec = newRec.replace('/mItm','/0')
+    } else {
+        newRec = newRec.replace('/mItm','/'+$('#menuID').val())
+    }
+    window.location = newRec;
+}
+
+document.body.onbeforeunload = function() {
+    document.getElementById("wait_spinner").style.display = "block";
+}
+
+{# use areYouSure() (in cTools_common.html)
     $("#yesno-dialog").dialog({
         autoOpen: false,
         closeOnEscape: false,
@@ -211,69 +267,7 @@ menuIDdlg_cancelBtn.addEventListener("click", function () {
         yesno_chosen();
         $("yesno-dialog").close()
     });
-
-    function NewMenuID_chosen() {
-        var newRec
-
-        if (CopyORNew == 'copy') {
-            newRec = "" {# "{% url 'MenuCreate' 'menuGroup' 'menuNum' 'fromGroup' 'fromMenu' %}" #}
-        } else if (CopyORNew == 'new') {
-            newRec = "" {# "{% url 'MenuCreate' 'menuGroup' 'menuNum' %}" #}
-        } else {
-            // something is wrong
-        }
-        newRec = newRec.replace('/menuGroup','/'+$('#NewMnuGroup').val())
-        newRec = newRec.replace('/menuNum','/'+$('#NewMnuID').val())
-        newRec = newRec.replace('/fromGroup','/'+$('#menuGroup').val())
-        newRec = newRec.replace('/fromMenu','/'+$('#menuID').val())
-        window.location = newRec;
-    }
-
-    function yesno_chosen(yesnoVal) {
-        if (yesnoVal) {
-            //OK, kill this menu
-            newRec = "" {# "{% url 'MenuRemove' 'menuGroup' 'menuNum' %}" #}
-            newRec = newRec.replace('/menuGroup','/'+$('#menuGroup').val())
-            newRec = newRec.replace('/menuNum','/'+$('#menuID').val())
-            window.location = newRec;
-
-        } else {
-            // nope, don't really wanna destroy this menu; carry on
-        }
-    }
-  
-const copyBtn = document.getElementById("CopyMenu");
-const newBtn  = document.getElementById("NewMenu");
-
-function openMenuDialog(mode) {
-    CopyORNew = mode;
-    getMenuIDdialog.showModal();
-}
-
-copyBtn.addEventListener("click", () => openMenuDialog("copy"));
-newBtn.addEventListener("click",  () => openMenuDialog("new"));
-
-
-    $("#RemvMenu").on("click", function() {
-        // are you sure?
-        $("#yesno-dialog-text").html("Are you <b>SURE</b> you want to remove this menu?")  // is there a way I can pass this to the dialog object?
-        $("#yesno-dialog").dialog("open")
-    });    
-
-    function loadNewMenu(newGrp) {
-        var newRec = "" {# "{% url 'EditMenu' 'mGrp' 'mItm' %}" #}
-        newRec = newRec.replace('/mGrp','/'+$('#menuGroup').val())
-        if (newGrp) {
-            newRec = newRec.replace('/mItm','/0')
-        } else {
-            newRec = newRec.replace('/mItm','/'+$('#menuID').val())
-        }
-        window.location = newRec;
-    }
-
-    document.body.onbeforeunload = function() {
-        document.getElementById("wait_spinner").style.display = "block";
-    }
+#}
 
 </script>
 
