@@ -1,6 +1,11 @@
 from flask import Blueprint, current_app
 
-ctools_bp = Blueprint('ctools', __name__, template_folder='templates')
+ctools_bp = Blueprint(
+    'ctools', __name__, 
+    static_folder='assets',  # specify static folder for cTools
+    static_url_path='/static/ctools',  # specify URL path for cTools static files
+    template_folder='templates'
+    )
 
 @ctools_bp.route('/status')
 def status():

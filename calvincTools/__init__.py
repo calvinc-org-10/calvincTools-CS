@@ -24,7 +24,10 @@ class calvinCTools_init:
 
         # 2. Register Blueprints
         # This keeps cTools routes separate from the app routes
-        app.register_blueprint(ctools_bp, url_prefix='/ctools')
+        app.register_blueprint(
+            ctools_bp, 
+            url_prefix='/ctools',
+            )
 
         # Initialize extensions
         from .models import init_cDatabase      # can I move this back to main imports?

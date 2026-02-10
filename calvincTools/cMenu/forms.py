@@ -3,20 +3,13 @@ from dataclasses import dataclass
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField, SubmitField, Form, FormField, FieldList, IntegerField, HiddenField, BooleanField,
-    SelectField,
+    SelectField, RadioField,
     )
 from wtforms.validators import DataRequired
 
 # from calvincTools.models import menuItems
 from . import (MENUCOMMAND, MENUCOMMANDDICTIONARY)
 
-
-@dataclass
-class menuGoto():
-    menuGroup: int
-    menuGroup_choices: list[tuple[int, str]]
-    menuID: int
-    menuID_choices: list[tuple[int, str]]
 
 class MenuItemForm(Form):
     id = HiddenField()
@@ -29,6 +22,9 @@ class MenuItemForm(Form):
     pword = StringField()
     top_line = BooleanField()
     bottom_line = BooleanField()
+    CopyType = RadioField(choices=[('copy', 'Copy'), ('move', 'Move'), ])
+    CopyTarget = StringField()
+    Remove = BooleanField()
 
 class MenuGroupForm(Form):
     id = HiddenField()
