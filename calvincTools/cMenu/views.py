@@ -269,15 +269,36 @@ def edit_menu(group_id, menu_num):
     changed_data = {}
 
     if form.validate_on_submit():
-        flag_Group_updated = False
-        # 4a. Handle POST logic: Update menu group info if changed
+        # Update menu group info if changed
         if form.menu_group.GroupName.data != group.GroupName:
-            flag_Group_updated = True
             group.GroupName = form.menu_group.GroupName.data
+            changed_data['GroupName'] = form.menu_group.GroupName.data
         if form.menu_group.GroupInfo.data != group.GroupInfo:
-            flag_Group_updated = True
             group.GroupInfo = form.menu_group.GroupInfo.data
+            changed_data['GroupInfo'] = form.menu_group.GroupInfo.data
 
+        # has menu name changed? (OptionNumber=0)
+        if form.menu_name.data != menuName:
+            title_item = menuItems.query.filter_by(
+                MenuGroup_id=group_id,
+                MenuID=menu_num,
+                OptionNumber=0
+            ).first()
+            if title_item:
+                title_item.OptionText = form.menu_name.data     # type: ignore  
+            else:
+                # This should never happen since the menu must exist to get here, but just in case:
+                new_title = menuItems(
+                    MenuGroup_id=group_id,
+                    MenuID=menu_num,
+                    OptionNumber=0,
+                    OptionText=form.menu_name.data
+                )
+                db.session.add(new_title)
+            # endif title_item
+            changed_data['MenuName'] = form.menu_name.data
+        # endif menu name changed
+        
         db_items = (
             menuItems.query.filter_by(MenuGroup_id=group_id, MenuID=menu_num)
             .filter(menuItems.OptionNumber > 0)                #type: ignore
@@ -330,23 +351,95 @@ def edit_menu(group_id, menu_num):
             opt_text = (entry.get("OptionText") or "").strip()
 
             if db_item is None and opt_text:
+                # New item created if no existing db item and user entered text
                 new_item = menuItems(
                     **{key: value for key, value in entry.items() if key in allowed_fields}
                 )
                 db.session.add(new_item)
+                changed_data[f'Option{opt_num}'] = f'{opt_text} added'
             elif db_item is not None and not opt_text:
+                # Existing item deleted if user cleared text
                 db.session.delete(db_item)
+                changed_data[f'Option{opt_num}'] = f'{opt_num} deleted'
             elif db_item is not None:
+                # Existing item updated if user changed text or any other field
+                # note: cannot choose Remove along with copy/move!!
                 for key in allowed_fields:
                     new_val = entry.get(key)
                     if getattr(db_item, key) != new_val:
                         setattr(db_item, key, new_val)
+                        changed_data[f'Option{opt_num}'] = f'{opt_num} {key} updated'
                 # endfor allowed_fields
             # endif db_item vs entry
+
+            # copy/move
+            # note: cannot choose copy/move along with Remove!!
+#!#!#!#!#!#!
+            # if mnRec and thisItem.get('CopyTo',''):
+            #     MoveORCopy = thisItem.get('CopyTo')
+            #     CopyTarget = thisItem.get('CopyTarget').split(',')
+            #     targetGroup = None
+            #     if len(CopyTarget)==2:
+            #         targetGroup = menuGroup
+            #         try:
+            #             targetMenu = int(CopyTarget[0])
+            #         except:
+            #             targetMenu = None
+            #         try:
+            #             targetOption = int(CopyTarget[1])
+            #         except:
+            #             targetOption = None
+            #     elif len(CopyTarget)==3:
+            #         try:
+            #             targetGroup = int(CopyTarget[0])
+            #         except:
+            #             targetGroup = None
+            #         try:
+            #             targetMenu = int(CopyTarget[1])
+            #         except:
+            #             targetMenu = None
+            #         try:
+            #             targetOption = int(CopyTarget[2])
+            #         except:
+            #             targetOption = None
+            #     else:
+            #         pass    # targetGroup is already None
+
+            #     if targetGroup is None or targetMenu is None or targetOption is None:
+            #         if changed_data: changed_data += ", "
+            #         changed_data += "Could not interpret option " + str(i) + " " + MoveORCopy + " target " + thisItem.get('CopyTarget')
+            #     else:
+            #         if menuItems.objects.filter(MenuGroup=targetGroup, MenuID=targetMenu, OptionNumber=targetOption).exists():
+            #             if changed_data: changed_data += ", "
+            #             changed_data += "Could not " + MoveORCopy + " option " + str(i)
+            #             changed_data +=  " - target " + thisItem.get('CopyTarget') + " already exists."
+            #         else:
+            #             menuItems(
+            #                     MenuGroup_id = targetGroup,
+            #                     MenuID = targetMenu,
+            #                     OptionNumber = targetOption,
+            #                     OptionText = mnRec.OptionText,
+            #                     Command = mnRec.Command,
+            #                     Argument = mnRec.Argument
+            #                 ).save()
+            #             if MoveORCopy == 'move':
+            #                 mnRec.delete()
+            #                 mnItem_list[i_0based] = {'OptionText':'',
+            #                     'Command':'',
+            #                     'Argument':''}
+
+
+            #             if changed_data: changed_data += ", "
+            #             changed_data += "Option " + str(i)
+            #             if MoveORCopy == 'move': changed_data += " moved"
+            #             else: changed_data += " copied"
+            #             changed_data +=  " to " + thisItem.get('CopyTarget') + "."
+#!#!#!#!#!#!
         # endfor menu_items.entries
 
         db.session.commit()
-        # return redirect(url_for('some_success_view'))
+
+        return redirect(url_for("menu.edit_menu", group_id=group_id, menu_num=menu_num))
     # endif form.validate_on_submit()
 
     mnuGoto = {
