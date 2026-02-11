@@ -225,20 +225,24 @@ menuIDdlg_cancelBtn.addEventListener("click", function () {
 });
 
 function NewMenuID_chosen() {
-    var newRec
+    var newRec;
 
-    valNewMnuGrp = document.getElementById('NewMnuGroup').value
-    valNewMnuID = document.getElementById('NewMnuID').value
-    valFromMnuGrp = document.getElementById('menuGroup').value
-    valFromMnuID = document.getElementById('menuID').value
+    valNewMnuGrp = document.getElementById('NewMnuGroup').value;
+    valNewMnuID = document.getElementById('NewMnuID').value;
+    valFromMnuGrp = document.getElementById('menuGroup').value;
+    valFromMnuID = document.getElementById('menuID').value;
     
     if (CopyORNew == 'copy') {
-        newRec = "{{ url_for('menu.create_menu', menu_group=valNewMnuGrp, menu_num=valNewMnuID, from_group=valFromMnuGrp, from_menu=valFromMnuID) }}";
+        newRec = "{{ url_for('menu.create_menu', menu_group=-101, menu_num=-102, from_group=-103, from_menu=-104) }}";
     } else if (CopyORNew == 'new') {
-        newRec = "{{ url_for('menu.create_menu', menu_group=valNewMnuGrp, menu_num=valNewMnuID) }}";
+        newRec = "{{ url_for('menu.create_menu', menu_group=-101, menu_num=-102) }}";
     } else {
         // something is wrong
     }
+    newRec = newRec.replace('/-101','/'+valNewMnuGrp);
+    newRec = newRec.replace('/-102','/'+valNewMnuID);
+    newRec = newRec.replace('/-103','/'+valFromMnuGrp);
+    newRec = newRec.replace('/-104','/'+valFromMnuID);        
     window.location = newRec;
 }
 
@@ -260,11 +264,16 @@ groupIDdlg_cancelBtn.addEventListener("click", function () {
 });
 
 function NewMenuGroup_chosen() {
-// REVIEW ME!!
-    var newRec = "" {# "{% url 'MenuGroupCreate' 'menuGroup' 'groupName' 'groupDesc' %}" #}
-    newRec = newRec.replace('/menuGroup','/'+$('#NewMnuGroup_G').val())
-    newRec = newRec.replace('/groupName','/'+$('#NewMnuGroupName_G').val())
-    newRec = newRec.replace('/groupDesc','/'+$('#NewMnuGroupDesc_G').val())
+    var newRec;
+
+    valNewGrpID = document.getElementById('NewMnuGroup_G').value;
+    valNewGrpName = document.getElementById('NewMnuGroupName_G').value;
+    valNewGrpInfo = document.getElementById('NewMnuGroupDesc_G').value;
+    
+    // newRec = "{{ url_for('menu.create_group', group_id=-101, group_name=valNewGrpName, group_info=valNewGrpInfo) }}";
+    newRec = "{{ url_for('menu.create_group', group_id=-101, group_name='New Group', group_info='') }}";
+    newRec = newRec.replace('/-101','/'+valNewGrpID);
+
     window.location = newRec;
 }
 
@@ -287,14 +296,18 @@ function yesno_chosen(yesnoVal) {
     }
 }
   
-function loadNewMenu(newGrp) {
-    var newRec = "" {# "{% url 'EditMenu' 'mGrp' 'mItm' %}" #}
-    newRec = newRec.replace('/mGrp','/'+$('#menuGroup').val())
-    if (newGrp) {
-        newRec = newRec.replace('/mItm','/0')
+function loadNewMenu(anothrGrp) {
+
+    gotoGroup = document.getElementById('menuGroup').value;
+    if (anothrGrp) {
+        gotoMenu = 0;
     } else {
-        newRec = newRec.replace('/mItm','/'+$('#menuID').val())
+        gotoMenu = document.getElementById('menuID').value;
     }
+
+    var newRec = "{{ url_for('menu.edit_menu', group_id=-101, menu_num=-102) }}"
+    newRec = newRec.replace('/-101','/'+gotoGroup);
+    newRec = newRec.replace('/-102','/'+gotoMenu);
     window.location = newRec;
 }
 

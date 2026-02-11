@@ -197,7 +197,14 @@ def edit_menu(group_id, menu_num):
 
     from ..models import ( db, menuItems, menuGroups, )
 
-    thisMenu = menuItems.query.filter_by(MenuGroup_id=group_id, MenuID=menu_num, OptionNumber=0).first()
+    thisMenu = menuItems.query.filter_by(
+        MenuGroup_id=group_id, 
+        MenuID=menu_num, 
+        OptionNumber=0
+        ).first()
+    if not thisMenu:
+        flash(f"Menu {group_id},{menu_num} does not exist", "error")
+        return redirect(url_for("menu.edit_menu_init"))
     menuName = thisMenu.OptionText if thisMenu else ""          # type: ignore
     group = thisMenu.menu_group                                 # type: ignore
 
@@ -234,24 +241,30 @@ def edit_menu(group_id, menu_num):
         )
         .order_by(numbers_cte.c.n)
     )
-    menu_items = [dict(row._mapping) for row in db.session.execute(stmt).fetchall()]    # type: ignore      # pylint: disable=protected-access
+    menu_items_forform = [
+        dict(row._mapping) for row in db.session.execute(stmt).fetchall()
+        ]    # type: ignore      # pylint: disable=protected-access
 
-    if not any(item['id'] for item in menu_items):
-        flash(f'Menu {group_id},{menu_num} does not exist', 'error')
-        return redirect(url_for('menu.edit_menu_init'))
-    
-    # Initialize form with explicit data so FieldList gets all 20 entries
-    menu_group_data = {
-        "id": group.id,
-        "GroupName": group.GroupName,
-        "GroupInfo": group.GroupInfo,
-    }
-    form = MenuEditForm(formdata=None, data={
-        "menu_group": menu_group_data,
-        "menu_items": menu_items,
-    })
+    if request.method == "POST":
+        form = MenuEditForm()
+    else:
+        # Initialize form with explicit data so FieldList gets all 20 entries
+        menu_group_data = {
+            "id": group.id,
+            "GroupName": group.GroupName,
+            "GroupInfo": group.GroupInfo,
+        }
+        form = MenuEditForm(
+            formdata=None, 
+            data={
+                "menu_group": menu_group_data,
+                "menu_items": menu_items_forform,
+            },
+        )
+    # endif request.method
 
     changed_data = {}
+
     if form.validate_on_submit():
         flag_Group_updated = False
         # 4a. Handle POST logic: Update menu group info if changed
@@ -261,32 +274,77 @@ def edit_menu(group_id, menu_num):
         if form.menu_group.GroupInfo.data != group.GroupInfo:
             flag_Group_updated = True
             group.GroupInfo = form.menu_group.GroupInfo.data
+
+        db_items = (
+            menuItems.query.filter_by(MenuGroup_id=group_id, MenuID=menu_num)
+            .filter(menuItems.OptionNumber > 0)                #type: ignore
+            .all()
+        )
+        db_by_option = {item.OptionNumber: item for item in db_items}
+
+        allowed_fields = {
+            "MenuGroup_id",
+            "MenuID",
+            "OptionNumber",
+            "OptionText",
+            "Command",
+            "Argument",
+            "pword",
+            "top_line",
+            "bottom_line",
+        }
+
+        # # 4b. Handle POST logic: Compare form data to db_items_dict
+        # for entry in form.menu_items.data:
+        #     opt_num = entry['OptionNumber']
+        #     db_item = menu_items_forform[opt_num]
             
-        # 4b. Handle POST logic: Compare form data to db_items_dict
-        for entry in form.menu_items.data:
-            opt_num = entry['OptionNumber']
-            db_item = menu_items[opt_num]
-            
-            # Case A: User entered text for an empty slot -> CREATE
-            if not db_item and entry['OptionText']:
-                new_item = menuItems(**entry)
+        #     # Case A: User entered text for an empty slot -> CREATE
+        #     if not db_item and entry['OptionText']:
+        #         new_item = menuItems(**entry)
+        #         db.session.add(new_item)
+                
+        #     # Case B: Slot was occupied but user cleared text -> DELETE
+        #     elif db_item and not entry['OptionText']:
+        #         db.session.delete(db_item)
+                
+        #     # Case C: Slot occupied and text changed -> UPDATE
+        #     elif db_item and entry['OptionText'] != db_item.OptionText:
+        #         # Update all relevant fields from the form entry
+        #         for key, value in entry.items():
+        #             if key != 'id': # Don't overwrite the PK
+        #                 setattr(db_item, key, value)
+        #     # endif db_item vs entry
+        # # endfor menu_items.data
+        for index, entry_form in enumerate(form.menu_items.entries, start=1):
+            entry = entry_form.data
+            opt_num = entry.get("OptionNumber") or index
+            entry["OptionNumber"] = opt_num
+            entry["MenuGroup_id"] = group_id
+            entry["MenuID"] = menu_num
+
+            db_item = db_by_option.get(opt_num)
+            opt_text = (entry.get("OptionText") or "").strip()
+
+            if db_item is None and opt_text:
+                new_item = menuItems(
+                    **{key: value for key, value in entry.items() if key in allowed_fields}
+                )
                 db.session.add(new_item)
-                
-            # Case B: Slot was occupied but user cleared text -> DELETE
-            elif db_item and not entry['OptionText']:
+            elif db_item is not None and not opt_text:
                 db.session.delete(db_item)
-                
-            # Case C: Slot occupied and text changed -> UPDATE
-            elif db_item and entry['OptionText'] != db_item.OptionText:
-                # Update all relevant fields from the form entry
-                for key, value in entry.items():
-                    if key != 'id': # Don't overwrite the PK
-                        setattr(db_item, key, value)
+            elif db_item is not None:
+                for key in allowed_fields:
+                    new_val = entry.get(key)
+                    if getattr(db_item, key) != new_val:
+                        setattr(db_item, key, new_val)
+                # endfor allowed_fields
             # endif db_item vs entry
-        # endfor menu_items.data
+        # endfor menu_items.entries
 
         db.session.commit()
         # return redirect(url_for('some_success_view'))
+    # endif form.validate_on_submit()
 
     mnuGoto = {
         'menuGroup':group.GroupName,
@@ -324,6 +382,11 @@ def edit_menu(group_id, menu_num):
 # menuName_obj = db_instance.session.execute(stmt).scalar_one_or_none()
 
 # edit_menu
+
+@menu_bp.route('/Gcreate/<int:group_id>/<group_name>/<group_info>')
+@superuser_required
+def create_group(group_id, group_name, group_info):
+    return f"Group {group_id} with name {group_name} and info {group_info} would be created here"
 
 @menu_bp.route('/create/<int:menu_group>/<int:menu_num>')
 @menu_bp.route('/create/<int:menu_group>/<int:menu_num>/<int:from_group>/<int:from_menu>')
