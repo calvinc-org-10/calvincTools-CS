@@ -206,6 +206,7 @@ def edit_menu(group_id, menu_num):
         flash(f"Menu {group_id},{menu_num} does not exist", "error")
         return redirect(url_for("menu.edit_menu_init"))
     menuName = thisMenu.OptionText if thisMenu else ""          # type: ignore
+    print(f"Editing Menu: Group {group_id}, Menu {menu_num} - {menuName}")
     group = thisMenu.menu_group                                 # type: ignore
 
     # construct the query to get all 20 options with left join to menuItems
@@ -242,8 +243,8 @@ def edit_menu(group_id, menu_num):
         .order_by(numbers_cte.c.n)
     )
     menu_items_forform = [
-        dict(row._mapping) for row in db.session.execute(stmt).fetchall()
-        ]    # type: ignore      # pylint: disable=protected-access
+        dict(row._mapping) for row in db.session.execute(stmt).fetchall()       # type: ignore      # pylint: disable=protected-access
+        ]
 
     if request.method == "POST":
         form = MenuEditForm()
@@ -259,8 +260,10 @@ def edit_menu(group_id, menu_num):
             data={
                 "menu_group": menu_group_data,
                 "menu_items": menu_items_forform,
+                "menu_name": menuName,
             },
         )
+        print(f"init GET form: Group {group_id}, Menu {menu_num} - {menuName}")
     # endif request.method
 
     changed_data = {}

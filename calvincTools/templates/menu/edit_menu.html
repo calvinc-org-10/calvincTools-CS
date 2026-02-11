@@ -27,7 +27,7 @@
             >{{ ch }}</option>"
         {% endfor %}
         </select>  <small>{{ menuGoto.menuGroup }}</small>
-        <button type="button" id="NewMenuGroup">New Mnu Grp</button>
+        <small><button type="button" id="NewMenuGroup">New Mnu Grp</button></small>
         <br>
         Menu <select id="menuID" onchange="loadNewMenu(false);">
         {% for ch in menuGoto.menuID_choices %}
@@ -43,9 +43,9 @@
 <div class="row max-width=100%">
     <div class="col-1 text-start"></div>
     <div class="col-8 text-center">
-        GroupName: {{ form.menu_group.GroupName() }}
-        GroupInfo: {{ form.menu_group.GroupInfo() }}
-        MenuName:  <input type="text" name="menuName" form="menueditForm" value="{{ menuName }}" size="15">
+        GroupName: {{ form.menu_group.GroupName(form="menueditForm") }}
+        GroupInfo: {{ form.menu_group.GroupInfo(form="menueditForm") }}
+        MenuName: {{ form.menu_name(size=15, form="menueditForm") }} {# <input type="text" name="menuName" form="menueditForm" value="{{ menuName }}" size="15"> #}
     </div>
     <div class="col-2">
         <button type="button" id="CopyMenu">Copy Menu</button>

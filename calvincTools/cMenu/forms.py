@@ -35,4 +35,5 @@ class MenuEditForm(FlaskForm):
     ### CHANGE ME??
     menu_group = FormField(MenuGroupForm)
     menu_items = FieldList(FormField(MenuItemForm), min_entries=20, max_entries=20)
-    submit = SubmitField('Save Menu')
+    menu_name = StringField('Menu Name', validators=[DataRequired()])
+    # submit = SubmitField('Save Menu')
