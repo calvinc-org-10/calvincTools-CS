@@ -1,0 +1,4 @@
+Use menu templates for new groups and menus
+Insure menu group numbers >0, menu numbers >=0
+Change cTools db to cMenu
+Why doesn't form.validate_on_submit (edit_menu, ln 271) option work?

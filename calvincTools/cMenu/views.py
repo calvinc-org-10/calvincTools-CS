@@ -318,28 +318,6 @@ def edit_menu(group_id, menu_num):
             "bottom_line",
         }
 
-        # # 4b. Handle POST logic: Compare form data to db_items_dict
-        # for entry in form.menu_items.data:
-        #     opt_num = entry['OptionNumber']
-        #     db_item = menu_items_forform[opt_num]
-            
-        #     # Case A: User entered text for an empty slot -> CREATE
-        #     if not db_item and entry['OptionText']:
-        #         new_item = menuItems(**entry)
-        #         db.session.add(new_item)
-                
-        #     # Case B: Slot was occupied but user cleared text -> DELETE
-        #     elif db_item and not entry['OptionText']:
-        #         db.session.delete(db_item)
-                
-        #     # Case C: Slot occupied and text changed -> UPDATE
-        #     elif db_item and entry['OptionText'] != db_item.OptionText:
-        #         # Update all relevant fields from the form entry
-        #         for key, value in entry.items():
-        #             if key != 'id': # Don't overwrite the PK
-        #                 setattr(db_item, key, value)
-        #     # endif db_item vs entry
-        # # endfor menu_items.data
         for index, entry_form in enumerate(form.menu_items.entries, start=1):
             entry = entry_form.data
             opt_num = entry.get("OptionNumber") or index
@@ -350,96 +328,123 @@ def edit_menu(group_id, menu_num):
             db_item = db_by_option.get(opt_num)
             opt_text = (entry.get("OptionText") or "").strip()
 
-            if db_item is None and opt_text:
+            copymoveRequested = entry.get("CopyType", "")
+            removalRequested = entry.get("Remove", False) or opt_text == ""
+            isNewitem = db_item is None and opt_text != ""
+            processRemoval, processCopyMove, processUpdate = False, False, True
+            
+            changes_made = ""
+                        
+            if copymoveRequested and removalRequested:
+                flash(f"Option {opt_num}: Cannot choose both Remove and Copy/Move. Please fix and resubmit.", "error")
+                changes_made += ("<br>" if changes_made else "") + "Error: Remove and Copy/Move both selected. Option not removed nor copied/moved."
+                processRemoval, processCopyMove, processUpdate = False, False, True
+                # continue
+            elif removalRequested:
+                processRemoval, processCopyMove, processUpdate = True, False, False
+                if isNewitem:
+                    flash(f"Option {opt_num}: Cannot remove an option that doesn't exist. Please fix and resubmit.", "error")
+                    changes_made += ("<br>" if changes_made else "") + "Error: Remove selected for non-existent option. Option added, not removed."
+                    processRemoval, processCopyMove, processUpdate = False, True, True                    
+                # continue
+            elif copymoveRequested:
+                processRemoval, processCopyMove, processUpdate = False, True, True
+            # endif copymove vs remove
+            
+            if isNewitem and processUpdate:
                 # New item created if no existing db item and user entered text
                 new_item = menuItems(
                     **{key: value for key, value in entry.items() if key in allowed_fields}
                 )
                 db.session.add(new_item)
-                changed_data[f'Option{opt_num}'] = f'{opt_text} added'
-            elif db_item is not None and not opt_text:
+                changes_made += ("<br>" if changes_made else "") + "Option added."
+            elif removalRequested and processRemoval and db_item is not None:
                 # Existing item deleted if user cleared text
                 db.session.delete(db_item)
-                changed_data[f'Option{opt_num}'] = f'{opt_num} deleted'
-            elif db_item is not None:
+                changes_made += ("<br>" if changes_made else "") + "Option deleted."
+            elif db_item is not None and processUpdate:
                 # Existing item updated if user changed text or any other field
-                # note: cannot choose Remove along with copy/move!!
                 for key in allowed_fields:
                     new_val = entry.get(key)
                     if getattr(db_item, key) != new_val:
                         setattr(db_item, key, new_val)
-                        changed_data[f'Option{opt_num}'] = f'{opt_num} {key} updated'
+                        changes_made += ("<br>" if changes_made else "") + f"{key} updated."
                 # endfor allowed_fields
             # endif db_item vs entry
 
             # copy/move
-            # note: cannot choose copy/move along with Remove!!
-#!#!#!#!#!#!
-            # if mnRec and thisItem.get('CopyTo',''):
-            #     MoveORCopy = thisItem.get('CopyTo')
-            #     CopyTarget = thisItem.get('CopyTarget').split(',')
-            #     targetGroup = None
-            #     if len(CopyTarget)==2:
-            #         targetGroup = menuGroup
-            #         try:
-            #             targetMenu = int(CopyTarget[0])
-            #         except:
-            #             targetMenu = None
-            #         try:
-            #             targetOption = int(CopyTarget[1])
-            #         except:
-            #             targetOption = None
-            #     elif len(CopyTarget)==3:
-            #         try:
-            #             targetGroup = int(CopyTarget[0])
-            #         except:
-            #             targetGroup = None
-            #         try:
-            #             targetMenu = int(CopyTarget[1])
-            #         except:
-            #             targetMenu = None
-            #         try:
-            #             targetOption = int(CopyTarget[2])
-            #         except:
-            #             targetOption = None
-            #     else:
-            #         pass    # targetGroup is already None
+            if copymoveRequested and processCopyMove:
+                MoveORCopy = entry.get('CopyType')
+                CopyTarget = entry.get('CopyTarget', '').split(',')
+                targetGroup = None
+                if len(CopyTarget)==2:
+                    targetGroup = menu_num  # default to same menu if only menu and option number provided
+                    try:
+                        targetMenu = int(CopyTarget[0])
+                    except:
+                        targetMenu = None
+                    try:
+                        targetOption = int(CopyTarget[1])
+                    except:
+                        targetOption = None
+                elif len(CopyTarget)==3:
+                    try:
+                        targetGroup = int(CopyTarget[0])
+                    except:
+                        targetGroup = None
+                    try:
+                        targetMenu = int(CopyTarget[1])
+                    except:
+                        targetMenu = None
+                    try:
+                        targetOption = int(CopyTarget[2])
+                    except:
+                        targetOption = None
+                else:
+                    targetMenu = None
+                    targetOption = None
+                    pass    # targetGroup is already None
+                # endif length of CopyTarget (for parsing the target menu and option)
 
-            #     if targetGroup is None or targetMenu is None or targetOption is None:
-            #         if changed_data: changed_data += ", "
-            #         changed_data += "Could not interpret option " + str(i) + " " + MoveORCopy + " target " + thisItem.get('CopyTarget')
-            #     else:
-            #         if menuItems.objects.filter(MenuGroup=targetGroup, MenuID=targetMenu, OptionNumber=targetOption).exists():
-            #             if changed_data: changed_data += ", "
-            #             changed_data += "Could not " + MoveORCopy + " option " + str(i)
-            #             changed_data +=  " - target " + thisItem.get('CopyTarget') + " already exists."
-            #         else:
-            #             menuItems(
-            #                     MenuGroup_id = targetGroup,
-            #                     MenuID = targetMenu,
-            #                     OptionNumber = targetOption,
-            #                     OptionText = mnRec.OptionText,
-            #                     Command = mnRec.Command,
-            #                     Argument = mnRec.Argument
-            #                 ).save()
-            #             if MoveORCopy == 'move':
-            #                 mnRec.delete()
-            #                 mnItem_list[i_0based] = {'OptionText':'',
-            #                     'Command':'',
-            #                     'Argument':''}
+                if targetGroup is None or targetMenu is None or targetOption is None:
+                    changes_made += ("<br>" if changes_made else "") + f"Could not interpret {MoveORCopy} target {entry.get('CopyTarget')}"
+                else:
+                    if menuItems.query.filter_by(MenuGroup=targetGroup, MenuID=targetMenu, OptionNumber=targetOption).exists():     # type: ignore
+                        changes_made += ("<br>" if changes_made else "") + f"Could not {MoveORCopy} to {entry.get('CopyTarget')} - target already exists."
+                    else:
+                        new_item = menuItems(
+                                MenuGroup_id = targetGroup,
+                                MenuID = targetMenu,
+                                OptionNumber = targetOption,
+                                OptionText = entry["OptionText"] or "",
+                                Command = entry["Command"],
+                                Argument = entry["Argument"]
+                            )
+                        db.session.add(new_item)
+                        if MoveORCopy == 'move' and db_item is not None:   # if move, delete original (but if copy, keep original)
+                            db.session.delete(db_item)
+                        # endif move (not just copy)
 
+                        changes_made += ("<br>" if changes_made else "") + f"Option {opt_num} {MoveORCopy}d to {entry.get('CopyTarget')}."
+                    # endif target exists
+                # endif valid target for copy/move
+            # endif copy/move requested
 
-            #             if changed_data: changed_data += ", "
-            #             changed_data += "Option " + str(i)
-            #             if MoveORCopy == 'move': changed_data += " moved"
-            #             else: changed_data += " copied"
-            #             changed_data +=  " to " + thisItem.get('CopyTarget') + "."
-#!#!#!#!#!#!
+            if changes_made:
+                changed_data[f'Option{opt_num}'] = changes_made
+
         # endfor menu_items.entries
 
         db.session.commit()
 
+        session['changed_data'] = changed_data
         return redirect(url_for("menu.edit_menu", group_id=group_id, menu_num=menu_num))
+        ##########################
+        # OOPS!! the redirect will cause us to lose the changed_data messages about what changed. 
+        # To fix this, we can store the messages in the session before redirecting, 
+        # and then pop them in the GET request to display.
+        # session['changed_data'] = changed_data
+        ##########################
     # endif form.validate_on_submit()
 
     mnuGoto = {
@@ -552,7 +557,7 @@ def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
     
     db.session.commit()
     flash('Menu created successfully', 'success')
-    return redirect(url_for('menu.edit_menu', menu_group=menu_group, menu_num=menu_num))
+    return redirect(url_for('menu.edit_menu', group_id=menu_group, menu_num=menu_num))
 
 
 @menu_bp.route('/remove/<int:menu_group>/<int:menu_num>')
