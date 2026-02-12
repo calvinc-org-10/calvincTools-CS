@@ -5,7 +5,7 @@ from wtforms import (
     StringField, SubmitField, Form, FormField, FieldList, IntegerField, HiddenField, BooleanField,
     SelectField, RadioField,
     )
-from wtforms.validators import DataRequired
+from wtforms.validators import (DataRequired, Optional, )
 
 # from calvincTools.models import menuItems
 from . import (MENUCOMMAND, MENUCOMMANDDICTIONARY)
@@ -22,7 +22,11 @@ class MenuItemForm(Form):
     pword = StringField()
     top_line = BooleanField()
     bottom_line = BooleanField()
-    CopyType = RadioField(choices=[('copy', 'Copy'), ('move', 'Move'), ])
+    CopyType = RadioField(
+        choices=[('copy', 'Copy'), ('move', 'Move'), ('', 'do not Copy/Move')],
+        validators=[Optional()],
+        validate_choice=False
+    )
     CopyTarget = StringField()
     Remove = BooleanField()
 

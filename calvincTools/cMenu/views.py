@@ -328,7 +328,7 @@ def edit_menu(group_id, menu_num):
             db_item = db_by_option.get(opt_num)
             opt_text = (entry.get("OptionText") or "").strip()
 
-            copymoveRequested = entry.get("CopyType", "")
+            copymoveRequested = entry.get("CopyType", "") or ""
             removalRequested = entry.get("Remove", False) or opt_text == ""
             isNewitem = db_item is None and opt_text != ""
             processRemoval, processCopyMove, processUpdate = False, False, True
