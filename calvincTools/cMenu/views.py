@@ -381,24 +381,24 @@ def edit_menu(group_id, menu_num):
                     targetGroup = menu_num  # default to same menu if only menu and option number provided
                     try:
                         targetMenu = int(CopyTarget[0])
-                    except:
+                    except ValueError:
                         targetMenu = None
                     try:
                         targetOption = int(CopyTarget[1])
-                    except:
+                    except ValueError:
                         targetOption = None
                 elif len(CopyTarget)==3:
                     try:
                         targetGroup = int(CopyTarget[0])
-                    except:
+                    except ValueError:
                         targetGroup = None
                     try:
                         targetMenu = int(CopyTarget[1])
-                    except:
+                    except ValueError:
                         targetMenu = None
                     try:
                         targetOption = int(CopyTarget[2])
-                    except:
+                    except ValueError:
                         targetOption = None
                 else:
                     targetMenu = None

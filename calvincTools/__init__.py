@@ -45,6 +45,8 @@ class calvinCTools_init:
         app.register_blueprint(util_bp)
         
         # Home route
+        # Note: We define this route here to ensure it exists, but the caller can override it by defining their own route for '/'
+        # in fact, need to make it easier for caller to override this route, since it's likely they will want to customize the home page
         @app.route('/index')    # leave route('/') for caller to set
         def index():
             mnugrp = session.get('menu_group', 1)
@@ -61,8 +63,9 @@ class calvinCTools_init:
         
         @app.errorhandler(500)
         def internal_error(error):   # pylint: disable=unused-argument
-            if models.db is not None:
-                models.db.session.rollback()
+            from .models import db
+            if db is not None:
+                db.session.rollback()
             return render_template('errors/500.html'), 500
 
         # 3. Attach cTools to the app extensions (optional but recommended)
