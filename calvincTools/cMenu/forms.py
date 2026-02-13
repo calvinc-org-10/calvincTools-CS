@@ -22,10 +22,10 @@ class MenuItemForm(Form):
     pword = StringField()
     top_line = BooleanField()
     bottom_line = BooleanField()
-    CopyType = RadioField(
-        choices=[('copy', 'Copy'), ('move', 'Move'), ('', 'do not Copy/Move')],
+    CopyType = SelectField(
+        choices=[('', '----'), ('copy', 'Copy'), ('move', 'Move'), ],
         validators=[Optional()],
-        validate_choice=False
+        validate_choice=False,
     )
     CopyTarget = StringField()
     Remove = BooleanField()

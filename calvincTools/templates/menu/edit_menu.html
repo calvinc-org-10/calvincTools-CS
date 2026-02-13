@@ -54,15 +54,17 @@
     </div>
 </div>
 {% endblock %}
+{#
 {% block statusMsgs %}
-    {% if changed_data %}
+    {% if session.changed_data %}
         <div class="alert alert-success p-0 alert-dismissible fade show">
             <button type="button" class="btn-close p-0" data-bs-dismiss="alert"></button>
             Changes successfully saved.
-            ChDat: {{ changed_data }}
+            ChDat: {{ session.changed_data }}
         </div>
     {% endif %}
 {% endblock %}
+#}
 {% block boddy %}
 <form method="POST" id="menueditForm">
     {{ form.hidden_tag() }}

@@ -206,7 +206,6 @@ def edit_menu(group_id, menu_num):
         flash(f"Menu {group_id},{menu_num} does not exist", "error")
         return redirect(url_for("menu.edit_menu_init"))
     menuName = thisMenu.OptionText if thisMenu else ""          # type: ignore
-    print(f"Editing Menu: Group {group_id}, Menu {menu_num} - {menuName}")
     group = thisMenu.menu_group                                 # type: ignore
 
     # construct the query to get all 20 options with left join to menuItems
@@ -263,7 +262,6 @@ def edit_menu(group_id, menu_num):
                 "menu_name": menuName,
             },
         )
-        print(f"init GET form: Group {group_id}, Menu {menu_num} - {menuName}")
     # endif request.method
 
     changed_data = {}
@@ -276,6 +274,8 @@ def edit_menu(group_id, menu_num):
         if form.menu_group.GroupInfo.data != group.GroupInfo:
             group.GroupInfo = form.menu_group.GroupInfo.data
             changed_data['GroupInfo'] = form.menu_group.GroupInfo.data
+        if 'GroupName' in changed_data or 'GroupInfo' in changed_data:
+            db.session.add(group)
 
         # has menu name changed? (OptionNumber=0)
         if form.menu_name.data != menuName:
@@ -286,6 +286,7 @@ def edit_menu(group_id, menu_num):
             ).first()
             if title_item:
                 title_item.OptionText = form.menu_name.data     # type: ignore  
+                db.session.add(title_item)
             else:
                 # This should never happen since the menu must exist to get here, but just in case:
                 new_title = menuItems(
@@ -297,6 +298,7 @@ def edit_menu(group_id, menu_num):
                 db.session.add(new_title)
             # endif title_item
             changed_data['MenuName'] = form.menu_name.data
+            
         # endif menu name changed
         
         db_items = (
@@ -437,7 +439,7 @@ def edit_menu(group_id, menu_num):
 
         db.session.commit()
 
-        session['changed_data'] = changed_data
+        flash(f"changed data: {changed_data}", "info")
         return redirect(url_for("menu.edit_menu", group_id=group_id, menu_num=menu_num))
         ##########################
         # OOPS!! the redirect will cause us to lose the changed_data messages about what changed. 
@@ -460,7 +462,7 @@ def edit_menu(group_id, menu_num):
         # 'menuContents':fullMenuHTML,              ## in form
         'menuName':menuName,
         'menuGoto':mnuGoto,
-        'changed_data': changed_data,
+        # 'changed_data': changed_data,
         }
     templt = "menu/edit_menu.html"
     # return render(req, templt, context=cntext)
@@ -536,6 +538,8 @@ def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
             )
             db.session.add(new_item)
     else:
+        # REPLACE THIS
+        # copy from dbmenulist.py - newmenu_menulist depending on whether it's a new menu in an existing group or a new group and menu.
         # Create new menu from scratch
         title_item = menuItems(
             MenuGroup_id=menu_group,
