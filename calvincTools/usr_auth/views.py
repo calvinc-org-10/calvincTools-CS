@@ -404,6 +404,115 @@ def register_view():
     return render_template('auth/signup.html')
 
 
+@superuser_required
+def user_list_view(blank_user_count: int = 5):
+    """
+    Handle user list management (GET and POST).
+    Displays all existing users plus blank forms for new user entries.
+    
+    Args:
+        blank_user_count: Number of blank user forms to display for new entries (default: 5)
+    
+    GET: Display all users + blank forms
+    POST: Save/update all users
+    """
+    from ..models import User, db
+    from .forms import UserListForm
+    
+    if request.method == 'GET':
+        # Get all existing users
+        existing_users = User.query.all()
+        
+        # Create form with existing users
+        form = UserListForm()
+        
+        # Populate form with existing users
+        form.users.data = existing_users
+        
+        # Add blank users for new entries
+        for _ in range(blank_user_count):
+            blank_user = User()  # type: ignore
+            form.users.append_entry(blank_user)
+        
+        return render_template(
+            'auth/user_list.html',
+            form=form,
+            blank_user_count=blank_user_count
+        )
+    
+    elif request.method == 'POST':
+        form = UserListForm()
+        
+        if form.validate_on_submit():
+            try:
+                # Get all user IDs from the request to identify which ones are new/existing
+                user_ids_in_form = []
+                for i, user_data in enumerate(form.users.data):
+                    if hasattr(user_data, 'id') and user_data.id:
+                        user_ids_in_form.append(user_data.id)
+                
+                # Process each user in the form
+                for i, user_form in enumerate(form.users.entries):
+                    username = user_form.username.data.strip() if user_form.username.data else ''
+                    email = user_form.email.data.strip() if user_form.email.data else ''
+                    
+                    # Skip blank entries (no username and no email)
+                    if not username and not email:
+                        continue
+                    
+                    # Check if this is an existing user or new user
+                    user = None
+                    if hasattr(user_form, 'obj') and user_form.obj and hasattr(user_form.obj, 'id'):
+                        user = User.query.get(user_form.obj.id)
+                    
+                    if user:
+                        # Update existing user
+                        user.username = username
+                        user.email = email
+                        user.FLDis_active = user_form.FLDis_active.data
+                        user.is_superuser = user_form.is_superuser.data
+                        user.permissions = user_form.permissions.data or ''
+                        
+                        # Only update password if provided
+                        if user_form.password.data:
+                            user.set_password(user_form.password.data)
+                    else:
+                        # Create new user
+                        user = User(  # type: ignore
+                            username=username,
+                            email=email,
+                            FLDis_active=user_form.FLDis_active.data,
+                            is_superuser=user_form.is_superuser.data,
+                            permissions=user_form.permissions.data or '',
+                            menuGroup=1  # default menu group
+                        )
+                        
+                        # Set password if provided
+                        if user_form.password.data:
+                            user.set_password(user_form.password.data)
+                        else:
+                            # Generate a temporary password for new users
+                            user.set_password('TempPassword123!')
+                    
+                    db.session.add(user)
+                
+                db.session.commit()
+                flash('All users saved successfully!', 'success')
+                return redirect(url_for('auth.user_list'))
+            
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error saving users: {str(e)}', 'danger')
+                return redirect(url_for('auth.user_list'))
+        else:
+            flash('Form validation failed. Please check your entries.', 'danger')
+            return render_template(
+                'auth/user_list.html',
+                form=form,
+                blank_user_count=blank_user_count
+            )
+
+
 # ============================================================================
 # BLUEPRINT REGISTRATION
 # ============================================================================
@@ -420,6 +529,7 @@ def register_auth_blueprint(app):
     auth_bp.add_url_rule('/logout', 'logout', logout_view, methods=['GET', 'POST'])
     auth_bp.add_url_rule('/change-password', 'change_password', change_password_view, methods=['GET', 'POST'])
     auth_bp.add_url_rule('/register', 'register', register_view, methods=['GET', 'POST'])
+    auth_bp.add_url_rule('/users', 'user_list', user_list_view, methods=['GET', 'POST'])
     
     app.register_blueprint(auth_bp)
 
