@@ -11,7 +11,7 @@ class UserForm(FlaskForm):
     username = StringField(
         'Username',
         validators=[
-            DataRequired(),
+            # DataRequired(),
             Length(min=3, max=80, message='Username must be between 3 and 80 characters')
         ],
         render_kw={'class': 'form-control'}
@@ -20,7 +20,7 @@ class UserForm(FlaskForm):
     email = StringField(
         'Email',
         validators=[
-            DataRequired(),
+            # DataRequired(),
             Email(message='Invalid email address'),
             Length(max=120)
         ],

@@ -36,6 +36,7 @@ setup(
         "Flask",
         "Jinja2",
         "Flask-WTF",
+        "email-validator",
         "Flask-SQLAlchemy",
         "Flask-Migrate",
         "Flask-Login",

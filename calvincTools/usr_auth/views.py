@@ -405,19 +405,18 @@ def register_view():
 
 
 @superuser_required
-def user_list_view(blank_user_count: int = 5):
+def user_list_view():
     """
     Handle user list management (GET and POST).
     Displays all existing users plus blank forms for new user entries.
-    
-    Args:
-        blank_user_count: Number of blank user forms to display for new entries (default: 5)
     
     GET: Display all users + blank forms
     POST: Save/update all users
     """
     from ..models import User, db
     from .forms import UserListForm
+    
+    blank_user_count = request.args.get('blank_user_count', 5, type=int)
     
     if request.method == 'GET':
         # Get all existing users
@@ -426,8 +425,13 @@ def user_list_view(blank_user_count: int = 5):
         # Create form with existing users
         form = UserListForm()
         
+        # Clear default entry so we can control the list explicitly
+        while len(form.users) > 0:
+            form.users.pop_entry()
+        
         # Populate form with existing users
-        form.users.data = existing_users
+        for user in existing_users:
+            form.users.append_entry(user)
         
         # Add blank users for new entries
         for _ in range(blank_user_count):
@@ -468,14 +472,14 @@ def user_list_view(blank_user_count: int = 5):
                     if user:
                         # Update existing user
                         user.username = username
-                        user.email = email
-                        user.FLDis_active = user_form.FLDis_active.data
-                        user.is_superuser = user_form.is_superuser.data
-                        user.permissions = user_form.permissions.data or ''
+                        user.email = email      # pyright: ignore[reportAttributeAccessIssue]
+                        user.FLDis_active = user_form.FLDis_active.data     # pyright: ignore[reportAttributeAccessIssue]
+                        user.is_superuser = user_form.is_superuser.data     # pyright: ignore[reportAttributeAccessIssue]
+                        user.permissions = user_form.permissions.data or ''     # pyright: ignore[reportAttributeAccessIssue]
                         
                         # Only update password if provided
                         if user_form.password.data:
-                            user.set_password(user_form.password.data)
+                            user.set_password(user_form.password.data)      # pyright: ignore[reportAttributeAccessIssue]
                     else:
                         # Create new user
                         user = User(  # type: ignore
@@ -529,7 +533,7 @@ def register_auth_blueprint(app):
     auth_bp.add_url_rule('/logout', 'logout', logout_view, methods=['GET', 'POST'])
     auth_bp.add_url_rule('/change-password', 'change_password', change_password_view, methods=['GET', 'POST'])
     auth_bp.add_url_rule('/register', 'register', register_view, methods=['GET', 'POST'])
-    auth_bp.add_url_rule('/users', 'user_list', user_list_view, methods=['GET', 'POST'])
+    auth_bp.add_url_rule('/users', 'user_list', user_list_view, methods=['GET', 'POST']) # type: ignore
     
     app.register_blueprint(auth_bp)
 

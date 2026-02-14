@@ -27,6 +27,7 @@ dependencies = [
     "Flask",
     "Jinja2",
     "Flask-WTF",
+    "email_validator",
     "Flask-SQLAlchemy",
     "Flask-Migrate",
     "Flask-Login",
