@@ -76,20 +76,22 @@ def load_menu(menu_group, menu_num):
     ).order_by(menuItems.OptionNumber).all()
     
     menu_name = next((item.OptionText for item in menu_items if item.OptionNumber == 0), 'Menu')
-    
-    # Build menu HTML (you might want to do this in template instead)
     menu_html = build_menu_html(menu_items, menu_group, menu_num)
+
+    templt = 'menu/cMenu.html'
+    # templt = 'menu/display.html'
+    cntext = {
+        'grpNum': menu_group,
+        'menuNum': menu_num,
+        'menuName': menu_name,
+        'menuContents': menu_html,
+        'sysver': "We'll get versioning later",
+    }
     
-    return render_template('menu/display.html',
-                         grpNum=menu_group,
-                         menuNum=menu_num,
-                         menuName=menu_name,
-                         menuContents=menu_html,
-                         sysver="We'll get versioning later"
-                         )
+    return render_template(templt, **cntext)
+# load_menu
 
-
-def build_menu_html(menu_items, menu_group, menu_num):  # pylint: disable=unused-argument
+def build_menu_htmlOLD(menu_items, menu_group, menu_num):  # pylint: disable=unused-argument
     """
     Helper to build menu HTML. 
     Django equivalent: inline logic in LoadMenu
@@ -117,9 +119,11 @@ def build_menu_html(menu_items, menu_group, menu_num):  # pylint: disable=unused
             href = url_for('menu.handle_command', command_num=item.Command, command_arg=arg)
             target = ' target="_blank"' if item.Command != MENUCOMMAND.ExitApplication else ''
             onclick = ''
+        # endif command type
         
         html = f'<a href="{href}"{onclick}{target} class="btn btn-lg btn-outline-secondary mx-auto">{item.OptionText}</a>'
         menu_list[item.OptionNumber - 1] = html
+    # endfor menu_items
     
     # Build grid (2 columns, 10 rows)
     full_html = ""
@@ -128,8 +132,45 @@ def build_menu_html(menu_items, menu_group, menu_num):  # pylint: disable=unused
         full_html += f'<div class="col m-1">{menu_list[i]}</div>'
         full_html += f'<div class="col m-1">{menu_list[i+10]}</div>'
         full_html += f'</div>'
+    # endfor rows
     
     return full_html
+def build_menu_html(menu_items, menu_group, menu_num):  # pylint: disable=unused-argument
+    """
+    Helper to build menu HTML. 
+    Django equivalent: inline logic in LoadMenu
+    """
+    # from flask import url_for
+    
+    # Initialize 20 empty slots
+    menu_html = ['<span class="btn btn-lg btn-outline-transparent mx-auto"></span>'] * 20
+    
+    for item in menu_items:
+        if item.OptionNumber == 0:
+            continue
+        
+        # Build HTML for this menu item
+        if item.Command == MENUCOMMAND.LoadMenu:
+            href = url_for('menu.load_menu', menu_group=menu_group, menu_num=item.Argument)
+            target = ''
+            onclick = ''
+        elif item.Command == MENUCOMMAND.ExitApplication:
+            href = '#'
+            onclick = ' onclick="event.preventDefault(); document.getElementById(\'lgoutfm\').submit();"'
+            target = ''
+        else:
+            arg = item.Argument if item.Argument else 'no-arg-no'
+            href = url_for('menu.handle_command', command_num=item.Command, command_arg=arg)
+            target = ' target="_blank"' if item.Command != MENUCOMMAND.ExitApplication else ''
+            onclick = ''
+        # endif command type
+        
+        menu_html[item.OptionNumber - 1] = \
+            f'<a href="{href}"{onclick}{target} class="btn btn-lg btn-outline-secondary mx-auto">{item.OptionText}</a>'
+    # endfor menu_items
+    
+    return menu_html
+# build_menu_html
 
 
 @menu_bp.route('/command/<int:command_num>/<command_arg>')

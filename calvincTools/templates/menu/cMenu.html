@@ -1,0 +1,42 @@
+{% extends "cTools_common.html" %}
+
+{% block formName %}{{ menuName }}{% endblock %}
+{% block tTitle %}{{ menuName }}{% endblock %}
+<!-- menu head -->
+{% block Hdr_LogoFormNameUserName %}
+<div class="row max-width=100%">
+    <div class="col-1 text-start calvin-smalltext">
+        {{ grpNum }},{{ menuNum }}
+        <br>
+        {{ sysver }}
+    </div>
+    <div class="col-2"></div>
+    <div class="col-6 text-center">
+        <img src={{ url_for('ctools.static', filename='cTools.png') }} width="150" height="75">
+
+        <h1>{{ menuName }}</h1>
+    </div>
+    <div class="col-3 text-end">{{ current_user }}</div>
+</div>
+{% endblock %}
+
+{% block boddy %}
+<table class="container text-center">
+    <tbody>
+        {% for i in range(10) %}
+        <tr>
+            <td>
+                {{ menuContents[i] | safe }}
+            </td>
+            <td>
+                {{ menuContents[i+10] | safe }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<form id="lgoutfm" method="post" action="{{ url_for('auth.logout')  }}" style="display: none;">
+</form>
+
+{% endblock %}
