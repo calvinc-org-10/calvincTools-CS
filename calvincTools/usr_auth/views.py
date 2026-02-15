@@ -4,6 +4,7 @@ from functools import wraps
 from flask import (
     render_template, redirect, url_for, flash, 
     request, session, 
+    current_app,
     )
 from flask.views import MethodView
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -496,7 +497,8 @@ def user_list_view():
                             user.set_password(user_form.password.data)
                         else:
                             # Generate a temporary password for new users
-                            user.set_password('TempPassword123!')
+                            dfltPW = current_app.config.get('NEWUSER_DEFAULT_PW', 'TempPassword123!')
+                            user.set_password(dfltPW)
                     
                     db.session.add(user)
                 

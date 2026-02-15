@@ -7,7 +7,6 @@ calvincTools - A Python package
 from flask import Flask, render_template, redirect, url_for, session
 from flask_migrate import Migrate
 from .blueprints import ctools_bp
-# from calvincTools.config import cTools_config
 from .usr_auth.views import init_login_manager, register_auth_blueprint
 from .cMenu.views import menu_bp
 from .views.util_views import util_bp

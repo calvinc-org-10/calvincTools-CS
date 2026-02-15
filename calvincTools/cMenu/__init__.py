@@ -25,3 +25,4 @@ MENUCOMMANDDICTIONARY = {
 }
 # Convert dictionary to object
 MENUCOMMAND =  types.SimpleNamespace(**{CText:CNum for CNum,CText in MENUCOMMANDDICTIONARY.items()})
+

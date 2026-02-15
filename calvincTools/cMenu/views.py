@@ -8,6 +8,7 @@ from flask import (
     session,
     flash, 
     )
+from flask.typing import ResponseReturnValue
 from flask_login import login_required, current_user
 
 from sqlalchemy import (
@@ -86,6 +87,7 @@ def load_menu(menu_group, menu_num):
     
     menu_name = next((item.OptionText for item in menu_items if item.OptionNumber == 0), 'Menu')
     menu_html = build_menu_html(menu_items, menu_group, menu_num)
+    sysver = current_app.config.get('APP_VERSION', 'unknown version')
 
     templt = 'menu/cMenu.html'
     cntext = {
@@ -93,56 +95,12 @@ def load_menu(menu_group, menu_num):
         'menuNum': menu_num,
         'menuName': menu_name,
         'menuContents': menu_html,
-        'sysver': "We'll get versioning later",
+        'sysver': sysver,
     }
     
     return render_template(templt, **cntext)
 # load_menu
 
-def build_menu_htmlOLD(menu_items, menu_group, menu_num):  # pylint: disable=unused-argument
-    """
-    Helper to build menu HTML. 
-    Django equivalent: inline logic in LoadMenu
-    """
-    # from flask import url_for
-    
-    # Initialize 20 empty slots
-    menu_list = ['<span class="btn btn-lg btn-outline-transparent mx-auto"></span>'] * 20
-    
-    for item in menu_items:
-        if item.OptionNumber == 0:
-            continue
-        
-        # Build HTML for this menu item
-        if item.Command == MENUCOMMAND.LoadMenu:
-            href = url_for('menu.load_menu', menu_group=menu_group, menu_num=item.Argument)
-            target = ''
-            onclick = ''
-        elif item.Command == MENUCOMMAND.ExitApplication:
-            href = '#'
-            onclick = ' onclick="event.preventDefault(); document.getElementById(\'lgoutfm\').submit();"'
-            target = ''
-        else:
-            arg = item.Argument if item.Argument else 'no-arg-no'
-            href = url_for('menu.handle_command', command_num=item.Command, command_arg=arg)
-            target = ' target="_blank"' if item.Command != MENUCOMMAND.ExitApplication else ''
-            onclick = ''
-        # endif command type
-        
-        html = f'<a href="{href}"{onclick}{target} class="btn btn-lg btn-outline-secondary mx-auto">{item.OptionText}</a>'
-        menu_list[item.OptionNumber - 1] = html
-    # endfor menu_items
-    
-    # Build grid (2 columns, 10 rows)
-    full_html = ""
-    for i in range(10):
-        full_html += f'<div class="row">'
-        full_html += f'<div class="col m-1">{menu_list[i]}</div>'
-        full_html += f'<div class="col m-1">{menu_list[i+10]}</div>'
-        full_html += f'</div>'
-    # endfor rows
-    
-    return full_html
 def build_menu_html(menu_items, menu_group, menu_num):  # pylint: disable=unused-argument
     """
     Helper to build menu HTML. 
@@ -163,9 +121,12 @@ def build_menu_html(menu_items, menu_group, menu_num):  # pylint: disable=unused
             target = ''
             onclick = ''
         elif item.Command == MENUCOMMAND.ExitApplication:
-            href = '#'
-            onclick = ' onclick="event.preventDefault(); document.getElementById(\'lgoutfm\').submit();"'
+            # href = '#'
+            # onclick = ' onclick="event.preventDefault(); document.getElementById(\'lgoutfm\').submit();"'
+            arg = 'no-arg-no'
+            href = url_for('menu.handle_command', command_num=item.Command, command_arg=arg)
             target = ''
+            onclick = ''
         else:
             arg = item.Argument if item.Argument else 'no-arg-no'
             href = url_for('menu.handle_command', command_num=item.Command, command_arg=arg)
@@ -192,10 +153,10 @@ def handle_command(command_num, command_arg):
     extra_args = {}
 
     if command_num == MENUCOMMAND.FormBrowse:
-        endpt = 'forms.browse'
+        endpt = 'menu.form_browse'
         extra_args['formname'] = command_arg
     elif command_num == MENUCOMMAND.OpenTable:
-        endpt = 'forms.show_table'
+        endpt = 'menu.show_table'
         extra_args['tblname'] = command_arg
     elif command_num == MENUCOMMAND.RunSQLStatement:
         endpt = 'utils.run_sql'
@@ -521,7 +482,7 @@ def edit_menu(group_id, menu_num):
     mnuGoto = {
         'menuGroup':group.GroupName,
         'menuGroup_choices': menuGroups.query.all(),
-        'menuID':menu_num,
+'menuID':menu_num,
         'menuID_choices':menuItems.query.filter_by(MenuGroup_id=group_id, OptionNumber=0).all(),
         }
 
@@ -649,3 +610,50 @@ def remove_menu(menu_group, menu_num):
     db.session.commit()
     flash('Menu removed successfully', 'success')
     return redirect(url_for('menu.edit_menu_init'))
+
+############################################################
+############################################################
+
+@menu_bp.route('/formbrowse/<formname>')
+@superuser_required
+def form_browse(formname: str) -> ResponseReturnValue:
+    urlIndex = 0
+    viewIndex = 1
+
+    FormNameToURL_Map = current_app.config['FORMNAME_TO_URL_MAP']
+
+    # theForm = 'Form ' + formname + ' is not built yet.  Calvin needs more coffee.'
+    formname = formname.lower()
+    if formname in FormNameToURL_Map:
+        if FormNameToURL_Map[formname][urlIndex]:
+            endpt = FormNameToURL_Map[formname][urlIndex]
+            if endpt in current_app.view_functions:
+                return redirect(url_for(endpt))
+            # endif endpoint exists
+        elif FormNameToURL_Map[formname][viewIndex]:
+            fn = FormNameToURL_Map[formname][viewIndex]
+            if callable(fn):
+                return fn()     # type: ignore
+                # return redirect(url_for(fn.__name__))
+            # endif is callable
+        # endif url vs view
+    # endif formname in map
+    
+    templt = "UnderConstruction.html"
+    cntext = {
+        'formname': formname,
+        }
+    flash(f"Form {formname} not found. This form may not be implemented yet, or there may be a typo in the menu configuration.", "warning")
+    return render_template(templt, **cntext)
+
+    # # must be rendered if theForm came from a class-based-view
+    # if hasattr(theForm,'render'): theForm = theForm.render()
+    # return theForm
+# form_browse
+
+@menu_bp.route('/showtable/<tblname>')
+@superuser_required
+def show_table(tblname):
+    # showing a table is nothing more than another form
+    return form_browse(tblname)
+
