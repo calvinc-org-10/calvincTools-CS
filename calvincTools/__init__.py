@@ -37,7 +37,7 @@ class calvinCTools_init:
         
         # Create default Calvin user if not exists
         # R E M O V E   I N   P R O D U C T I O N   ! ! !
-        # self.create_calvin(app)
+        # create_calvin(app)
         
         # Register blueprints
         register_auth_blueprint(app)
@@ -74,22 +74,5 @@ class calvinCTools_init:
         app.extensions['ctools'] = self
     # init_app
     
-    def create_calvin(self, app):
-        from .models import User, db
-        uname = "calvinc460"
-        pw = "WyrdPass"
-        eml = "cdev@notreal.mail"
-        with app.app_context():
-            if User.query.filter_by(username=uname).first():
-                return
-            # Create new user
-            Calvin_DA_MAN = User(username=uname, email=eml)      # type: ignore
-            Calvin_DA_MAN.is_superuser = True   # make superuser    # type: ignore
-            Calvin_DA_MAN.menuGroup = 1  # default menu group
-            Calvin_DA_MAN.set_password(pw)
-            
-            db.session.add(Calvin_DA_MAN)
-            db.session.commit()
-
 # calvinCTools
 

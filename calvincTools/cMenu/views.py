@@ -1,5 +1,13 @@
 # pylint: disable=no-member
-from flask import Blueprint, render_template, redirect, url_for, flash, request, session
+from flask import (
+    Blueprint, 
+    current_app,
+    url_for, 
+    render_template, redirect, 
+    request, 
+    session,
+    flash, 
+    )
 from flask_login import login_required, current_user
 
 from sqlalchemy import (
@@ -27,7 +35,7 @@ def get_default_menu(MenuGroup_id):
         return None, f'No such MenuGroup as {MenuGroup_id}'
     
     menu_item = menuItems.query.filter_by(
-        menuGroup_id=MenuGroup_id,
+        MenuGroup_id=MenuGroup_id,
         OptionNumber=0
     ).first()
     
@@ -36,11 +44,12 @@ def get_default_menu(MenuGroup_id):
     
     # Get minimum MenuID for this group with OptionNumber=0
     result = db.session.query(func.min(menuItems.MenuID)).filter_by(
-        menuGroup_id=MenuGroup_id,
-        OptyionNumber=0
+        MenuGroup_id=MenuGroup_id,
+        OptionNumber=0
     ).scalar()
     
     return result, ''
+# get_default_menu
 
 
 @menu_bp.route('/load/<int:menu_group>/<int:menu_num>')
@@ -79,7 +88,6 @@ def load_menu(menu_group, menu_num):
     menu_html = build_menu_html(menu_items, menu_group, menu_num)
 
     templt = 'menu/cMenu.html'
-    # templt = 'menu/display.html'
     cntext = {
         'grpNum': menu_group,
         'menuNum': menu_num,
@@ -179,26 +187,46 @@ def handle_command(command_num, command_arg):
     """
     Django equivalent: HandleMenuCommand
     """
-    command_text = MENUCOMMANDDICTIONARY.get(command_num, 'UnknownCommand')
-    
+    command_name = MENUCOMMANDDICTIONARY.get(command_num, 'UnknownCommand')
+    endpt = None
+    extra_args = {}
+
     if command_num == MENUCOMMAND.FormBrowse:
-        return redirect(url_for('forms.browse', formname=command_arg))
+        endpt = 'forms.browse'
+        extra_args['formname'] = command_arg
     elif command_num == MENUCOMMAND.OpenTable:
-        return redirect(url_for('forms.show_table', tblname=command_arg))
+        endpt = 'forms.show_table'
+        extra_args['tblname'] = command_arg
     elif command_num == MENUCOMMAND.RunSQLStatement:
-        return redirect(url_for('utils.run_sql'))
+        endpt = 'utils.run_sql'
     elif command_num == MENUCOMMAND.ChangePW:
-        return redirect(url_for('auth.change_password'))
+        endpt = 'auth.change_password'
     elif command_num == MENUCOMMAND.EditMenu:
-        return redirect(url_for('menu.edit_menu_init'))
+        endpt = 'menu.edit_menu_init'
     elif command_num == MENUCOMMAND.EditParameters:
-        return redirect(url_for('utils.edit_parameters'))
+        endpt = 'utils.edit_parameters'
     elif command_num == MENUCOMMAND.EditGreetings:
-        return redirect(url_for('utils.greetings'))
+        endpt = 'utils.edit_greetings'
     elif command_num == MENUCOMMAND.ExitApplication:
-        return redirect(url_for('auth.logout'))
+        endpt = 'auth.logout'
+    # need to implement:
+    # 21: 'RunCode',
+    # 32: 'ConstructSQLStatement',
+    # 36: 'LoadExtWebPage',
+    # 62: 'ChangeUser',
+    # 63: 'ChangeMenuGroup',
     else:
-        return f"Command {command_text} ({command_num}) will be performed with argument {command_arg}"
+        flash(f"Invalid request for {command_name} ({command_num}) to be performed with argument {command_arg}")
+    # endif command_num
+
+    if endpt in current_app.view_functions:
+        return redirect(url_for(endpt, **extra_args))
+    else:
+        flash(f"{command_name} command not implemented yet", "error")
+        fallback_url = url_for('menu.load_menu', menu_group=0, menu_num=0)
+        return redirect(request.referrer or fallback_url)
+    # endif endpoint exists
+# handle_command
 
 
 @menu_bp.route('/editmenu')

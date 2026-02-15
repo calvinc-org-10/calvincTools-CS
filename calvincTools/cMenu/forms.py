@@ -18,10 +18,10 @@ class MenuItemForm(Form):
     OptionNumber = IntegerField()
     OptionText = StringField()
     Command = SelectField(choices=MENUCOMMANDDICTIONARY.items(), coerce=int)
-    Argument = StringField()
-    pword = StringField()
-    top_line = BooleanField()
-    bottom_line = BooleanField()
+    Argument = StringField(default='')
+    pword = StringField(default='')
+    top_line = BooleanField(default=False)
+    bottom_line = BooleanField(default=False)
     CopyType = SelectField(
         choices=[('', '----'), ('copy', 'Copy'), ('move', 'Move'), ],
         validators=[Optional()],

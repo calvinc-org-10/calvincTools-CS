@@ -1,4 +1,4 @@
 Use menu templates for new groups and menus
 Insure menu group numbers >0, menu numbers >=0
 Change cTools db to cMenu
-gracefully handle nonexistent menu
+Edit menu: set pword = '' if pword == None (to avoid a change on subsequent save)
