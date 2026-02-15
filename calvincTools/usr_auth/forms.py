@@ -1,12 +1,21 @@
+from datetime import datetime
+
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SelectField, SubmitField
+from wtforms import (
+    StringField, PasswordField, IntegerField, BooleanField, 
+    DateField,
+    SelectField, 
+    HiddenField, SubmitField,
+    )
 from wtforms.validators import DataRequired, Email, Length, ValidationError, Optional
 from wtforms import FieldList, FormField
 
-from calvincTools.models import User
+# from calvincTools.models import User
 
 class UserForm(FlaskForm):
     """Form for viewing, editing, and adding users."""
+    
+    id = HiddenField()  # Hidden field to store user ID for editing existing users
     
     username = StringField(
         'Username',
@@ -50,6 +59,29 @@ class UserForm(FlaskForm):
         validators=[Optional(), Length(max=1024)],
         render_kw={'class': 'form-control', 'placeholder': 'Comma-separated permissions'}
     )
+
+    menuGroup = IntegerField(
+        'Menu Group',
+        validators=[Optional()],
+        render_kw={'class': 'form-control'}
+    )
+    
+    date_joined = HiddenField(
+        default=datetime.now().strftime('%Y-%m-%d'),
+        render_kw={'class': 'form-control'}
+    )
+    # DateField(
+    #     'Date Joined',
+    #     format='%Y-%m-%d',
+    #     default=datetime.now(),
+    #     validators=[Optional()],
+    #     render_kw={'class': 'form-control'}
+    #     )
+    
+    last_login = HiddenField(
+        default='',
+        render_kw={'class': 'form-control'}
+    )
     
     submit = SubmitField('Save User', render_kw={'class': 'btn btn-primary'})
     
@@ -73,5 +105,4 @@ class UserForm(FlaskForm):
 class UserListForm(FlaskForm):
     """Form for managing multiple users."""
     users = FieldList(FormField(UserForm), min_entries=1)
-    # add_user = SubmitField('Add User', render_kw={'class': 'btn btn-secondary'})
     submit = SubmitField('Save All Users', render_kw={'class': 'btn btn-primary'})

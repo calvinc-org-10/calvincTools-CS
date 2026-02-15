@@ -450,6 +450,7 @@ def user_list_view():
         
         if form.validate_on_submit():
             try:
+                # REDO THIS!! - we pass the id in now!!
                 # Get all user IDs from the request to identify which ones are new/existing
                 user_ids_in_form = []
                 for i, user_data in enumerate(form.users.data):
