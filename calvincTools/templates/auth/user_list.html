@@ -57,7 +57,10 @@
                         <tbody id="userTableBody">
                             {% for user_form in form.users %}
                                 <tr class="user-row" data-user-index="{{ loop.index0 }}">
-                                    <td>{{ user_form.id.data }}</td>
+                                    {{ user_form.hidden_tag() }}
+                                    <td>
+                                        {{ user_form.pk.data or '' }}
+                                    </td>
 
                                     <!-- Username -->
                                     <td>
@@ -252,6 +255,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const baseName = `users-${index}-`;
         
         row.innerHTML = `
+            <td>
+                <input id="${baseName}pk" name="${baseName}pk" type="hidden" value="">
+            </td>
             <!-- Username -->
             <td>
                 <input class="form-control" id="${baseName}username" 

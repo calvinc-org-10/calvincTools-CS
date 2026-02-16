@@ -15,12 +15,13 @@ from wtforms import FieldList, FormField
 class UserForm(FlaskForm):
     """Form for viewing, editing, and adding users."""
     
-    id = HiddenField()  # Hidden field to store user ID for editing existing users
+    pk = HiddenField()  # Hidden field to store user ID for editing existing users
     
     username = StringField(
         'Username',
         validators=[
             # DataRequired(),
+            Optional(),
             Length(min=3, max=80, message='Username must be between 3 and 80 characters')
         ],
         render_kw={'class': 'form-control'}
@@ -30,6 +31,7 @@ class UserForm(FlaskForm):
         'Email',
         validators=[
             # DataRequired(),
+            Optional(),
             Email(message='Invalid email address'),
             Length(max=120)
         ],
@@ -89,7 +91,31 @@ class UserForm(FlaskForm):
         """Check if username already exists (excluding current user in edit mode)."""
         from calvincTools.models import User
 
+        record_id_raw = self.pk.data
+        record_id = None
+        if record_id_raw not in (None, ''):
+            try:
+                record_id = int(record_id_raw)
+            except (TypeError, ValueError):
+                record_id = None
+
+        if record_id is not None and not field.data:
+            raise ValidationError('Username is required for existing users.')
+
+        if record_id is None and field.data and not self.email.data:
+            raise ValidationError('Email is required when username is provided.')
+
+        if not field.data:
+            return
+
         user = User.query.filter_by(username=field.data).first()
+        if user and record_id is not None:
+            try:
+                if int(record_id) == user.id: # type: ignore
+                    return
+            except (TypeError, ValueError):
+                pass
+
         if user:
             raise ValidationError('Username already exists.')
     
@@ -97,7 +123,31 @@ class UserForm(FlaskForm):
         """Check if email already exists (excluding current user in edit mode)."""
         from calvincTools.models import User
 
+        record_id_raw = self.pk.data
+        record_id = None
+        if record_id_raw not in (None, ''):
+            try:
+                record_id = int(record_id_raw)
+            except (TypeError, ValueError):
+                record_id = None
+
+        if record_id is not None and not field.data:
+            raise ValidationError('Email is required for existing users.')
+
+        if record_id is None and field.data and not self.username.data:
+            raise ValidationError('Username is required when email is provided.')
+
+        if not field.data:
+            return
+
         user = User.query.filter_by(email=field.data).first()
+        if user and record_id is not None:
+            try:
+                if int(record_id) == user.id: # type: ignore
+                    return
+            except (TypeError, ValueError):
+                pass
+
         if user:
             raise ValidationError('Email already registered.')
 

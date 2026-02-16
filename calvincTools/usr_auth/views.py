@@ -432,7 +432,17 @@ def user_list_view():
         
         # Populate form with existing users
         for user in existing_users:
-            form.users.append_entry(user)
+            form.users.append_entry({
+                "pk": user.id,
+                "username": user.username,
+                "email": user.email,
+                "FLDis_active": user.FLDis_active,
+                "is_superuser": user.is_superuser,
+                "permissions": user.permissions,
+                "menuGroup": user.menuGroup,
+                "date_joined": user.date_joined,
+                "last_login": user.last_login,
+            })
         
         # Add blank users for new entries
         for _ in range(blank_user_count):
@@ -450,12 +460,11 @@ def user_list_view():
         
         if form.validate_on_submit():
             try:
-                # REDO THIS!! - we pass the id in now!!
                 # Get all user IDs from the request to identify which ones are new/existing
                 user_ids_in_form = []
-                for i, user_data in enumerate(form.users.data):
-                    if hasattr(user_data, 'id') and user_data.id:
-                        user_ids_in_form.append(user_data.id)
+                for user_data in form.users.data:
+                    if user_data.get("pk"):
+                        user_ids_in_form.append(user_data["pk"])
                 
                 # Process each user in the form
                 for i, user_form in enumerate(form.users.entries):
@@ -468,8 +477,8 @@ def user_list_view():
                     
                     # Check if this is an existing user or new user
                     user = None
-                    if hasattr(user_form, 'obj') and user_form.obj and hasattr(user_form.obj, 'id'):
-                        user = User.query.get(user_form.obj.id)
+                    if user_form.pk.data:
+                        user = User.query.get(user_form.pk.data)
                     
                     if user:
                         # Update existing user
@@ -478,6 +487,7 @@ def user_list_view():
                         user.FLDis_active = user_form.FLDis_active.data     # pyright: ignore[reportAttributeAccessIssue]
                         user.is_superuser = user_form.is_superuser.data     # pyright: ignore[reportAttributeAccessIssue]
                         user.permissions = user_form.permissions.data or ''     # pyright: ignore[reportAttributeAccessIssue]
+                        user.menuGroup = user_form.menuGroup.data           # pyright: ignore[reportAttributeAccessIssue]
                         
                         # Only update password if provided
                         if user_form.password.data:
@@ -490,7 +500,7 @@ def user_list_view():
                             FLDis_active=user_form.FLDis_active.data,
                             is_superuser=user_form.is_superuser.data,
                             permissions=user_form.permissions.data or '',
-                            menuGroup=1  # default menu group
+                            menuGroup=user_form.menuGroup.data
                         )
                         
                         # Set password if provided
@@ -500,17 +510,21 @@ def user_list_view():
                             # Generate a temporary password for new users
                             dfltPW = current_app.config.get('NEWUSER_DEFAULT_PW', 'TempPassword123!')
                             user.set_password(dfltPW)
+                        # endif password given
+                    # if user exists or new user created
                     
                     db.session.add(user)
                 
                 db.session.commit()
                 flash('All users saved successfully!', 'success')
                 return redirect(url_for('auth.user_list'))
+            # endfor each user in form
             
             except Exception as e:
                 db.session.rollback()
                 flash(f'Error saving users: {str(e)}', 'danger')
                 return redirect(url_for('auth.user_list'))
+            # endtry
         else:
             flash('Form validation failed. Please check your entries.', 'danger')
             return render_template(
@@ -518,6 +532,9 @@ def user_list_view():
                 form=form,
                 blank_user_count=blank_user_count
             )
+        # endif form.validate_on_submit()
+    # endif request.method == 'GET' vs 'POST'
+# user_list_view
 
 
 # ============================================================================
@@ -539,6 +556,7 @@ def register_auth_blueprint(app):
     auth_bp.add_url_rule('/users', 'user_list', user_list_view, methods=['GET', 'POST']) # type: ignore
     
     app.register_blueprint(auth_bp)
+# register_auth_blueprint(app) should be called in your app factory function after initializing the app and db.
 
 
 # ============================================================================
