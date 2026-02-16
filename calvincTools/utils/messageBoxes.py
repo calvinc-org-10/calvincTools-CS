@@ -33,12 +33,3 @@ def areYouSure(parent, title:str,
     # handled in cTools_common.html in CalvinTools web app
     pass
 
-class UnderConstruction_Dialog():
-    """A dialog that displays an 'under construction' message with a barrier icon.
-    
-    Attributes:
-        _svg_constr_barrier (str): Path to the construction barrier SVG icon.
-    """
-    # handled by redirecting to errors/under_construction.html in CalvinTools web app
-    pass
-

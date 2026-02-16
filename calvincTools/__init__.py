@@ -9,7 +9,7 @@ from flask_migrate import Migrate
 from .blueprints import ctools_bp
 from .usr_auth.views import init_login_manager, register_auth_blueprint
 from .cMenu.views import menu_bp
-from .views.util_views import util_bp
+from .utils import util_bp
 
 class calvinCTools_init:
     def __init__(self, app=None, app_db=None):

@@ -13,7 +13,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from .mixins import _ModelInitMixin
 
 from .cMenu import MENUCOMMAND
-from .dbmenulist import initmenu_menulist
+from .cMenu.dbmenulist import initmenu_menulist
 
 # Initialize db at module level - will be set by init_cDatabase
 db = None

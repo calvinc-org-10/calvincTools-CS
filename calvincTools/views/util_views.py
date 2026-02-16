@@ -1,17 +1,14 @@
-import datetime
-import os
 
-from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file
+from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from sqlalchemy import text
+
+from ..utils import util_bp
 
 # db and models imported in each method so that the initalized versions are used
 
 from ..forms import RawSQLForm
 from ..decorators import superuser_required
-
-util_bp = Blueprint('utils', __name__, url_prefix='/utils')
-
 
 @util_bp.route('/sql', methods=['GET', 'POST'])
 @superuser_required
@@ -19,7 +16,7 @@ def run_sql():
     """
     Django equivalent: fn_cRawSQL
     """
-    from ..models import ( db, cParameters, cGreetings, )
+    from ..models import ( db, )
     
     form = RawSQLForm()
     context = {}

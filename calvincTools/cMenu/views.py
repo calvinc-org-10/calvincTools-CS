@@ -20,7 +20,10 @@ from sqlalchemy.orm import aliased
 # db and models imported in each method so that the initalized versions are used
 
 from ..decorators import superuser_required
-from . import (MENUCOMMAND, MENUCOMMANDDICTIONARY)
+from . import (
+    MENUCOMMAND, MENUCOMMANDDICTIONARY,
+    )
+from .initial_menus import initial_menus
 from .forms import MenuEditForm
 
 menu_bp = Blueprint('menu', __name__, url_prefix='/menu')
@@ -170,12 +173,17 @@ def handle_command(command_num, command_arg):
         endpt = 'utils.edit_greetings'
     elif command_num == MENUCOMMAND.ExitApplication:
         endpt = 'auth.logout'
+    elif command_num == MENUCOMMAND.EditUsers:
+        endpt = 'auth.user_list'
+    elif command_num == MENUCOMMAND.ShowRoutes_URLs:
+        endpt = 'utils.show_routes'
     # need to implement:
     # 21: 'RunCode',
     # 32: 'ConstructSQLStatement',
     # 36: 'LoadExtWebPage',
     # 62: 'ChangeUser',
     # 63: 'ChangeMenuGroup',
+    # 110: 'Show Help',
     else:
         flash(f"Invalid request for {command_name} ({command_num}) to be performed with argument {command_arg}")
     # endif command_num
@@ -184,8 +192,8 @@ def handle_command(command_num, command_arg):
         return redirect(url_for(endpt, **extra_args))
     else:
         flash(f"{command_name} command not implemented yet", "error")
-        fallback_url = url_for('menu.load_menu', menu_group=0, menu_num=0)
-        return redirect(request.referrer or fallback_url)
+        notreadyyet_msg = f"{command_name} command not implemented yet. Calvin needs more coffee."
+        return render_template("UnderConstruction.html", notreadyyet_msg=notreadyyet_msg)
     # endif endpoint exists
 # handle_command
 
@@ -369,14 +377,14 @@ def edit_menu(group_id, menu_num):
                         
             if copymoveRequested and removalRequested:
                 flash(f"Option {opt_num}: Cannot choose both Remove and Copy/Move. Please fix and resubmit.", "error")
-                changes_made += ("<br>" if changes_made else "") + "Error: Remove and Copy/Move both selected. Option not removed nor copied/moved."
+                changes_made += (", " if changes_made else "") + "Error: Remove and Copy/Move both selected. Option not removed nor copied/moved."
                 processRemoval, processCopyMove, processUpdate = False, False, True
                 # continue
             elif removalRequested:
                 processRemoval, processCopyMove, processUpdate = True, False, False
                 if isNewitem:
                     flash(f"Option {opt_num}: Cannot remove an option that doesn't exist. Please fix and resubmit.", "error")
-                    changes_made += ("<br>" if changes_made else "") + "Error: Remove selected for non-existent option. Option added, not removed."
+                    changes_made += (", " if changes_made else "") + "Error: Remove selected for non-existent option. Option added, not removed."
                     processRemoval, processCopyMove, processUpdate = False, True, True                    
                 # continue
             elif copymoveRequested:
@@ -389,18 +397,18 @@ def edit_menu(group_id, menu_num):
                     **{key: value for key, value in entry.items() if key in allowed_fields}
                 )
                 db.session.add(new_item)
-                changes_made += ("<br>" if changes_made else "") + "Option added."
+                changes_made += (", " if changes_made else "") + "Option added."
             elif removalRequested and processRemoval and db_item is not None:
                 # Existing item deleted if user cleared text
                 db.session.delete(db_item)
-                changes_made += ("<br>" if changes_made else "") + "Option deleted."
+                changes_made += (", " if changes_made else "") + "Option deleted."
             elif db_item is not None and processUpdate:
                 # Existing item updated if user changed text or any other field
                 for key in allowed_fields:
                     new_val = entry.get(key)
                     if getattr(db_item, key) != new_val:
                         setattr(db_item, key, new_val)
-                        changes_made += ("<br>" if changes_made else "") + f"{key} updated."
+                        changes_made += (", " if changes_made else "") + f"{key} updated."
                 # endfor allowed_fields
             # endif db_item vs entry
 
@@ -439,10 +447,10 @@ def edit_menu(group_id, menu_num):
                 # endif length of CopyTarget (for parsing the target menu and option)
 
                 if targetGroup is None or targetMenu is None or targetOption is None:
-                    changes_made += ("<br>" if changes_made else "") + f"Could not interpret {MoveORCopy} target {entry.get('CopyTarget')}"
+                    changes_made += (", " if changes_made else "") + f"Could not interpret {MoveORCopy} target {entry.get('CopyTarget')}"
                 else:
                     if menuItems.query.filter_by(MenuGroup=targetGroup, MenuID=targetMenu, OptionNumber=targetOption).exists():     # type: ignore
-                        changes_made += ("<br>" if changes_made else "") + f"Could not {MoveORCopy} to {entry.get('CopyTarget')} - target already exists."
+                        changes_made += (", " if changes_made else "") + f"Could not {MoveORCopy} to {entry.get('CopyTarget')} - target already exists."
                     else:
                         new_item = menuItems(
                                 MenuGroup_id = targetGroup,
@@ -457,7 +465,7 @@ def edit_menu(group_id, menu_num):
                             db.session.delete(db_item)
                         # endif move (not just copy)
 
-                        changes_made += ("<br>" if changes_made else "") + f"Option {opt_num} {MoveORCopy}d to {entry.get('CopyTarget')}."
+                        changes_made += (", " if changes_made else "") + f"Option {opt_num} {MoveORCopy}d to {entry.get('CopyTarget')}."
                     # endif target exists
                 # endif valid target for copy/move
             # endif copy/move requested
@@ -471,18 +479,12 @@ def edit_menu(group_id, menu_num):
 
         flash(f"changed data: {changed_data}", "info")
         return redirect(url_for("menu.edit_menu", group_id=group_id, menu_num=menu_num))
-        ##########################
-        # OOPS!! the redirect will cause us to lose the changed_data messages about what changed. 
-        # To fix this, we can store the messages in the session before redirecting, 
-        # and then pop them in the GET request to display.
-        # session['changed_data'] = changed_data
-        ##########################
     # endif form.validate_on_submit()
 
     mnuGoto = {
         'menuGroup':group.GroupName,
         'menuGroup_choices': menuGroups.query.all(),
-'menuID':menu_num,
+        'menuID':menu_num,
         'menuID_choices':menuItems.query.filter_by(MenuGroup_id=group_id, OptionNumber=0).all(),
         }
 
@@ -495,31 +497,17 @@ def edit_menu(group_id, menu_num):
         # 'changed_data': changed_data,
         }
     templt = "menu/edit_menu.html"
-    # return render(req, templt, context=cntext)
     return render_template(templt, **cntext)
-    
-#     return render_template('menu/edit. html',
-#                          menu_group=menu_group_obj,
-#                          menu_num=menu_num,
-#                          menu_items=menu_items,
-#                          command_choices=command_choices)
-
-# from sqlalchemy import select
-
-# # Filtered List
-# stmt = select(menuItems).filter_by(MenuGroup_id=group_id, OptionNumber=0)
-# menuID_choices = db_instance.session.execute(stmt).scalars().all()
-
-# # Single Item
-# stmt = select(menuItems).filter_by(MenuGroup_id=group_id, MenuID=menu_id, OptionNumber=0)
-# menuName_obj = db_instance.session.execute(stmt).scalar_one_or_none()
-
 # edit_menu
 
 @menu_bp.route('/Gcreate/<int:group_id>/<group_name>/<group_info>')
 @superuser_required
 def create_group(group_id, group_name, group_info):
-    return f"Group {group_id} with name {group_name} and info {group_info} would be created here"
+    from ..models import ( menuGroups, )
+    menugroup = menuGroups.create_newgroup(group_name=group_name, group_info=group_info, isSuperUser=False, group_id=group_id)
+    flash(f"Group {group_id} with name {group_name} and info {group_info} would be created here", "info")
+    flash("successful" if menugroup else "failed", "info")
+    return redirect(request.referrer or url_for('menu.edit_menu', group_id=group_id, menu_num=0))
 
 @menu_bp.route('/create/<int:menu_group>/<int:menu_num>')
 @menu_bp.route('/create/<int:menu_group>/<int:menu_num>/<int:from_group>/<int:from_menu>')
@@ -538,14 +526,16 @@ def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
     
     if existing:
         flash(f'Menu {menu_group},{menu_num} already exists', 'error')
-        return redirect(url_for('menu.edit_menu_init'))
+        return redirect(request.referrer or url_for('menu.edit_menu', group_id=menu_group, menu_num=menu_num))
     
     # Get or create menu group
     menu_group_obj = menuGroups.query.get(menu_group)
     if not menu_group_obj: 
-        menu_group_obj = menuGroups(id=menu_group, GroupName='New Menu Group')
-        db.session. add(menu_group_obj)
-        db.session.flush()
+        menu_group_obj = menuGroups.create_newgroup(
+            group_name='New Menu Group', 
+            group_info='', 
+            isSuperUser=False, group_id=menu_group
+            )
     
     if from_menu is not None:
         # Copy from existing menu
@@ -568,26 +558,22 @@ def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
             )
             db.session.add(new_item)
     else:
-        # REPLACE THIS
-        # copy from dbmenulist.py - newmenu_menulist depending on whether it's a new menu in an existing group or a new group and menu.
+        new_items = initial_menus['existing.group.newmenu']
         # Create new menu from scratch
-        title_item = menuItems(
-            MenuGroup_id=menu_group,
-            MenuID=menu_num,
-            OptionNumber=0,
-            OptionText='New Menu'
-        )
-        db.session.add(title_item)
-        
-        exit_item = menuItems(
-            MenuGroup_id=menu_group,
-            MenuID=menu_num,
-            OptionNumber=20,
-            OptionText='Return to Main Menu',
-            Command=MENUCOMMAND.LoadMenu,
-            Argument='0'
-        )
-        db.session.add(exit_item)
+        menuitems = [
+            menuItems(
+                MenuGroup_id=menu_group,
+                MenuID=menu_num,
+                OptionNumber=item['OptionNumber'],
+                OptionText=item['OptionText'],
+                Command=item['Command'],
+                Argument=item['Argument'],
+                pword=item.get('PWord', ''),
+                top_line=item.get('TopLine', False),
+                bottom_line=item.get('BottomLine', False),
+            ) for item in new_items
+        ]
+        db.session.add_all(menuitems)
     
     db.session.commit()
     flash('Menu created successfully', 'success')
@@ -639,12 +625,9 @@ def form_browse(formname: str) -> ResponseReturnValue:
         # endif url vs view
     # endif formname in map
     
-    templt = "UnderConstruction.html"
-    cntext = {
-        'formname': formname,
-        }
     flash(f"Form {formname} not found. This form may not be implemented yet, or there may be a typo in the menu configuration.", "warning")
-    return render_template(templt, **cntext)
+    notreadyyet_msg = f"Form {formname} is not built yet.  Calvin needs more coffee."
+    return render_template("UnderConstruction.html", notreadyyet_msg=notreadyyet_msg)
 
     # # must be rendered if theForm came from a class-based-view
     # if hasattr(theForm,'render'): theForm = theForm.render()

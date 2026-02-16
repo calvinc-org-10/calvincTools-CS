@@ -1,0 +1,49 @@
+{% extends "cTools_common.html" %}
+
+{% block customCSS %}
+.table-container {
+  max-height: 300px; /* or any specific height */
+  overflow-y: auto; /* Enables vertical scrolling within this container */
+}
+
+table {
+  width: 80%;
+  border-collapse: collapse; /* Optional: for cleaner borders */
+}
+
+th {
+  position: sticky;
+  top: 0; /* Sticks to the top of the scrollable container */
+  background-color: #4CAF50; /* Add a background color */
+  color: white;
+  z-index: 1; /* Ensures the header is above the body content */
+  padding: 12px; /* Optional: for better spacing */
+}
+
+/* Optional styling for readability */
+td {
+  padding: 1px 10px;
+  border: 1px solid #ddd;
+}
+{% endblock %}
+
+{% block boddy %}
+<table class="container table-container">
+  <thead>
+    <tr>
+      <th>endpoint</th>
+      <th>URL</th>
+      <th>methods</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for endpoint, rule, methods in rules %}
+    <tr>
+      <td>{{ endpoint }}</td>
+      <td>{{ rule }}</td>
+      <td>{{ methods|join(", ") }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</ul>
+{% endblock %}

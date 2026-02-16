@@ -5,7 +5,7 @@ from .database import cTools_db
 from .models import init_cDatabase
 from .usr_auth.views import init_login_manager, register_auth_blueprint
 from .cMenu.views import menu_bp
-from .views.util_views import util_bp
+from .utils import util_bp
 from . import config
 
 

@@ -1,6 +1,10 @@
 from typing import Any
 import ast
 
+from flask import render_template, current_app
+from . import util_bp
+
+
 def is_hashable(obj: Any) -> bool:
     """Check if an object is hashable."""
     try:
@@ -138,3 +142,16 @@ def pretty_show_fns(path_:str):
     
     return result_str
 
+
+@util_bp.route('/routes')
+def show_routes():
+    rules = [
+        (rule.endpoint, rule.rule, rule.methods) # type: ignore
+        for rule in current_app.url_map.iter_rules()
+    ]
+
+    templt = 'utils/routes.html'
+    cntext = {
+        'rules': rules
+    }
+    return render_template(templt, **cntext)

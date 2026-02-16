@@ -21,6 +21,9 @@ MENUCOMMANDDICTIONARY = {
     91: 'EditMenu',
     92: 'EditParameters',
     93: 'EditGreetings',
+    94: 'EditUsers',
+    110: 'ShowHelp',
+    111: 'ShowRoutes_URLs',
     200: 'ExitApplication',
 }
 # Convert dictionary to object

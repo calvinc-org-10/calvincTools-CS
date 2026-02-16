@@ -19,7 +19,7 @@ from werkzeug.local import LocalProxy
 from .mixins import _ModelInitMixin
 
 from .cMenu import MENUCOMMAND
-from .dbmenulist import initmenu_menulist
+from .cMenu.initial_menus import initial_menus
 
 # Module-level db reference - will be set by init_cDatabase
 # Using a dictionary to hold the actual db so we can update it
@@ -112,6 +112,11 @@ class menuGroups(_ModelInitMixin, SkeletonModelBase):
     def createtable(cls, flskapp):      # pylint: disable=unused-argument
         """Create the table and populate with initial data if empty."""
         ...         # pylint: disable=unnecessary-ellipsis
+        
+    @classmethod
+    def create_newgroup(cls, group_name: str, group_info: str, isSuperUser: bool = False, group_id = None):
+        ...         # pylint: disable=unnecessary-ellipsis
+
 
 class menuItems(_ModelInitMixin, SkeletonModelBase):
     """
@@ -281,52 +286,66 @@ def init_cDatabase(flskapp, db_instance):
                 # Create tables if they don't exist
                 db_instance.create_all()
 
+                if not db_instance.session.query(cls).first():
+                    cls.create_newgroup(
+                        group_name="Initial Group", 
+                        group_info="Group Info here", 
+                        isSuperUser=True
+                        )
+            # endwith app context
+        # createtable
+        
+        @classmethod
+        def create_newgroup(cls, group_name: str, group_info: str, isSuperUser: bool = False, group_id = None):
+            """Create a new menu group with default menu items."""
+            
+            init_menu_type = 'new.super.menugroup.newmenu' if isSuperUser else 'new.ordinary.menugroup.newmenu'
+            
+            with flskapp.app_context():
                 try:
-                    # Check if any group exists
-                    if not db_instance.session.query(cls).first():
-                        # Add starter group
-                        starter = cls(GroupName="Group Name", GroupInfo="Group Info")
-                        db_instance.session.add(starter)
-                        db_instance.session.commit()
-                        # Add default menu items for the starter group
-                        starter_id = starter.id
-                        # Get the menuItems class from module
-                        menuItems_cls = getattr(current_module, 'menuItems')
-                        # TODO: use dbmenulist initmenu_menulist
-                        menu_items = [
-                            menuItems_cls(
-                                MenuGroup_id=starter_id, MenuID=0, OptionNumber=0, 
-                                OptionText='New Menu', 
-                                Command=None, Argument='Default', 
-                                pword='', top_line=True, bottom_line=True
-                                ),
-                            menuItems_cls(
-                                MenuGroup_id=starter_id, MenuID=0, OptionNumber=11, 
-                                OptionText='Edit Menu', 
-                                Command=MENUCOMMAND.EditMenu, Argument='', 
-                                pword='', top_line=None, bottom_line=None
-                                ),
-                            menuItems_cls(
-                                MenuGroup_id=starter_id, MenuID=0, OptionNumber=19, 
-                                OptionText='Change Password', 
-                                Command=MENUCOMMAND.ChangePW, Argument='', 
-                                pword='', top_line=None, bottom_line=None
-                                ),
-                            menuItems_cls(
-                                MenuGroup_id=starter_id, MenuID=0, OptionNumber=20, 
-                                OptionText='Go Away!', 
-                                Command=MENUCOMMAND.ExitApplication, Argument='', 
-                                pword='', top_line=None, bottom_line=None
-                                ),
-                            ]
-                        db_instance.session.add_all(menu_items)
-                        db_instance.session.commit()
-                    # endif no group exists
+                    if isinstance(group_id, int):
+                        # Check if group_id already exists
+                        existing_group = db_instance.session.query(cls).filter_by(id=group_id).first()
+                        if existing_group:
+                            raise ValueError(f"A group with the ID '{group_id}' already exists.")
+                    # endif group_id check
+                    
+                    # Create new group
+                    if group_id is not None:
+                        new_group = cls(id=group_id, GroupName=group_name, GroupInfo=group_info)
+                    else:
+                        new_group = cls(GroupName=group_name, GroupInfo=group_info)
+                    db_instance.session.add(new_group)
+                    db_instance.session.commit()
+                    
+                    # Add default menu items for the new group
+                    new_group_id = new_group.id
+                    menuItems_cls = getattr(current_module, 'menuItems')
+
+                    menu_items = [ 
+                        menuItems_cls(
+                            MenuGroup_id=new_group_id, MenuID=0, OptionNumber=item['OptionNumber'], 
+                            OptionText=item['OptionText'], 
+                            Command=item['Command'], Argument=item['Argument'], 
+                            pword=item.get('PWord',''), 
+                            top_line=item.get('TopLine', 0),
+                            bottom_line=item.get('BottomLine', 0)
+                            )
+                         for item in initial_menus[init_menu_type]
+                         ]
+                    db_instance.session.add_all(menu_items)
+                    db_instance.session.commit()
+                    
+                    return new_group
                 except IntegrityError:
                     db_instance.session.rollback()
+                    raise ValueError(f"A group with the name '{group_name}' already exists.")
                 finally:
-                    db_instance.session.close()
-                # end try
+                    db_instance.session.close() 
+                # end try (creating new group and menu items)
+            # endwith app context
+        # create_newgroup
+    # menuGroups
 
     class menuItems(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
         """Menu items model with database columns."""

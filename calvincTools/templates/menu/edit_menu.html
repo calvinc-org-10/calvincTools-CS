@@ -267,11 +267,15 @@ function NewMenuGroup_chosen() {
 
     valNewGrpID = document.getElementById('NewMnuGroup_G').value;
     valNewGrpName = document.getElementById('NewMnuGroupName_G').value;
+        if (valNewGrpName == '')  { valNewGrpName = '-'};
     valNewGrpInfo = document.getElementById('NewMnuGroupDesc_G').value;
+        if (valNewGrpInfo == '')  { valNewGrpInfo = '-'};
     
     // newRec = "{{ url_for('menu.create_group', group_id=-101, group_name=valNewGrpName, group_info=valNewGrpInfo) }}";
-    newRec = "{{ url_for('menu.create_group', group_id=-101, group_name='New Group', group_info='') }}";
+    newRec = "{{ url_for('menu.create_group', group_id=-101, group_name='-102', group_info='-103') }}";
     newRec = newRec.replace('/-101','/'+valNewGrpID);
+    newRec = newRec.replace('/-102','/'+valNewGrpName);
+    newRec = newRec.replace('/-103','/'+valNewGrpInfo);
 
     window.location = newRec;
 }
