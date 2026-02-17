@@ -135,6 +135,7 @@ def login_view():
         'sysver_key': sysver_key,
         'sysver':current_app.config.get('APP_VERSION', sysver[sysver_key]),
         'applogo_url': current_app.config.get('APP_LOGO_URL', None),
+        'appNews_htmlfile': current_app.config.get('APP_NEWS_HTMLFILE', None),
     }
 
     if request.method == 'POST': 

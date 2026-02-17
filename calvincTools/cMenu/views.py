@@ -99,6 +99,7 @@ def load_menu(menu_group, menu_num):
         'menuName': menu_name,
         'menuContents': menu_html,
         'sysver': sysver,
+        'applogo_url': current_app.config.get('APP_LOGO_URL', None),
     }
     
     return render_template(templt, **cntext)
