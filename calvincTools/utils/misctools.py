@@ -155,3 +155,15 @@ def show_routes():
         'rules': rules
     }
     return render_template(templt, **cntext)
+
+@util_bp.route('/formlist')
+def show_forms():
+
+    FormNameToURL_Map = current_app.config['FORMNAME_TO_URL_MAP']
+
+    templt = 'utils/forms.html'
+    cntext = {
+        'forms': FormNameToURL_Map
+    }
+    return render_template(templt, **cntext)
+

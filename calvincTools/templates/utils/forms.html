@@ -1,0 +1,50 @@
+{% extends "cTools_common.html" %}
+
+{% block customCSS %}
+.table-container {
+  max-height: 300px; /* or any specific height */
+  overflow-y: auto; /* Enables vertical scrolling within this container */
+}
+
+table {
+  width: 80%;
+  border-collapse: collapse; /* Optional: for cleaner borders */
+}
+
+th {
+  position: sticky;
+  top: 0; /* Sticks to the top of the scrollable container */
+  background-color: #4CAF50; /* Add a background color */
+  color: white;
+  z-index: 1; /* Ensures the header is above the body content */
+  padding: 12px; /* Optional: for better spacing */
+}
+
+/* Optional styling for readability */
+td {
+  padding: 1px 10px;
+  border: 1px solid #ddd;
+}
+{% endblock %}
+
+{% block boddy %}
+{{ forms }} test 5
+<table class="container table-container">
+  <thead>
+    <tr>
+      <th>form menu name</th>
+      <th>endpoint</th>
+      <th>view</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for fMenuName, UV_tuple in forms.items() %}
+    <tr>
+      <td>{{ fMenuName }}</td>
+      <td>{{ UV_tuple[0] if UV_tuple[0] is not none else "---" }}</td>
+      <td>{{ UV_tuple[1] if UV_tuple[1] is not none else "---" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</ul>
+{% endblock %}

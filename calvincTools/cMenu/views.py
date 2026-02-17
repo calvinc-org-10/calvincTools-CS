@@ -177,6 +177,8 @@ def handle_command(command_num, command_arg):
         endpt = 'auth.user_list'
     elif command_num == MENUCOMMAND.ShowRoutes_URLs:
         endpt = 'utils.show_routes'
+    elif command_num == MENUCOMMAND.ShowForms:
+        endpt = 'utils.show_forms'
     # need to implement:
     # 21: 'RunCode',
     # 32: 'ConstructSQLStatement',
