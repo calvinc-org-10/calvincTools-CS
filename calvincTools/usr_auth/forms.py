@@ -1,3 +1,4 @@
+#pylint: disable=no-member
 from datetime import datetime
 
 from flask_wtf import FlaskForm
@@ -11,6 +12,21 @@ from wtforms.validators import DataRequired, Email, Length, ValidationError, Opt
 from wtforms import FieldList, FormField
 
 # from calvincTools.models import User
+
+class LoginForm(FlaskForm):
+    """Form for user login."""
+    username = StringField(
+        'Username',
+        validators=[DataRequired(message='Username is required')],
+        render_kw={'class': 'form-control'}
+    )
+    password = PasswordField(
+        'Password',
+        validators=[DataRequired(message='Password is required')],
+        render_kw={'class': 'form-control'}
+    )
+    submit = SubmitField('Login', render_kw={'class': 'btn btn-primary'})
+
 
 class UserForm(FlaskForm):
     """Form for viewing, editing, and adding users."""

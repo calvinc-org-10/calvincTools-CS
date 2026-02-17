@@ -1,5 +1,7 @@
+#pylint: disable=no-member
 from datetime import datetime
 from functools import wraps
+import random
 
 from flask import (
     render_template, redirect, url_for, flash, 
@@ -10,6 +12,9 @@ from flask.views import MethodView
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
+
+from calvincTools.app_secrets import sysver_key
+from calvincTools.sysver import sysver
 
 # db and models imported in each method so that the initalized versions are used
 
@@ -30,8 +35,8 @@ def init_login_manager(app):
     
     @login_manager.user_loader
     def load_user(user_id):
-        from ..models import User
         """Load user by ID for Flask-Login."""
+        from ..models import User
         return User.query.get(int(user_id))
     
     return login_manager
@@ -115,11 +120,23 @@ def login_view():
     """
     Handle user login (GET and POST).
     """
-    from ..models import User, db
+    from ..models import User, cGreetings, db
     
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     
+    grts = cGreetings.query.all()
+    Greeting = random.choice(grts)['Greeting'] if grts else ''
+
+    templt = 'auth/Uaffirm.html'
+    cntext = {
+        'invalidusr': False,
+        'Greeting':Greeting,
+        'sysver_key': sysver_key,
+        'sysver':current_app.config.get('APP_VERSION', sysver[sysver_key]),
+        'applogo_url': current_app.config.get('APP_LOGO_URL', None),
+    }
+
     if request.method == 'POST': 
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
@@ -127,17 +144,21 @@ def login_view():
         
         if not username or not password:
             flash('Please provide both username and password.', 'danger')
-            return render_template('auth/login.html')
+            return render_template(templt, **cntext)
         
         user = User.query.filter_by(username=username).first()
+
+        # DEV bypass goes here
         
         if user is None or not user.check_password(password):
             flash('Invalid username or password.', 'danger')
-            return render_template('auth/login.html')
+            cntext['invalidusr'] = True
+            return render_template(templt, **cntext)
         
         if not user.is_active:
             flash('Your account has been deactivated. Please contact support.', 'danger')
-            return render_template('auth/login.html')
+            cntext['invalidusr'] = True
+            return render_template(templt, **cntext)
         
         # Log the user in
         assert isinstance(remember, bool), "Remember must be a boolean value"
@@ -149,6 +170,8 @@ def login_view():
         # set initial menugroup
         session['menu_group'] = user.menuGroup if user.menuGroup else 1
         
+        # django_settings.TIME_ZONE = request.POST['localTZ'] # set the time zone from wherever the user's at 
+
         # Redirect to next page or home
         next_page = request.args.get('next')
         if next_page:
@@ -156,7 +179,8 @@ def login_view():
         return redirect(url_for('index'))
     
     # GET request
-    return render_template('auth/login.html')
+
+    return render_template(templt, **cntext)
 
 # flask-login example login view
 # @app.route('/login', methods=['GET', 'POST'])
@@ -467,7 +491,7 @@ def user_list_view():
                         user_ids_in_form.append(user_data["pk"])
                 
                 # Process each user in the form
-                for i, user_form in enumerate(form.users.entries):
+                for i, user_form in enumerate(form.users.entries):      #pylint: disable=unused-variable
                     username = user_form.username.data.strip() if user_form.username.data else ''
                     email = user_form.email.data.strip() if user_form.email.data else ''
                     
@@ -520,7 +544,7 @@ def user_list_view():
                 return redirect(url_for('auth.user_list'))
             # endfor each user in form
             
-            except Exception as e:
+            except Exception as e:      #pylint: disable=broad-exception-caught
                 db.session.rollback()
                 flash(f'Error saving users: {str(e)}', 'danger')
                 return redirect(url_for('auth.user_list'))
