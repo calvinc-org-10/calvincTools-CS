@@ -9,6 +9,16 @@
 {% block boddy %}
 
 <div class="container m-2">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
 {% if form.errors %}
     <h1>You are not an authorized user.</h1>
     <br><br>
@@ -31,8 +41,8 @@
     <div class="row">
         <div class="col-6 border-right border-dark">
             <div id="header">
-                <img src={% static 'WICS-Logo.png' %} width="200" height="100">
-                <br><span class=h1>WICS</span> version {{ sysver }}
+                <img src={{ url_for('static', filename='App-Logo.png') }} width="200" height="100">
+                <br><span class=h1>The App</span> version {{ sysver }}
             </div>
             <div class="container">
             <form method="post" id="login-form"> 
