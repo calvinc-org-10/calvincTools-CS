@@ -1,3 +1,2 @@
-Use menu templates for new groups and menus
 Insure menu group numbers >0, menu numbers >=0
 Edit menu: set pword = '' if pword == None (to avoid a change on subsequent save)

@@ -58,7 +58,7 @@ class calvinCTools_init:
         
         @app.errorhandler(403)
         def forbidden(error):   # pylint: disable=unused-argument
-            return render_template('errors/403.html'), 403
+            return render_template('errors/403.html', error=error), 403
         
         @app.errorhandler(500)
         def internal_error(error):   # pylint: disable=unused-argument
