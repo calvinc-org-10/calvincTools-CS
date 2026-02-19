@@ -23,7 +23,7 @@ def register_menu_blueprint(app):
     menu_bp.add_url_rule('/editmenu', 'edit_menu_init', edit_menu_init, methods=['GET'])
     menu_bp.add_url_rule('/edit/<int:group_id>/<int:menu_num>', 'edit_menu', edit_menu, methods=['POST', 'GET'])
     menu_bp.add_url_rule('/Gcreate/<int:group_id>/<group_name>/<group_info>', 'create_group', create_group, methods=['GET'])
-    menu_bp.add_url_rule('/create/<int:menu_group>/<int:menu_num>/<int:from_group>/<int:frosm_menu>', 'create_menu', create_menu, methods=['GET'])
+    menu_bp.add_url_rule('/create/<int:menu_group>/<int:menu_num>/<int:from_group>/<int:from_menu>', 'create_menu', create_menu, methods=['GET'])
     menu_bp.add_url_rule('/remove/<int:menu_group>/<int:menu_num>', 'remove_menu', remove_menu, methods=['GET'])
 
     menu_bp.add_url_rule('/formbrowse/<formname>', 'form_browse', form_browse, methods=['GET'])
