@@ -45,14 +45,6 @@ class calvinCTools_init:
         register_menu_blueprint(app)
         register_util_blueprint(app)
         
-        # Home route
-        # Note: We define this route here to ensure it exists, but the caller can override it by defining their own route for '/'
-        # in fact, need to make it easier for caller to override this route, since it's likely they will want to customize the home page
-        @app.route('/index')    # leave route('/') for caller to set
-        def index():
-            mnugrp = session.get('menu_group', 1)
-            return redirect(url_for('menu.load_menu', menu_group=mnugrp, menu_num=0))
-        
         # Error handlers
         @app.errorhandler(404)
         def not_found(error):   # pylint: disable=unused-argument

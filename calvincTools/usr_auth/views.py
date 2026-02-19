@@ -174,7 +174,8 @@ def login_view():
         next_page = request.args.get('next')
         if next_page:
             return redirect(next_page)
-        return redirect(url_for('index'))
+        mgroup = user.menuGroup if user.menuGroup else 1
+        return redirect(url_for('menu.load_menu', menu_group=mgroup, menu_num=0))  # Redirect to the menu page after login
     
     # GET request
 
