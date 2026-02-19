@@ -1,7 +1,6 @@
 from calvincTools.cMenu.forms import MenuEditForm
 from sqlalchemy.orm import aliased
 from calvincTools.cMenu.initial_menus import initial_menus
-from calvincTools.cMenu.views import menu_bp
 from calvincTools.decorators import superuser_required
 
 
@@ -9,7 +8,6 @@ from flask import flash, redirect, render_template, request, url_for
 from sqlalchemy import case, func, literal, select
 
 
-@menu_bp.route('/editmenu')
 @superuser_required
 def edit_menu_init():
     """
@@ -34,7 +32,6 @@ def edit_menu_init():
     return redirect(url_for('menu.edit_menu', group_id=menu_grp, menu_num=menu_num))
 # edit_menu_init
 
-@menu_bp.route('/edit/<int:group_id>/<int:menu_num>', methods=['GET', 'POST'])
 @superuser_required
 def edit_menu(group_id, menu_num):
     """
@@ -311,7 +308,6 @@ def edit_menu(group_id, menu_num):
     return render_template(templt, **cntext)
 
 
-@menu_bp.route('/Gcreate/<int:group_id>/<group_name>/<group_info>')
 @superuser_required
 def create_group(group_id, group_name, group_info):
     from ..models import ( menuGroups, )
@@ -321,8 +317,6 @@ def create_group(group_id, group_name, group_info):
     return redirect(request.referrer or url_for('menu.edit_menu', group_id=group_id, menu_num=0))
 
 
-@menu_bp.route('/create/<int:menu_group>/<int:menu_num>')
-@menu_bp.route('/create/<int:menu_group>/<int:menu_num>/<int:from_group>/<int:from_menu>')
 @superuser_required
 def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
     """
@@ -392,7 +386,6 @@ def create_menu(menu_group, menu_num, from_group=None, from_menu=None):
     return redirect(url_for('menu.edit_menu', group_id=menu_group, menu_num=menu_num))
 
 
-@menu_bp.route('/remove/<int:menu_group>/<int:menu_num>')
 @superuser_required
 def remove_menu(menu_group, menu_num):
     """

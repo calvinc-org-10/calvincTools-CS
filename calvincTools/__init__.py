@@ -6,10 +6,12 @@ calvincTools - A Python package
 
 from flask import Flask, render_template, redirect, url_for, session
 from flask_migrate import Migrate
+
+from .usr_auth.views import init_login_manager
 from .blueprints import ctools_bp
-from .usr_auth.views import init_login_manager, register_auth_blueprint
-from .cMenu.views import menu_bp
-from .utils import util_bp
+from .usr_auth.routes import register_auth_blueprint
+from .cMenu.routes import register_menu_blueprint
+from .utils.routes import register_util_blueprint
 
 class calvinCTools_init:
     def __init__(self, app=None, app_db=None):
@@ -40,8 +42,8 @@ class calvinCTools_init:
         
         # Register blueprints
         register_auth_blueprint(app)
-        app.register_blueprint(menu_bp)
-        app.register_blueprint(util_bp)
+        register_menu_blueprint(app)
+        register_util_blueprint(app)
         
         # Home route
         # Note: We define this route here to ensure it exists, but the caller can override it by defining their own route for '/'

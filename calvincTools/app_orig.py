@@ -1,10 +1,11 @@
 from flask import Flask, render_template, redirect, url_for, session
 from flask_migrate import Migrate
 
-from .database import cTools_db  
+from .database import cTools_db
+from .usr_auth.routes import register_auth_blueprint  
 from .models import init_cDatabase
-from .usr_auth.views import init_login_manager, register_auth_blueprint
-from .cMenu.views import menu_bp
+from .usr_auth.views import init_login_manager
+from .cMenu.routes import menu_bp
 from .utils import util_bp
 from . import config
 

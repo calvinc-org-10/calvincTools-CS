@@ -1,5 +1,4 @@
 #pylint: disable=no-member
-from datetime import datetime
 from functools import wraps
 import random
 
@@ -9,9 +8,7 @@ from flask import (
     current_app,
     )
 from flask.views import MethodView
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
-from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, login_user, logout_user, current_user
 
 from calvincTools.app_secrets import sysver_key
 from calvincTools.sysver import sysver
@@ -120,7 +117,7 @@ def login_view():
     """
     Handle user login (GET and POST).
     """
-    from ..models import User, cGreetings, db
+    from ..models import User, cGreetings
     
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -211,7 +208,7 @@ import unicodedata
 from urllib.parse import (
     ParseResult, SplitResult, 
     _coerce_args, _splitnetloc, _splitparams, # type: ignore
-    scheme_chars, urlencode as original_urlencode, uses_params,
+    scheme_chars, uses_params,
 )
 def url_has_allowed_host_and_scheme(url, allowed_hosts, require_https=False):
     """
@@ -562,27 +559,6 @@ def user_list_view():
 # user_list_view
 
 
-# ============================================================================
-# BLUEPRINT REGISTRATION
-# ============================================================================
-
-def register_auth_blueprint(app):
-    """
-    Register authentication routes with the Flask app.
-    """
-    from flask import Blueprint
-    
-    auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
-    
-    auth_bp.add_url_rule('/login', 'login', login_view, methods=['GET', 'POST'])
-    auth_bp.add_url_rule('/logout', 'logout', logout_view, methods=['GET', 'POST'])
-    auth_bp.add_url_rule('/change-password', 'change_password', change_password_view, methods=['GET', 'POST'])
-    auth_bp.add_url_rule('/register', 'register', register_view, methods=['GET', 'POST'])
-    auth_bp.add_url_rule('/users', 'user_list', user_list_view, methods=['GET', 'POST']) # type: ignore
-    
-    app.register_blueprint(auth_bp)
-# register_auth_blueprint(app) should be called in your app factory function after initializing the app and db.
-
 
 # ============================================================================
 # ALTERNATIVE:  CLASS-BASED VIEWS
@@ -597,7 +573,7 @@ class LoginView(MethodView):
         return render_template('auth/login.html')
     
     def post(self):
-        from ..models import User, db
+        from ..models import User
         username = request.form.get('susername', '').strip()
         password = request.form.get('password', '')
         remember = request.form.get('remember', False)

@@ -1,15 +1,13 @@
 # pylint: disable=no-member
 from flask import (
-    Blueprint, 
     current_app,
     url_for, 
     render_template, redirect, 
     flash, 
     )
-from flask_login import login_required, current_user
+from flask_login import login_required
 
 from sqlalchemy import (
-    union_all, cast, Integer, String, Boolean,
     func,
 )
 
@@ -19,9 +17,6 @@ from sqlalchemy import (
 from . import (
     MENUCOMMAND, MENUCOMMANDDICTIONARY,
     )
-
-menu_bp = Blueprint('menu', __name__, url_prefix='/menu')
-
 
 def get_default_menu(MenuGroup_id):
     """
@@ -50,14 +45,13 @@ def get_default_menu(MenuGroup_id):
 # get_default_menu
 
 
-@menu_bp.route('/load/<int:menu_group>/<int:menu_num>')
 @login_required
 def load_menu(menu_group, menu_num):
     """
     Django equivalent:  LoadMenu
     Displays a menu to the user. 
     """
-    from ..models import ( db, menuItems, menuGroups, )
+    from ..models import ( menuItems, )
 
     # Check if menu exists
     menu_items_query = menuItems.query.filter_by(
@@ -140,7 +134,6 @@ def build_menu_html(menu_items, menu_group, menu_num):  # pylint: disable=unused
 # build_menu_html
 
 
-@menu_bp.route('/command/<int:command_num>/<command_arg>')
 @login_required
 def handle_command(command_num, command_arg):
     """

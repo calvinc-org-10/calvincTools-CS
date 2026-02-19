@@ -1,4 +1,3 @@
-from .blueprints import util_bp
 
 from .messageBoxes import *
 from .fileDialogs import *

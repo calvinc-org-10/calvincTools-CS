@@ -2,7 +2,6 @@ from typing import Any
 import ast
 
 from flask import render_template, current_app
-from . import util_bp
 
 
 def is_hashable(obj: Any) -> bool:
@@ -143,7 +142,6 @@ def pretty_show_fns(path_:str):
     return result_str
 
 
-@util_bp.route('/routes')
 def show_routes():
     rules = [
         (rule.endpoint, rule.rule, rule.methods) # type: ignore
@@ -156,7 +154,6 @@ def show_routes():
     }
     return render_template(templt, **cntext)
 
-@util_bp.route('/formlist')
 def show_forms():
 
     FormNameToURL_Map = current_app.config['FORMNAME_TO_URL_MAP']

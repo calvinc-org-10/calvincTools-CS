@@ -4,14 +4,11 @@ from flask.typing import ResponseReturnValue
 from flask_login import current_user, login_required
 from sqlalchemy import text
 
-from calvincTools.cMenu.views import menu_bp
 from calvincTools.decorators import superuser_required
 from calvincTools.forms import RawSQLForm
-from calvincTools.utils import util_bp
 
 
 
-@util_bp.route('/sql', methods=['GET', 'POST'])
 @superuser_required
 def run_sql():
     """
@@ -76,7 +73,6 @@ def run_sql():
     return render_template('utils/enter_sql. html', form=form)
 
 
-@util_bp.route('/parameters', methods=['GET', 'POST'])
 @superuser_required
 def edit_parameters():
     """
@@ -106,7 +102,6 @@ def edit_parameters():
 # db and models imported in each method so that the initalized versions are used
 
 
-@util_bp.route('/greetings', methods=['GET', 'POST'])
 @login_required
 def greetings():
     """
@@ -132,7 +127,6 @@ def greetings():
 ############################################################
 
 
-@menu_bp.route('/formbrowse/<formname>')
 @superuser_required
 def form_browse(formname: str) -> ResponseReturnValue:
     urlIndex = 0
@@ -165,7 +159,6 @@ def form_browse(formname: str) -> ResponseReturnValue:
     # return theForm
 # form_browse
 
-@menu_bp.route('/showtable/<tblname>')
 @superuser_required
 def show_table(tblname):
     # showing a table is nothing more than another form
