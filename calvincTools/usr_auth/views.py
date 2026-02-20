@@ -3,7 +3,8 @@ from functools import wraps
 import random
 
 from flask import (
-    render_template, redirect, url_for, flash, 
+    render_template, redirect, url_for, abort,
+    flash, 
     request, session, 
     current_app,
     )
@@ -71,7 +72,7 @@ def superuser_required(f):
         
         if not current_user.is_superuser:
             flash('You do not have permission to access this page. ', 'danger')
-            return redirect(url_for('index'))  # or return a 403 page
+            abort(403)  # Forbidden
         
         return f(*args, **kwargs)
     return decorated_function
@@ -104,7 +105,7 @@ def anonymous_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if current_user.is_authenticated:
-            return redirect(url_for('index'))
+            abort(403)  # Forbidden
         return f(*args, **kwargs)
     return decorated_function
 
@@ -120,6 +121,8 @@ def login_view():
     from ..models import User, cGreetings
     
     if current_user.is_authenticated:
+        flash('You are already logged in.', 'info')
+        # return a blank page here
         return redirect(url_for('index'))
     
     grts = cGreetings.query.all()
@@ -139,38 +142,51 @@ def login_view():
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
         remember = request.form.get('remember', False)
+        localTZ = request.form.get('localTZ', 'UTC')
         
-        if not username or not password:
-            flash('Please provide both username and password.', 'danger')
-            return render_template(templt, **cntext)
-        
-        user = User.query.filter_by(username=username).first()
+        dev_bypass = request.form.get('dev_bypass', False)
+        if dev_bypass:
+            user = User.query.filter_by(is_superuser=True).first()
+            if user:
+                login_user(user, remember=True)
+                flash(f'DEV BYPASS: Logged in as {user.username}', 'warning')
+            else:
+                flash('DEV BYPASS FAILED: User not found.', 'danger')
+                return render_template(templt, **cntext)
+        else:
+            if not username or not password:
+                flash('Please provide both username and password.', 'danger')
+                return render_template(templt, **cntext)
+            
+            user = User.query.filter_by(username=username).first()
 
-        # DEV bypass goes here
-        
-        if user is None or not user.check_password(password):
-            flash('Invalid username or password.', 'danger')
-            cntext['invalidusr'] = True
-            return render_template(templt, **cntext)
-        
-        if not user.is_active:
-            flash('Your account has been deactivated. Please contact support.', 'danger')
-            cntext['invalidusr'] = True
-            return render_template(templt, **cntext)
-        
-        # Log the user in
-        assert isinstance(remember, bool), "Remember must be a boolean value"
-        login_user(user, remember=remember)
-        user.update_last_login()
-        
-        flash(f'Welcome back, {user.username}!', 'success')
+            # DEV bypass goes here
+            # dev_submit, local_tz
+            
+            if user is None or not user.check_password(password):
+                flash('Invalid username or password.', 'danger')
+                cntext['invalidusr'] = True
+                return render_template(templt, **cntext)
+            
+            if not user.is_active:
+                flash('Your account has been deactivated. Please contact support.', 'danger')
+                cntext['invalidusr'] = True
+                return render_template(templt, **cntext)
+            
+            # Log the user in
+            assert isinstance(remember, bool), "Remember must be a boolean value"
+            login_user(user, remember=remember)
+            user.update_last_login()
+            
+            flash(f'Welcome back, {user.username}!', 'success')
+        # endif dev bypass
         
         # set initial menugroup
         session['menu_group'] = user.menuGroup if user.menuGroup else 1
-        
-        # django_settings.TIME_ZONE = request.POST['localTZ'] # set the time zone from wherever the user's at 
+        session['TIME_ZONE'] = localTZ
 
         # Redirect to next page or home
+        # next_page = request.form.get('next') is real location, but it needs to be set up correctly
         next_page = request.args.get('next')
         if next_page:
             return redirect(next_page)
@@ -180,30 +196,7 @@ def login_view():
     # GET request
 
     return render_template(templt, **cntext)
-
-# flask-login example login view
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     # Here we use a class of some kind to represent and validate our
-#     # client-side form data. For example, WTForms is a library that will
-#     # handle this for us, and we use a custom LoginForm to validate.
-#     form = LoginForm()
-#     if form.validate_on_submit():
-#         # Login and validate the user.
-#         # user should be an instance of your `User` class
-#         login_user(user)
-
-#         flask.flash('Logged in successfully.')
-
-#         next = flask.request.args.get('next')
-#         # url_has_allowed_host_and_scheme should check if the url is safe
-#         # for redirects, meaning it matches the request host.
-#         # See Django's url_has_allowed_host_and_scheme for an example.
-#         if not url_has_allowed_host_and_scheme(next, request.host):
-#             return flask.abort(400)
-
-#         return flask.redirect(next or flask.url_for('index'))
-#     return flask.render_template('login.html', form=form)
+# login_view
 # from Django http.py
 import unicodedata
 from urllib.parse import (
@@ -369,6 +362,7 @@ def change_password_view():
         db.session.commit()
         
         flash('Your password has been changed successfully.', 'success')
+        # return a blank page here
         return redirect(url_for('index'))
     
     # GET request
@@ -382,6 +376,8 @@ def register_view():
     from ..models import User, db
     
     if current_user.is_authenticated:
+        flash('You are already logged in.  Your account already exists.', 'info')
+        # return a blank page here
         return redirect(url_for('index'))
     
     if request.method == 'POST': 
