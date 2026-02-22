@@ -7,6 +7,7 @@ from sqlalchemy import text
 from calvincTools.decorators import superuser_required
 from calvincTools.forms import RawSQLForm
 
+# db and models imported in each method so that the initalized versions are used
 
 
 @superuser_required
@@ -22,7 +23,7 @@ def run_sql():
     if form.validate_on_submit():
         sql_query = form.input_sql.data
         try:
-            # isz there actually any SQL entered?
+            # is there actually any SQL entered?
             if not sql_query.strip(): # type: ignore
                 flash('Please enter a SQL query.', 'warning')
                 return render_template('utils/enter_sql.html', form=form)
@@ -47,12 +48,12 @@ def run_sql():
                 columns = result.keys()
                 rows = [dict(row._mapping) for row in result]
 
-                context['col_names'] = list(columns)
-                context['num_records'] = len(rows)
-                context['sql_results'] = rows
-                context['orig_sql'] = sql_query
+                context['colNames'] = list(columns)
+                context['nRecs'] = len(rows)
+                context['SQLresults'] = rows
+                context['OrigSQL'] = sql_query
 
-                # Optionally save to Excel
+                # Optionally save to Excel - WRITEMEWRITEMEWRITEME!!!!
                 # excel_file = save_to_excel(rows, columns)
                 # context['excel_file'] = excel_file
 
@@ -70,40 +71,146 @@ def run_sql():
             flash(f'SQL Error: {str(e)}', 'danger')
             return render_template('utils/enter_sql.html', form=form)
 
-    return render_template('utils/enter_sql. html', form=form)
-
+    return render_template('utils/enter_sql.html', form=form)
+# run_sql
 
 @superuser_required
+## steal hints from edit users
 def edit_parameters():
     """
     Django equivalent: fncParmForm
+
+    Handle Parameter management (GET and POST).
+    Displays all existing Parameters plus a blank form for new entries.
+    
+    GET: Display all records + blank forms
+    POST: Save/update all parameters from the form, then redirect back to GET to show updated list.
     """
     from ..models import ( db, cParameters, )
+    from .forms import (cParameterEditForm, cParameterItemForm, )
+    
+    blank_formline_count = request.args.get('blank_formline_count', 1, type=int)
+    flds_to_update = ['parm_name', 'parm_value', 'user_modifiable', 'comments']
+    flds_form_labels = ['Parameter Name', 'Parameter Value', 'User Modifiable', 'Comments']
+    has_id_field = False   # cParameterItemForm has no id field, so we set this to False to prevent the template from trying to render it
+    
+    if request.method == 'GET':
+        # Get all existing users
+        existing_parms = cParameters.query.all()
+        
+        # Create form with existing users
+        form = cParameterEditForm()
+        
+        # Clear default entry so we can control the list explicitly
+        while len(form.parameters) > 0:
+            form.parameters.pop_entry()
+        
+        # Populate form with existing users
+        for parm in existing_parms:
+            form.parameters.append_entry({
+                # "pk": parm.id,
+                "parm_name": parm.parm_name,
+                "parm_value": parm.parm_value,
+                "user_modifiable": parm.user_modifiable,
+                "comments": parm.comments,
+            })
+        
+        # Add blank users for new entries
+        blank_user = cParameters()  # type: ignore
+        for _ in range(blank_formline_count):
+            form.parameters.append_entry(blank_user)
+        
+        templt = 'utils/cParameters.html'
+        contxt = {
+            'form': form,
+            'fields_to_update': dict(zip(flds_to_update, flds_form_labels)),
+            'has_id_field': has_id_field,   # cParameterItemForm has no id field, so we set this to False to prevent the template from trying to render it
+            'prototype_blank_record': blank_user,
+            'blank_formline_count': blank_formline_count,
+            }
+        return render_template(templt, **contxt)
+    
+    elif request.method == 'POST':
+        form = cParameterEditForm()
+        
+        if form.validate_on_submit():
+            try:
+                # Get all user IDs from the request to identify which ones are new/existing
+                parameters_in_form = []
+                # for user_data in form.parameters.data:
+                #     if user_data.get("pk"):
+                #         parameters_in_form.append(user_data["pk"])
+                
+                # Process each user in the form
+                for i, parm_form in enumerate(form.parameters.entries):      #pylint: disable=unused-variable
+                    data_from_form = {}
+                    # pk = getattr(parm_form.pk, 'data', None)
+                    # TODO: use flds_to_update to loop through and build data_from_form instead of hardcoding each field
+                    data_from_form['parm_name'] = getattr(parm_form.parm_name, 'data', '')
+                    data_from_form['parm_value'] = getattr(parm_form.parm_value, 'data', '')
+                    data_from_form['user_modifiable'] = getattr(parm_form.user_modifiable, 'data', True)
+                    data_from_form['comments'] = getattr(parm_form.comments, 'data', '')
+                    
+                    # Skip blank entries (no parm_name provided)
+                    if not data_from_form['parm_name'].strip():
+                        continue
+                    
+                    # Check if this is an existing user or new user
+                    parm = cParameters.query.filter(cParameters.parm_name == data_from_form['parm_name']).first()    # type: ignore
+                    
+                    if parm:
+                        # remove if requested
+                        if parm_form.Remove.data:
+                            db.session.delete(parm)
+                            continue
+                        
+                        # # make sure parm name hasn't been changed to a duplicate of another existing parm
+                        # existing_parm_with_same_name = cParameters.query.filter(cParameters.parm_name == data_from_form['parm_name'], cParameters.id != parm.id).first()    # type: ignore
+                        # if existing_parm_with_same_name:
+                        #     flash(f'Error: Parameter name "{data_from_form['parm_name']}" already exists. Please choose a different name.', 'danger')
+                        #     return redirect(url_for('utils.edit_parameters'))
+                        
+                        # Update existing parm
+                        for fld in flds_to_update:
+                            if data_from_form[fld] != getattr(parm, fld):
+                                setattr(parm, fld, data_from_form[fld])
+                    else:
+                        # Create new parm
+                        parm = cParameters(**{key:val for key, val in data_from_form.items() if key in flds_to_update})
+                    # if parm exists or new parm created
+                    
+                    db.session.add(parm)
+                
+                db.session.commit()
+                flash('All parms saved successfully!', 'success')
+                return redirect(url_for('utils.edit_parameters'))
+            # endfor each user in form
+            
+            except Exception as e:      #pylint: disable=broad-exception-caught
+                db.session.rollback()
+                flash(f'Error saving users: {str(e)}', 'danger')
+                return redirect(url_for('utils.edit_parameters'))
+            # endtry
+        else:
+            flash('Form validation failed. Please check your entries.', 'danger')
 
-    if request.method == 'POST':
-        # Handle form submission
-        # Process parameter updates
-        for key, value in request.form.items():
-            if key.startswith('parm_value_'):
-                parm_name = key.replace('parm_value_', '')
-                param = cParameters.query.get(parm_name)
-                if param and (param.user_modifiable or current_user.is_superuser):
-                    param.parm_value = value
-
-        db.session.commit()
-        flash('Parameters updated successfully', 'success')
-        return redirect(url_for('utils.edit_parameters'))
-
-    # GET request
-    parameters = cParameters.query.order_by(cParameters.parm_name).all()
-    return render_template('utils/parameters.html', parameters=parameters)
-
-
-# db and models imported in each method so that the initalized versions are used
-
+        templt = 'utils/cParameters.html'
+        blank_user = cParameters()  # type: ignore
+        contxt = {
+            'form': form,
+            'fields_to_update': dict(zip(flds_to_update, flds_form_labels)),
+            'has_id_field': has_id_field,   # cParameterItemForm has no id field, so we set this to False to prevent the template from trying to render it
+            'prototype_blank_record': blank_user,
+            'blank_formline_count': blank_formline_count,
+            }
+        return render_template(templt, **contxt)
+        # endif form.validate_on_submit()
+    # endif request.method == 'GET' vs 'POST'
+# edit_parameters
 
 @login_required
-def greetings():
+## steal hints from edit users
+def edit_greetings():
     """
     Django equivalent:  fn_cGreetings
     """

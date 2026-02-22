@@ -146,7 +146,10 @@ def login_view():
         
         dev_bypass = request.form.get('dev_bypass', False)
         if dev_bypass:
-            user = User.query.filter_by(is_superuser=True).first()
+            user = User.query.filter_by(username=username).first()
+            if not user:
+                user = User.query.filter_by(is_superuser=True).first()
+
             if user:
                 login_user(user, remember=True)
                 flash(f'DEV BYPASS: Logged in as {user.username}', 'warning')
@@ -159,9 +162,6 @@ def login_view():
                 return render_template(templt, **cntext)
             
             user = User.query.filter_by(username=username).first()
-
-            # DEV bypass goes here
-            # dev_submit, local_tz
             
             if user is None or not user.check_password(password):
                 flash('Invalid username or password.', 'danger')

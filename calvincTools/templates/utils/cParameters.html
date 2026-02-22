@@ -1,0 +1,259 @@
+{% extends "cTools_common.html" %}
+
+{% block tTitle %}Parameter Management{% endblock %}
+{% block formName %}Parameter Management{% endblock %}
+{% block customCSS %}
+    .badge {
+        display: inline-block;
+        font-size: 0.875rem;
+    }
+    
+    .make-inactive-btn {
+        min-width: 120px;
+    }
+    
+    .table-responsive {
+        margin-top: 20px;
+    }
+    
+    .parameter-row td {
+        vertical-align: middle;
+    }
+    
+    .form-control {
+        font-size: 0.9rem;
+    }
+    
+    .form-check {
+        padding-top: 0.5rem;
+    }
+{% endblock %}
+
+{% block boddy %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+        <form method="POST" action="{{ url_for('auth.user_list') }}" id="ListForm">
+            {{ form.hidden_tag() }}
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="tTable">
+                        <thead class="table-dark">
+                            <tr>
+                                {% if has_id_field %}
+                                    <th>id</th>
+                                {% endif %}
+                                {% for fldnm, fldlbl in fields_to_update.items() %}
+                                    <th>{{ fldlbl }}</th>
+                                {% endfor %}
+                                <th>remove</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tTableBody">
+                            {% for rowform in form.parameters %}
+                            <tr class="parameter-row" data-user-index="{{ loop.index0 }}">
+                                {% if has_id_field %}
+                                    <td>
+                                        {{ rowform.pk.data or '' }}
+                                    </td>
+                                {% endif %}
+                                {% for fldnm, fldlbl in fields_to_update.items() %}
+                                    <td>
+                                        {#{ rowform[fldnm](class="form-control") }#}
+                                        {{ rowform[fldnm]() }}
+                                        {% if rowform[fldnm].errors %}
+                                        <div class="text-danger small">
+                                            {% for error in rowform[fldnm].errors %}
+                                                {{ error }}<br>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+
+                                <td>
+                                    {{ rowform.Remove() }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-3">
+                    <button type="button" class="btn btn-secondary" id="addMoreUsersBtn">
+                        Add {{ blank_formline_count }} More Users
+                    </button>
+                    {#{ form.submit(class="btn btn-primary") }#}
+                    {# <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a> #}
+                    <a href="#" onclick="window.close();" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+    <div class="container mt-4">
+        <div class="row mx-auto max-width=100%">
+            <div class="col-5">
+                <button type="submit">
+                    <img src="{{ url_for('ctools.static', filename='svg/poem-poetry-icon.svg') }}" width="20" height="20">
+                    Save changes
+                </button>
+                
+                <button id="add-user" type="button" onclick="create_empty_rec()">
+                    Add parameter
+                </button>
+            </div>
+            <div class="col-5"></div>
+            <div class="col">
+                <button type="button" onclick="window.close();">
+                    <img src="{{ url_for('ctools.static', filename='svg/stop-road-sign-icon.svg') }}" width="20" height="20">
+                    Close Form
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {##
+    {# The 'empty_form' template for dynamic addition # }
+    <div id="empty_form" style="display:none;">
+        <tr style="border-bottom:solid;">
+            <td>{{ plist.empty_form.ParmName(class="form-control") if plist.empty_form else "" }}</td>
+            <td>{{ plist.empty_form.ParmValue(class="form-control") if plist.empty_form else "" }}</td>
+            <td>{{ plist.empty_form.UserModifiable() if plist.empty_form else "" }}</td>
+            <td>{{ plist.empty_form.Comments(class="form-control") if plist.empty_form else "" }}</td>
+            <td>
+                {% if plist.can_delete %}
+                    {{ plist.empty_form.DELETE() if plist.empty_form else "" }}
+                {% endif %}
+            </td>
+        </tr>
+    </div>
+    ##}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const blank_user_count = {{ blank_user_count }};
+    let nextIndex = document.querySelectorAll('.user-row').length;
+    
+    // Handle "Make Inactive" button clicks
+    document.querySelectorAll('.make-inactive-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const userIndex = this.dataset.userIndex;
+            const row = document.querySelector(`[data-user-index="${userIndex}"]`);
+            const disActiveInput = row.querySelector('.dis-active-input');
+            
+            // Toggle the state
+            if (disActiveInput.value === '1') {
+                disActiveInput.value = '0';
+                // Show INACTIVE badge instead of button
+                this.replaceWith(
+                    `<span class="badge" style="background-color: #dc3545; color: white; padding: 8px 12px;">
+                        INACTIVE
+                    </span>`
+                );
+            } else {
+                disActiveInput.value = '1';
+                // Show Make Inactive button instead of badge
+                this.style.display = '';
+            }
+        });
+    });
+    
+    // Handle "Add More Users" button
+    document.getElementById('addMoreUsersBtn').addEventListener('click', function() {
+        addBlankUserRows(blank_user_count);
+    });
+    
+    function addBlankUserRows(count) {
+        const tbody = document.getElementById('userTableBody');
+        const currentRowCount = document.querySelectorAll('.user-row').length;
+        
+        for (let i = 0; i < count; i++) {
+            const newIndex = currentRowCount + i;
+            const newRow = createBlankUserRow(newIndex);
+            tbody.appendChild(newRow);
+        }
+        
+        // Re-initialize event listeners for the new "Make Inactive" buttons
+        document.querySelectorAll('.make-inactive-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const userIndex = this.dataset.userIndex;
+                const row = document.querySelector(`[data-user-index="${userIndex}"]`);
+                const disActiveInput = row.querySelector('.dis-active-input');
+                
+                if (disActiveInput && disActiveInput.value === '1') {
+                    disActiveInput.value = '0';
+                    this.replaceWith(
+                        `<span class="badge" style="background-color: #dc3545; color: white; padding: 8px 12px;">
+                            INACTIVE
+                        </span>`
+                    );
+                }
+            });
+        });
+    }
+    
+    function createBlankUserRow(index) {
+        const row = document.createElement('tr');
+        row.className = 'user-row';
+        row.dataset.userIndex = index;
+        
+        // Build field names following WTForms FieldList naming convention
+        const baseName = `users-${index}-`;
+        
+        row.innerHTML = `
+            <td>
+                <input id="${baseName}pk" name="${baseName}pk" type="hidden" value="">
+            </td>
+            <!-- Username -->
+            <td>
+                <input class="form-control" id="${baseName}username" 
+                       name="${baseName}username" type="text">
+            </td>
+            
+            <!-- Email -->
+            <td>
+                <input class="form-control" id="${baseName}email" 
+                       name="${baseName}email" type="email">
+            </td>
+            
+            <!-- Password -->
+            <td>
+                <input class="form-control" id="${baseName}password" 
+                       name="${baseName}password" type="password"
+                       autocomplete="new-password">
+            </td>
+            
+            <!-- Active Status (checkbox for new blank rows) -->
+            <td class="align-middle">
+                <div class="form-check">
+                    <input class="form-check-input" id="${baseName}FLDis_active" 
+                           name="${baseName}FLDis_active" type="checkbox" value="y" checked>
+                    <label class="form-check-label" for="${baseName}FLDis_active">Active</label>
+                </div>
+            </td>
+            
+            <!-- Superuser -->
+            <td class="align-middle">
+                <div class="form-check">
+                    <input class="form-check-input" id="${baseName}is_superuser" 
+                           name="${baseName}is_superuser" type="checkbox" value="y">
+                </div>
+            </td>
+            
+            <!-- Permissions -->
+            <td>
+                <textarea class="form-control" id="${baseName}permissions" 
+                          name="${baseName}permissions" rows="2"></textarea>
+            </td>
+        `;
+        
+        return row;
+    }
+});
+</script>
+{% endblock %}

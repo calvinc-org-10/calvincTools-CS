@@ -1,0 +1,61 @@
+{% extends "cTools_common.html" %}
+
+{% block tTitle %}Enter SQL{% endblock %}
+{% block formName %}Enter SQL{% endblock %}
+{% block tHeader %}{% endblock %}
+{% block boddy %}
+<hr>
+Enter SQL to run (only SELECT statements are supported)
+<div class="container mx-auto">
+<form id="FmMain" class="trackformchanges" method="post">
+    {#{ csrf_token() }#}
+    {{ form.hidden_tag() }}
+
+    {% for field in form if field.widget.input_type != 'hidden' %}
+        <div>
+            {{ field.label }}
+            {{ field() }}
+            {% if field.errors %}
+                {% for error in field.errors %}<small>{{ error }}</small>{% endfor %}
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <div class="container">
+        <div class="row mx-auto max-width=100%">
+            <div class="col-4">
+                <button id="save_btn" type="submit">
+                    <img src="{{ url_for('ctools.static', filename='poem-poetry-icon.svg') }}" width="20" height="20">
+                    Run SQL
+                </button>
+            </div>
+            <div class="col-6"></div>
+            <div class="col">
+                <button id="close_btn" type="button">
+                    <img src="{{ url_for('ctools.static', filename='stop-road-sign-icon.svg') }}" width="20" height="20">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+</div>
+<br>
+<hr>
+
+<h2><u>Hints</u></h2>
+<div class="container mx-auto" style="height:300px; overflow: auto;">   
+    {% include 'SQLhints.html' %}
+</div>
+
+<script>
+    document.body.onbeforeunload = function() {
+        document.getElementById("wait_spinner").style.display = "block";
+    }
+
+    document.getElementById("close_btn").addEventListener("click", function () {
+        window.close();
+    });
+
+</script>
+{% endblock %}

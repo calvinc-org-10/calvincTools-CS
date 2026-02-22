@@ -59,7 +59,7 @@ class calvinCTools_init:
             from .models import db
             if db is not None:
                 db.session.rollback()
-            return render_template('errors/500.html'), 500
+            return render_template('errors/500.html', error=error), 500
 
         # 3. Attach cTools to the app extensions (optional but recommended)
         if not hasattr(app, 'extensions'):

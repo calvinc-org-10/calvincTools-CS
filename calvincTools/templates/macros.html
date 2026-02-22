@@ -1,0 +1,19 @@
+{% macro render_form(form, action_url='', method='post', btn_text='Submit', btn_class='btn btn-primary') %}
+<form action="{{ action_url }}" method="{{ method }}" id="FmMain" class="trackformchanges">
+    {{ form.hidden_tag() }}
+    
+    {% for field in form if field.widget.input_type != 'hidden' %}
+        <div class="mb-3">
+            {{ field.label(class="form-label") }}
+            {# Pass class_ to avoid conflict with Python's class keyword #}
+            {{ field(class="form-control" + (" is-invalid" if field.errors else "")) }}
+            
+            {% for error in field.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+    <button type="submit" class="{{ btn_class }}">{{ btn_text }}</button>
+</form>
+{% endmacro %}

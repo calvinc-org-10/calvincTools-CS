@@ -41,3 +41,16 @@ class MenuEditForm(FlaskForm):
     menu_items = FieldList(FormField(MenuItemForm), min_entries=20, max_entries=20)
     menu_name = StringField('Menu Name', validators=[DataRequired()])
     # submit = SubmitField('Save Menu')
+
+class cParameterItemForm(Form):
+    pk = HiddenField()
+    parm_name = StringField()
+    parm_value = StringField(default='')
+    user_modifiable = BooleanField(default=True)
+    comments = StringField(default='')
+
+    Remove = BooleanField(default=False)
+        
+class cParameterEditForm(FlaskForm):
+    parameters = FieldList(FormField(cParameterItemForm), min_entries=1)
+
