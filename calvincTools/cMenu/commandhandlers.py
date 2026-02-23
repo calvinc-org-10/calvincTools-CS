@@ -116,16 +116,17 @@ def edit_parameters():
             })
         
         # Add blank users for new entries
-        blank_user = cParameters()  # type: ignore
+        blank_rec = cParameters()  # type: ignore
         for _ in range(blank_formline_count):
-            form.parameters.append_entry(blank_user)
+            form.parameters.append_entry(blank_rec)
         
         templt = 'utils/cParameters.html'
         contxt = {
             'form': form,
             'fields_to_update': dict(zip(flds_to_update, flds_form_labels)),
             'has_id_field': has_id_field,   # cParameterItemForm has no id field, so we set this to False to prevent the template from trying to render it
-            'prototype_blank_record': blank_user,
+            'prototype_blank_record': blank_rec,
+            'blank2': cParameterItemForm(),
             'blank_formline_count': blank_formline_count,
             }
         return render_template(templt, **contxt)
@@ -195,12 +196,13 @@ def edit_parameters():
             flash('Form validation failed. Please check your entries.', 'danger')
 
         templt = 'utils/cParameters.html'
-        blank_user = cParameters()  # type: ignore
+        blank_rec = cParameters()  # type: ignore
         contxt = {
             'form': form,
             'fields_to_update': dict(zip(flds_to_update, flds_form_labels)),
             'has_id_field': has_id_field,   # cParameterItemForm has no id field, so we set this to False to prevent the template from trying to render it
-            'prototype_blank_record': blank_user,
+            'prototype_blank_record': blank_rec,
+            'blank2': cParameterItemForm(),
             'blank_formline_count': blank_formline_count,
             }
         return render_template(templt, **contxt)

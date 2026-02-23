@@ -33,7 +33,8 @@
 <div class="container mt-4">
     <div class="row">
         <div class="col-12">
-        <form method="POST" action="{{ url_for('auth.user_list') }}" id="ListForm">
+        {# <form method="POST" action="{{ url_for('auth.user_list') }}" id="ListForm"> #}
+        <form method="POST" id="ListForm">
             {{ form.hidden_tag() }}
                 
                 <div class="table-responsive">
@@ -81,7 +82,7 @@
                 </div>
                 
                 <div class="mt-3">
-                    <button type="button" class="btn btn-secondary" id="addMoreUsersBtn">
+                    <button type="button" class="btn btn-secondary" id="addMoreRecsBtn">
                         Add {{ blank_formline_count }} More Users
                     </button>
                     {#{ form.submit(class="btn btn-primary") }#}
@@ -115,8 +116,21 @@
         </div>
     </div>
 
+    for building blank forms:<br>
+    blank_user: <br>{{ prototype_blank_record }}<br>
+    null_form:<br> {{ blank2 }}<br>
+                                {% for fldnm, fldlbl in fields_to_update.items() %}
+                                    <td>
+                                        {{ blank2[fldnm]() }}
+                                    </td>
+                                {% endfor %}
+                                <td>
+                                    {{ blank2.Remove() }}
+                                </td>
+
+
     {##
-    {# The 'empty_form' template for dynamic addition # }
+    {# The 'empty_form' template for dynamic addition # } this comment not closed because its in an outer comment
     <div id="empty_form" style="display:none;">
         <tr style="border-bottom:solid;">
             <td>{{ plist.empty_form.ParmName(class="form-control") if plist.empty_form else "" }}</td>
@@ -130,6 +144,30 @@
             </td>
         </tr>
     </div>
+                            <tr class="parameter-row" data-user-index="{{ loop.index0 }}">
+                                {% if has_id_field %}
+                                    <td>
+                                        {{ rowform.pk.data or '' }}
+                                    </td>
+                                {% endif %}
+                                {% for fldnm, fldlbl in fields_to_update.items() %}
+                                    <td>
+                                        {#{ rowform[fldnm](class="form-control") }# } this comment not closed because its in an outer comment
+                                        {{ rowform[fldnm]() }}
+                                        {% if rowform[fldnm].errors %}
+                                        <div class="text-danger small">
+                                            {% for error in rowform[fldnm].errors %}
+                                                {{ error }}<br>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+
+                                <td>
+                                    {{ rowform.Remove() }}
+                                </td>
+                            </tr>
     ##}
 
 <script>
