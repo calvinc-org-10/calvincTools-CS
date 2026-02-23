@@ -36,85 +36,87 @@
         {# <form method="POST" action="{{ url_for('auth.user_list') }}" id="ListForm"> #}
         <form method="POST" id="ListForm">
             {{ form.hidden_tag() }}
-                
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped" id="tTable">
-                        <thead class="table-dark">
-                            <tr>
-                                {% if has_id_field %}
-                                    <th>id</th>
-                                {% endif %}
-                                {% for fldnm, fldlbl in fields_to_update.items() %}
-                                    <th>{{ fldlbl }}</th>
-                                {% endfor %}
-                                <th>remove</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tTableBody">
-                            {% for rowform in form.parameters %}
-                            <tr class="tbl-row" data-user-index="{{ loop.index0 }}">
-                                {% if has_id_field %}
-                                    <td>
-                                        {{ rowform.pk.data or '' }}
-                                    </td>
-                                {% endif %}
-                                {% for fldnm, fldlbl in fields_to_update.items() %}
-                                    <td>
-                                        {#{ rowform[fldnm](class="form-control") }#}
-                                        {{ rowform[fldnm]() }}
-                                        {% if rowform[fldnm].errors %}
-                                        <div class="text-danger small">
-                                            {% for error in rowform[fldnm].errors %}
-                                                {{ error }}<br>
-                                            {% endfor %}
-                                        </div>
-                                        {% endif %}
-                                    </td>
-                                {% endfor %}
 
-                                <td>
-                                    {{ rowform.Remove() }}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="table-responsive">
+            <table class="table table-bordered table-striped" id="tTable">
+                <thead class="table-dark">
+                    <tr>
+                        {% if has_id_field %}
+                            <th>id</th>
+                        {% endif %}
+                        {% for fldnm, fldlbl in fields_to_update.items() %}
+                            <th>{{ fldlbl }}</th>
+                        {% endfor %}
+                        <th>remove</th>
+                    </tr>
+                </thead>
+                <tbody id="tTableBody">
+                    {% for rowform in form.parameters %}
+                    <tr class="tbl-row" data-user-index="{{ loop.index0 }}">
+                        {% if has_id_field %}
+                            <td>
+                                {{ rowform.pk.data or '' }}
+                            </td>
+                        {% endif %}
+                        {% for fldnm, fldlbl in fields_to_update.items() %}
+                            <td>
+                                {#{ rowform[fldnm](class="form-control") }#}
+                                {{ rowform[fldnm]() }}
+                                {% if rowform[fldnm].errors %}
+                                <div class="text-danger small">
+                                    {% for error in rowform[fldnm].errors %}
+                                        {{ error }}<br>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+
+                        <td>
+                            {{ rowform.Remove() }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
                 
-                <div class="mt-3">
-                    <button type="button" class="btn btn-secondary" id="addMoreRecsBtn">
-                        Add {{ blank_formline_count }} More Records
-                    </button>
-                    {#{ form.submit(class="btn btn-primary") }#}
-                    {# <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a> #}
-                    <a href="#" onclick="window.close();" class="btn btn-secondary">Cancel</a>
+            <div class="mt-3">
+                <button type="button" class="btn btn-secondary" id="addMoreRecsBtn">
+                    Add {{ blank_formline_count }} More Records
+                </button>
+                {#{ form.submit(class="btn btn-primary") }#}
+                <a href="#" onclick="window.close();" class="btn btn-secondary">Cancel</a>
+            </div>
+
+            <div class="container mt-4">
+                <div class="row mx-auto max-width=100%">
+                    <div class="col-5">
+                        <button type="submit">
+                            <img src="{{ url_for('ctools.static', filename='svg/poem-poetry-icon.svg') }}" width="20" height="20">
+                            Save changes
+                        </button>
+                        
+                        <button id="add-user" type="button" onclick="create_empty_rec()">
+                            Add parameter
+                        </button>
+                    </div>
+                    <div class="col-5"></div>
+                    <div class="col">
+                        <button type="button" onclick="window.close();">
+                            <img src="{{ url_for('ctools.static', filename='svg/stop-road-sign-icon.svg') }}" width="20" height="20">
+                            Close Form
+                        </button>
+                    </div>
                 </div>
+            </div>
+
+
+
             </form>
         </div>
     </div>
 </div>
-
-    <div class="container mt-4">
-        <div class="row mx-auto max-width=100%">
-            <div class="col-5">
-                <button type="submit">
-                    <img src="{{ url_for('ctools.static', filename='svg/poem-poetry-icon.svg') }}" width="20" height="20">
-                    Save changes
-                </button>
-                
-                <button id="add-user" type="button" onclick="create_empty_rec()">
-                    Add parameter
-                </button>
-            </div>
-            <div class="col-5"></div>
-            <div class="col">
-                <button type="button" onclick="window.close();">
-                    <img src="{{ url_for('ctools.static', filename='svg/stop-road-sign-icon.svg') }}" width="20" height="20">
-                    Close Form
-                </button>
-            </div>
-        </div>
-    </div>
 
     {# The 'empty_form' template for dynamic addition #}
     <div id="empty_form" style="display:none;">
@@ -144,6 +146,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('addMoreRecsBtn').addEventListener('click', function() {
         addBlankRecordRows(blank_formline_count);
     });
+    
+    function create_empty_rec() {
+        addBlankRecordRows(blank_formline_count);
+    }
     
     function addBlankRecordRows(count) {
         const tbody = document.getElementById('tTableBody');
