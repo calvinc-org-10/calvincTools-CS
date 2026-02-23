@@ -125,8 +125,7 @@ def edit_parameters():
             'form': form,
             'fields_to_update': dict(zip(flds_to_update, flds_form_labels)),
             'has_id_field': has_id_field,   # cParameterItemForm has no id field, so we set this to False to prevent the template from trying to render it
-            'prototype_blank_record': blank_rec,
-            'blank2': cParameterItemForm(),
+            'prototype_blank_form': cParameterItemForm(),
             'blank_formline_count': blank_formline_count,
             }
         return render_template(templt, **contxt)
@@ -201,8 +200,7 @@ def edit_parameters():
             'form': form,
             'fields_to_update': dict(zip(flds_to_update, flds_form_labels)),
             'has_id_field': has_id_field,   # cParameterItemForm has no id field, so we set this to False to prevent the template from trying to render it
-            'prototype_blank_record': blank_rec,
-            'blank2': cParameterItemForm(),
+            'prototype_blank_form': cParameterItemForm(),
             'blank_formline_count': blank_formline_count,
             }
         return render_template(templt, **contxt)
