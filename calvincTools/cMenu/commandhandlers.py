@@ -89,14 +89,16 @@ def edit_parameters():
     from ..models import ( db, cParameters, )
     from .forms import (cParameterEditForm, cParameterItemForm, )
     
+    SuperMan = current_user.is_superuser
+
     blank_formline_count = request.args.get('blank_formline_count', 1, type=int)
-    flds_to_update = ['parm_name', 'parm_value', 'user_modifiable', 'comments']
+    flds_to_update = ['parm_name', 'parm_value', 'user_modifiable', 'comments'] if SuperMan else ['parm_name', 'parm_value', 'comments']   # only superusers can edit parm_name (?) and user_modifiable
     flds_form_labels = ['Parameter Name', 'Parameter Value', 'User Modifiable', 'Comments']
     has_id_field = False   # cParameterItemForm has no id field, so we set this to False to prevent the template from trying to render it
     
     if request.method == 'GET':
-        # Get all existing users
-        existing_parms = cParameters.query.all()
+        # Get all existing parameters to display in the form
+        existing_parms = cParameters.query.all() if SuperMan else cParameters.query.filter(cParameters.user_modifiable == True).all()
         
         # Create form with existing users
         form = cParameterEditForm()

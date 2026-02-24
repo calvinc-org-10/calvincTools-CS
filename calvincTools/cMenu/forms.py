@@ -43,7 +43,6 @@ class MenuEditForm(FlaskForm):
     # submit = SubmitField('Save Menu')
 
 class cParameterItemForm(Form):
-    pk = HiddenField()
     parm_name = StringField()
     parm_value = StringField(default='')
     user_modifiable = BooleanField(default=True)
