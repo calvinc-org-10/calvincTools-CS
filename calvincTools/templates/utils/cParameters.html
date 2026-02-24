@@ -97,7 +97,7 @@
                             Save changes
                         </button>
                         
-                        <button id="add-user" type="button" onclick="create_empty_rec()">
+                        <button id="add-record" type="button">
                             Add parameter
                         </button>
                     </div>
@@ -118,9 +118,9 @@
     </div>
 </div>
 
-    {# The 'empty_form' template for dynamic addition #}
+    {# The 'empty_form' template for dynamic addition # }
     <div id="empty_form" style="display:none;">
-        {# <tr class="tbl-row" data-user-index="__index__"> <!-- built by JS --> #}
+        { # <tr class="tbl-row" data-user-index="__index__"> <!-- built by JS --> # }
             {% if has_id_field %}
                 <td>
                     {{ prototype_blank_form.pk() }}
@@ -134,11 +134,27 @@
             <td>
                 {{ prototype_blank_form.Remove() }}
             </td>
-        {# </tr>    <!-- provided by JS -->     #}
+        { # </tr>    <!-- provided by JS -->     # }
     </div>
+    #}
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const newrow_HTML = `
+        {% if has_id_field %}
+        <td>
+            {{ prototype_blank_form.pk() }}
+        </td>
+        {% endif %}
+        {% for fldnm, fldlbl in fields_to_update.items() %}
+            <td>
+                {{ prototype_blank_form[fldnm]() }}
+            </td>
+        {% endfor %}
+        <td>
+            {{ prototype_blank_form.Remove() }}
+        </td>
+    `;
     const blank_formline_count = {{ blank_formline_count }};
     let nextIndex = document.querySelectorAll('.tbl-row').length;
     
@@ -146,11 +162,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('addMoreRecsBtn').addEventListener('click', function() {
         addBlankRecordRows(blank_formline_count);
     });
-    
-    function create_empty_rec() {
+    document.getElementById('add-record').addEventListener('click', function() {
         addBlankRecordRows(blank_formline_count);
-    }
-    
+    });
+
     function addBlankRecordRows(count) {
         const tbody = document.getElementById('tTableBody');
         const currentRowCount = document.querySelectorAll('.tbl-row').length;
@@ -160,22 +175,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const newRow = createBlankRecordRow(newIndex);
             tbody.appendChild(newRow);
         }
-        
-    }
+    };
     
     function createBlankRecordRow(index) {
         const row = document.createElement('tr');
         row.className = 'tbl-row';
         row.dataset.userIndex = index;
         
-        // Build field names following WTForms FieldList naming convention
-        const baseName = `users-${index}-`;
-        
         // copy from the empty_form template, but with dynamic field names and blank values
-        // row.innerHTML = ...;
+        row.innerHTML = newrow_HTML.replaceAll("-N-", `-${index}-` );
         
         return row;
-    }
+    };
 });
 </script>
 {% endblock %}

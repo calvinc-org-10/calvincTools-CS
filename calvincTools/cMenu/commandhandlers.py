@@ -125,7 +125,7 @@ def edit_parameters():
             'form': form,
             'fields_to_update': dict(zip(flds_to_update, flds_form_labels)),
             'has_id_field': has_id_field,   # cParameterItemForm has no id field, so we set this to False to prevent the template from trying to render it
-            'prototype_blank_form': cParameterItemForm(),
+            'prototype_blank_form': cParameterItemForm(prefix=form.parameters.name + '-N-'),  # create a prototype blank form with the correct prefix for dynamic addition in the template
             'blank_formline_count': blank_formline_count,
             }
         return render_template(templt, **contxt)
@@ -151,6 +151,8 @@ def edit_parameters():
                     data_from_form['user_modifiable'] = getattr(parm_form.user_modifiable, 'data', True)
                     data_from_form['comments'] = getattr(parm_form.comments, 'data', '')
                     
+                    record_needs_saving = False
+                    
                     # Skip blank entries (no parm_name provided)
                     if not data_from_form['parm_name'].strip():
                         continue
@@ -162,6 +164,7 @@ def edit_parameters():
                         # remove if requested
                         if parm_form.Remove.data:
                             db.session.delete(parm)
+                            flash(f'Parameter "{parm.parm_name}" removed successfully.', 'success')
                             continue
                         
                         # # make sure parm name hasn't been changed to a duplicate of another existing parm
@@ -174,15 +177,20 @@ def edit_parameters():
                         for fld in flds_to_update:
                             if data_from_form[fld] != getattr(parm, fld):
                                 setattr(parm, fld, data_from_form[fld])
+                                record_needs_saving = True
+                                flash(f'Parameter "{parm.parm_name}", {fld} updated successfully.', 'success')
                     else:
                         # Create new parm
                         parm = cParameters(**{key:val for key, val in data_from_form.items() if key in flds_to_update})
+                        record_needs_saving = True
+                        flash(f'Parameter "{parm.parm_name}" created successfully.', 'success')
                     # if parm exists or new parm created
                     
-                    db.session.add(parm)
+                    if record_needs_saving:
+                        db.session.add(parm)
                 
                 db.session.commit()
-                flash('All parms saved successfully!', 'success')
+                # flash('All parms saved successfully!', 'success')
                 return redirect(url_for('utils.edit_parameters'))
             # endfor each user in form
             
@@ -195,12 +203,11 @@ def edit_parameters():
             flash('Form validation failed. Please check your entries.', 'danger')
 
         templt = 'utils/cParameters.html'
-        blank_rec = cParameters()  # type: ignore
         contxt = {
             'form': form,
             'fields_to_update': dict(zip(flds_to_update, flds_form_labels)),
             'has_id_field': has_id_field,   # cParameterItemForm has no id field, so we set this to False to prevent the template from trying to render it
-            'prototype_blank_form': cParameterItemForm(),
+            'prototype_blank_form': cParameterItemForm(prefix=form.parameters.name + '-N-'),  # create a prototype blank form with the correct prefix for dynamic addition in the template
             'blank_formline_count': blank_formline_count,
             }
         return render_template(templt, **contxt)
