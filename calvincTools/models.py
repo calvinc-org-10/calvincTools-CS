@@ -473,6 +473,13 @@ def init_cDatabase(flskapp, db_instance):
             verdict = check_password_hash(self.password_hash, password)
             return verdict
 
+        def has_permission(self, permission_name: str) -> bool:
+            """Check if the user has a specific permission."""
+            if self.is_superuser:
+                return True  # Superusers have all permissions
+            permissions_list = self.permissions.lower().split(',') if self.permissions else []
+            return permission_name.lower() in permissions_list
+
         def update_last_login(self):
             """Update the last login timestamp."""
             self.last_login = datetime.now()

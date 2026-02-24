@@ -1,17 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ error_code }} Forbidden</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
-        h1 { color: #dc3545; }
-        p { color: #6c757d; }
-    </style>
-</8head>
-<body>
-    <h1>{{ error }} - Forbidden</h1>
-    <p>{{ error }}</p>
-</body>
-</html>
+{% extends "cTools_common.html" %}
+ 
+{% block tTitle %}403 Forbidden{% endblock %}
+{% block formName %}403 Forbidden{% endblock %}
+{% block customCSS %}
+    body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+    h1 { color: #dc3545; }
+    p { color: #6c757d; }
+{% endblock %}
+
+{% block boddy %}
+<h1>{{ error }} - Forbidden</h1>
+<p>{{ error }}</p>
+{% endblock %}

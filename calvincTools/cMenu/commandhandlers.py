@@ -4,7 +4,7 @@ from flask.typing import ResponseReturnValue
 from flask_login import current_user, login_required
 from sqlalchemy import text
 
-from calvincTools.decorators import superuser_required
+from calvincTools.decorators import superuser_required, permission_required
 from calvincTools.forms import RawSQLForm
 
 # db and models imported in each method so that the initalized versions are used
@@ -74,8 +74,8 @@ def run_sql():
     return render_template('utils/enter_sql.html', form=form)
 # run_sql
 
-@superuser_required
-## steal hints from edit users
+# @superuser_required
+@permission_required('EditParm')
 def edit_parameters():
     """
     Django equivalent: fncParmForm
