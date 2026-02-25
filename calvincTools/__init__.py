@@ -14,11 +14,11 @@ from .cMenu.routes import register_menu_blueprint
 from .utils.routes import register_util_blueprint
 
 class calvinCTools_init:
-    def __init__(self, app=None, app_db=None):
+    def __init__(self, app=None, app_db=None, cTools_bind_key=None, cTools_tablenames=None):
         if app is not None:
-            self.init_app(app, app_db)
+            self.init_app(app, app_db, cTools_bind_key, cTools_tablenames)
 
-    def init_app(self, app, app_db):
+    def init_app(self, app, app_db, cTools_bind_key=None, cTools_tablenames=None):
         # 1. configs should be already set by the user
         #    later, we will be procs to add/modify configs
         #    db configs MUST be set before app_db.init_app, but app_db.init_app MUST precede init_cDatabase here
@@ -32,7 +32,7 @@ class calvinCTools_init:
 
         # Initialize extensions
         from .models import init_cDatabase      # can I move this back to main imports?
-        init_cDatabase(app, app_db)
+        init_cDatabase(app, app_db, cTools_bind_key, cTools_tablenames)
         # migrate = Migrate(app, cMenu_db)
         init_login_manager(app)
         

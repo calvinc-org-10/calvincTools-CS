@@ -2,8 +2,12 @@ from dataclasses import dataclass
 
 from flask_wtf import FlaskForm
 from wtforms import (
-    StringField, SubmitField, Form, FormField, FieldList, IntegerField, HiddenField, BooleanField,
+    Form, 
+    StringField, TextAreaField, 
+    IntegerField, HiddenField, BooleanField,
     SelectField, RadioField,
+    SubmitField, 
+    FormField, FieldList, 
     )
 from wtforms.validators import (DataRequired, Optional, )
 
@@ -66,7 +70,7 @@ class cParameterEditForm_SU(FlaskForm):
 
 class cGreetingsItemForm(Form):
     pk = HiddenField()      # don't want to clash with the id attribute in Form
-    greeting = StringField()
+    greeting = TextAreaField()
 
     Remove = BooleanField(default=False)
         

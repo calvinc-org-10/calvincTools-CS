@@ -238,7 +238,7 @@ class User(UserMixin, SkeletonModelBase):
 # INITIALIZATION FUNCTION
 # ============================================================================
 
-def init_cDatabase(flskapp, db_instance):
+def init_cDatabase(flskapp, db_instance, cTools_bind_key=None, cTools_tablenames=None):
     """
     Initialize the database models with the Flask app and SQLAlchemy instance.
     This function configures the model classes to inherit from db.Model and adds columns.
@@ -257,6 +257,17 @@ def init_cDatabase(flskapp, db_instance):
     # Set the db reference so the LocalProxy works
     _db_holder['db'] = db_instance
     
+    if cTools_bind_key is None:
+        cTools_bind_key='cToolsdb'
+    if cTools_tablenames is None:
+        cTools_tablenames = {
+            'menuGroups': 'cMenu_menuGroups',
+            'menuItems': 'cMenu_menuItems',
+            'cParameters': 'cMenu_cParameters',
+            'cGreetings': 'cMenu_cGreetings',
+            'User': 'users',
+            }
+    
     # Get reference to current module to update the classes
     import sys
     current_module = sys.modules[__name__]
@@ -266,8 +277,8 @@ def init_cDatabase(flskapp, db_instance):
     
     class menuGroups(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
         """Menu groups model with database columns."""
-        __bind_key__ = 'cToolsdb'
-        __tablename__ = 'cMenu_menuGroups'
+        __bind_key__ = cTools_bind_key
+        __tablename__ = cTools_tablenames.get('menuGroups', 'cMenu_menuGroups')
         
         id = db_instance.Column(db_instance.Integer, primary_key=True)
         GroupName = db_instance.Column(db_instance.String(100), unique=True, nullable=False, index=True)
@@ -352,8 +363,8 @@ def init_cDatabase(flskapp, db_instance):
 
     class menuItems(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
         """Menu items model with database columns."""
-        __bind_key__ = 'cToolsdb'
-        __tablename__ = 'cMenu_menuItems'
+        __bind_key__ = cTools_bind_key
+        __tablename__ = cTools_tablenames.get('menuItems', 'cMenu_menuItems')
         
         id = db_instance.Column(db_instance.Integer, primary_key=True)
         MenuGroup_id = db_instance.Column(db_instance.Integer, db_instance.ForeignKey('cMenu_menuGroups.id', ondelete='RESTRICT'), nullable=True)
@@ -391,8 +402,8 @@ def init_cDatabase(flskapp, db_instance):
 
     class cParameters(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
         """Parameters model with database columns."""
-        __bind_key__ = 'cToolsdb'
-        __tablename__ = 'cMenu_cParameters'
+        __bind_key__ = cTools_bind_key
+        __tablename__ = cTools_tablenames.get('cParameters', 'cMenu_cParameters')
         
         parm_name: str = db_instance.Column(db_instance.String(100), primary_key=True)
         parm_value: str = db_instance.Column(db_instance.String(512), default='', nullable=False)
@@ -431,8 +442,8 @@ def init_cDatabase(flskapp, db_instance):
 
     class cGreetings(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
         """Greetings model with database columns."""
-        __bind_key__ = 'cToolsdb'
-        __tablename__ = 'cMenu_cGreetings'
+        __bind_key__ = cTools_bind_key
+        __tablename__ = cTools_tablenames.get('cGreetings', 'cMenu_cGreetings')
         
         id = db_instance.Column(db_instance.Integer, primary_key=True)
         greeting = db_instance.Column(db_instance.String(2000), nullable=False)
@@ -449,8 +460,8 @@ def init_cDatabase(flskapp, db_instance):
         Inherit from UserMixin to get default implementations for:
         - is_authenticated, is_active, is_anonymous, get_id()
         """
-        __bind_key__ = 'cToolsdb'
-        __tablename__ = 'users'
+        __bind_key__ =  cTools_bind_key
+        __tablename__ = cTools_tablenames.get('User', 'users')
 
         id = db_instance.Column(db_instance.Integer, primary_key=True)
         username = db_instance.Column(db_instance.String(80), unique=True, nullable=False, index=True)

@@ -11,3 +11,15 @@ The physical location (SQLALCHEMY_BINDS, __bind_key__) of the tables and the __t
 Then I decided to port WICS3 over. Those __bind_key__ and __tablename__ values would not work for my well-established and well-worn database. I had to find a way to overwrite them for WICS4. But NOT by changing the calvincTools code (at least not drastically). And of course, I realized that I'm not alone in having legacy databases that have to port over.
 
 The solution, and the way you can (mostly) override the "default" calvincTools tables:
+
+    def __init__(self, app=None, app_db=None, cTools_bind_key=None, cTools_tablenames=None):
+    if cTools_bind_key is None:
+        cTools_bind_key='cToolsdb'
+    if cTools_tablenames is None:
+        cTools_tablenames = {
+            'menuGroups': 'cMenu_menuGroups',
+            'menuItems': 'cMenu_menuItems',
+            'cParameters': 'cMenu_cParameters',
+            'cGreetings': 'cMenu_cGreetings',
+            'User': 'users',
+            }
