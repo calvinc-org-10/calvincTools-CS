@@ -52,6 +52,9 @@ class MockQuery:
     def filter_by(self, *args, **kwargs):
         return self
 
+    def filter(self, *args, **kwargs):
+        return self
+
     def all(self):
         return []
     

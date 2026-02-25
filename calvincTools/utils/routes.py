@@ -21,7 +21,7 @@ def register_util_blueprint(app):
 
     util_bp.add_url_rule('/sql', 'run_sql', run_sql, methods=['GET', 'POST'])
     util_bp.add_url_rule('/parameters', 'edit_parameters', edit_parameters, methods=['GET', 'POST'])
-    util_bp.add_url_rule('/greetings', 'greetings', edit_greetings, methods=['GET', 'POST'])
+    util_bp.add_url_rule('/greetings', 'edit_greetings', edit_greetings, methods=['GET', 'POST'])
     
     app.register_blueprint(util_bp)
     

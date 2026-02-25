@@ -45,11 +45,31 @@ class MenuEditForm(FlaskForm):
 class cParameterItemForm(Form):
     parm_name = StringField()
     parm_value = StringField(default='')
-    user_modifiable = BooleanField(default=True)
+    user_modifiable = HiddenField(default='1')
     comments = StringField(default='')
 
     Remove = BooleanField(default=False)
         
 class cParameterEditForm(FlaskForm):
     parameters = FieldList(FormField(cParameterItemForm), min_entries=1)
+
+class cParameterItemForm_SU(Form):
+    parm_name = StringField()
+    parm_value = StringField(default='')
+    user_modifiable = BooleanField(default=True)
+    comments = StringField(default='')
+
+    Remove = BooleanField(default=False)
+        
+class cParameterEditForm_SU(FlaskForm):
+    parameters = FieldList(FormField(cParameterItemForm_SU), min_entries=1)
+
+class cGreetingsItemForm(Form):
+    pk = HiddenField()      # don't want to clash with the id attribute in Form
+    greeting = StringField()
+
+    Remove = BooleanField(default=False)
+        
+class cGreetingsEditForm(FlaskForm):
+    greetings = FieldList(FormField(cGreetingsItemForm), min_entries=1)
 
