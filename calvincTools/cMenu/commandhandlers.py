@@ -267,10 +267,7 @@ def edit_greetings() -> ResponseReturnValue:
         for greeting in existing_greets:
             form.greetings.append_entry({
                 "pk": greeting.id,
-                "parm_name": greeting.parm_name,
-                "parm_value": greeting.parm_value,
-                "user_modifiable": greeting.user_modifiable,
-                "comments": greeting.comments,
+                "greeting": greeting.greeting,
             })
         
         # Add blank users for new entries
