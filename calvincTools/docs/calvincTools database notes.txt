@@ -1,0 +1,13 @@
+calvincTools started life as a separate "app" in my WICS3 project. As I built a few more projects and started including calvincTools code in them, it hit me that it should be its own module.
+
+The meat of calvincTools is the menu system. Since menuGroups were generally tied to users, this brought users into calvincTools. Since I'm fond of having a greeting on my login screens, this brought in cGreetings. Finally, some (not many) cParameters are better expressed in a form that can be changed without changing code, which brought in that table. So the tables used by calvincTools are
+    menuGroups, 
+	menuItems, 
+	cParameters, 
+	cGreetings, 
+	User
+The physical location (SQLALCHEMY_BINDS, __bind_key__) of the tables and the __tablename__ of each was defined in calvincTools.
+
+Then I decided to port WICS3 over. Those __bind_key__ and __tablename__ values would not work for my well-established and well-worn database. I had to find a way to overwrite them for WICS4. But NOT by changing the calvincTools code (at least not drastically). And of course, I realized that I'm not alone in having legacy databases that have to port over.
+
+The solution, and the way you can (mostly) override the "default" calvincTools tables:
