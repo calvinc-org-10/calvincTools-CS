@@ -13,7 +13,7 @@ from .usr_auth.routes import register_auth_blueprint
 from .cMenu.routes import register_menu_blueprint
 from .utils.routes import register_util_blueprint
 
-class calvinCTools_init:
+class calvincTools_init:
     def __init__(self, app=None, app_db=None, cTools_bind_key=None, cTools_tablenames=None):
         if app is not None:
             self.init_app(app, app_db, cTools_bind_key, cTools_tablenames)
