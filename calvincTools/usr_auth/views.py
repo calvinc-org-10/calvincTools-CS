@@ -126,7 +126,7 @@ def login_view():
         return redirect(url_for('index'))
     
     grts = cGreetings.query.all()
-    Greeting = random.choice(grts)['Greeting'] if grts else ''
+    Greeting = random.choice(grts).greeting if grts else ''
 
     templt = 'auth/Uaffirm.html'
     cntext = {
