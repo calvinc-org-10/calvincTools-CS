@@ -12,7 +12,7 @@ Then I decided to port WICS3 over. Those __bind_key__ and __tablename__ values w
 
 The solution, and the way you can (mostly) override the "default" calvincTools tables:
 
-    def __init__(self, app=None, app_db=None, cTools_bind_key=None, cTools_tablenames=None):
+    def __init__(self, app=None, app_db=None, cTools_bind_key=None, cTools_tablenames=None, cTools_models=None):
     if cTools_bind_key is None:
         cTools_bind_key='cToolsdb'
     if cTools_tablenames is None:
@@ -48,6 +48,23 @@ The solution, and the way you can (mostly) override the "default" calvincTools t
     # you don't have to specify them.
     
     # sorry, there's no way of changing the field names in the cTools tables. Too much of the calvincTools code relies on those field names
-    
-These settings should be made before callvinc calvincTools_init()
+    #########################  S C R A T C H   T H A T   ! ! !
+    Just added parameter cTools_models=None. It should be a dictionary with 0 more more of the same 
+    keys as cTools_tablenames (not all need be defined) and the associated value is a model class 
+    which will take the place of the default. Note that you really need your model class to define
+    the same fields (attributes) and methods as the native calvincTools code, otherwise you risk 
+    calvincTools code breaking. You can, if you wish, define extra attributes and methods.
+
+    My primary (only) reason for doing this is so that calvincTools would work with a legacy database
+    where the field names were not all exactly the same as in the models. In the mapped_column()
+    definitions, give the database field name as the first positional azrgument.
+    See the SQLAlchemy documentation (https://docs.sqlalchemy.org/en/20/orm/mapping_api.html#sqlalchemy.orm.mapped_column:~:text=x%20style%20mappings-,Parameters%3A,__name%C2%B6%20%E2%80%93%20String%20name%20to%20give%20to%20the%20Column.,-This%20is%20an) for details.
+
+    =======
+
+    For tables whose model classes are given in cTools_models, cTools_bind_key and 
+    the corresponding cTools_tablenames entry is ignored. Define __tablename__ and __bind_key__ in
+    your model, if needed
+
+These settings should be made before calling calvincTools_init()
 

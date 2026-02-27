@@ -238,7 +238,13 @@ class User(UserMixin, SkeletonModelBase):
 # INITIALIZATION FUNCTION
 # ============================================================================
 
-def init_cDatabase(flskapp, db_instance, cTools_bind_key=None, cTools_tablenames=None):
+def init_cDatabase(
+        flskapp, 
+        db_instance, 
+        cTools_bind_key=None, 
+        cTools_tablenames=None, 
+        cTools_models=None
+        ) -> tuple:
     """
     Initialize the database models with the Flask app and SQLAlchemy instance.
     This function configures the model classes to inherit from db.Model and adds columns.
