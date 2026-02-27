@@ -273,6 +273,8 @@ def init_cDatabase(
             'cGreetings': 'cMenu_cGreetings',
             'User': 'users',
             }
+    if cTools_models is None:
+        cTools_models = {}
     
     # Get reference to current module to update the classes
     import sys
@@ -281,91 +283,94 @@ def init_cDatabase(
     # Create enhanced model classes that inherit from db.Model
     # These will replace the placeholder classes defined above
     
-    class menuGroups(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
-        """Menu groups model with database columns."""
-        __bind_key__ = cTools_bind_key
-        __tablename__ = cTools_tablenames.get('menuGroups', 'cMenu_menuGroups')
-        
-        id = db_instance.Column(db_instance.Integer, primary_key=True)
-        GroupName = db_instance.Column(db_instance.String(100), unique=True, nullable=False, index=True)
-        GroupInfo = db_instance.Column(db_instance.String(250), default='')
-        
-        # Relationships
-        menu_items = db_instance.relationship('menuItems', back_populates='menu_group', lazy='selectin')
-        
-        def __repr__(self):
-            return f'<MenuGroup {self.id} - {self.GroupName}>'
-        
-        def __str__(self):
-            return f'menuGroup {self.GroupName}'
-
-        @classmethod
-        def createtable(cls, flskapp):
-            """Create the table and populate with initial data if empty."""
-            with flskapp.app_context():
-                # Create tables if they don't exist
-                db_instance.create_all()
-
-                if not db_instance.session.query(cls).first():
-                    cls.create_newgroup(
-                        group_name="Initial Group", 
-                        group_info="Group Info here", 
-                        isSuperUser=True
-                        )
-            # endwith app context
-        # createtable
-        
-        @classmethod
-        def create_newgroup(cls, group_name: str, group_info: str, isSuperUser: bool = False, group_id = None):
-            """Create a new menu group with default menu items."""
+    if cTools_models.get('menuGroups') is None:
+        class menuGroups(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
+            """Menu groups model with database columns."""
+            __bind_key__ = cTools_bind_key
+            __tablename__ = cTools_tablenames.get('menuGroups', 'cMenu_menuGroups')
             
-            init_menu_type = 'new.super.menugroup.newmenu' if isSuperUser else 'new.ordinary.menugroup.newmenu'
+            id = db_instance.Column(db_instance.Integer, primary_key=True)
+            GroupName = db_instance.Column(db_instance.String(100), unique=True, nullable=False, index=True)
+            GroupInfo = db_instance.Column(db_instance.String(250), default='')
             
-            with flskapp.app_context():
-                try:
-                    if isinstance(group_id, int):
-                        # Check if group_id already exists
-                        existing_group = db_instance.session.query(cls).filter_by(id=group_id).first()
-                        if existing_group:
-                            raise ValueError(f"A group with the ID '{group_id}' already exists.")
-                    # endif group_id check
-                    
-                    # Create new group
-                    if group_id is not None:
-                        new_group = cls(id=group_id, GroupName=group_name, GroupInfo=group_info)
-                    else:
-                        new_group = cls(GroupName=group_name, GroupInfo=group_info)
-                    db_instance.session.add(new_group)
-                    db_instance.session.commit()
-                    
-                    # Add default menu items for the new group
-                    new_group_id = new_group.id
-                    menuItems_cls = getattr(current_module, 'menuItems')
+            # Relationships
+            menu_items = db_instance.relationship('menuItems', back_populates='menu_group', lazy='selectin')
+            
+            def __repr__(self):
+                return f'<MenuGroup {self.id} - {self.GroupName}>'
+            
+            def __str__(self):
+                return f'menuGroup {self.GroupName}'
 
-                    menu_items = [ 
-                        menuItems_cls(
-                            MenuGroup_id=new_group_id, MenuID=0, OptionNumber=item['OptionNumber'], 
-                            OptionText=item['OptionText'], 
-                            Command=item['Command'], Argument=item['Argument'], 
-                            pword=item.get('PWord',''), 
-                            top_line=item.get('TopLine', 0),
-                            bottom_line=item.get('BottomLine', 0)
+            @classmethod
+            def createtable(cls, flskapp):
+                """Create the table and populate with initial data if empty."""
+                with flskapp.app_context():
+                    # Create tables if they don't exist
+                    db_instance.create_all()
+
+                    if not db_instance.session.query(cls).first():
+                        cls.create_newgroup(
+                            group_name="Initial Group", 
+                            group_info="Group Info here", 
+                            isSuperUser=True
                             )
-                         for item in initial_menus[init_menu_type]
-                         ]
-                    db_instance.session.add_all(menu_items)
-                    db_instance.session.commit()
-                    
-                    return new_group
-                except IntegrityError:
-                    db_instance.session.rollback()
-                    raise ValueError(f"A group with the name '{group_name}' already exists.")
-                finally:
-                    db_instance.session.close() 
-                # end try (creating new group and menu items)
-            # endwith app context
-        # create_newgroup
-    # menuGroups
+                # endwith app context
+            # createtable
+            
+            @classmethod
+            def create_newgroup(cls, group_name: str, group_info: str, isSuperUser: bool = False, group_id = None):
+                """Create a new menu group with default menu items."""
+                
+                init_menu_type = 'new.super.menugroup.newmenu' if isSuperUser else 'new.ordinary.menugroup.newmenu'
+                
+                with flskapp.app_context():
+                    try:
+                        if isinstance(group_id, int):
+                            # Check if group_id already exists
+                            existing_group = db_instance.session.query(cls).filter_by(id=group_id).first()
+                            if existing_group:
+                                raise ValueError(f"A group with the ID '{group_id}' already exists.")
+                        # endif group_id check
+                        
+                        # Create new group
+                        if group_id is not None:
+                            new_group = cls(id=group_id, GroupName=group_name, GroupInfo=group_info)
+                        else:
+                            new_group = cls(GroupName=group_name, GroupInfo=group_info)
+                        db_instance.session.add(new_group)
+                        db_instance.session.commit()
+                        
+                        # Add default menu items for the new group
+                        new_group_id = new_group.id
+                        menuItems_cls = getattr(current_module, 'menuItems')
+
+                        menu_items = [ 
+                            menuItems_cls(
+                                MenuGroup_id=new_group_id, MenuID=0, OptionNumber=item['OptionNumber'], 
+                                OptionText=item['OptionText'], 
+                                Command=item['Command'], Argument=item['Argument'], 
+                                pword=item.get('PWord',''), 
+                                top_line=item.get('TopLine', 0),
+                                bottom_line=item.get('BottomLine', 0)
+                                )
+                            for item in initial_menus[init_menu_type]
+                            ]
+                        db_instance.session.add_all(menu_items)
+                        db_instance.session.commit()
+                        
+                        return new_group
+                    except IntegrityError:
+                        db_instance.session.rollback()
+                        raise ValueError(f"A group with the name '{group_name}' already exists.")
+                    finally:
+                        db_instance.session.close() 
+                    # end try (creating new group and menu items)
+                # endwith app context
+            # create_newgroup
+        # menuGroups
+        cTools_models['menuGroups'] = menuGroups
+
 
     class menuItems(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
         """Menu items model with database columns."""
