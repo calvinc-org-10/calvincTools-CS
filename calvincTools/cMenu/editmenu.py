@@ -4,7 +4,7 @@ from calvincTools.cMenu.initial_menus import initial_menus
 from calvincTools.decorators import superuser_required
 
 
-from flask import flash, redirect, render_template, request, url_for
+from flask import flash, redirect, request, url_for
 from sqlalchemy import case, func, literal, select
 
 
@@ -308,7 +308,7 @@ def edit_menu(group_id, menu_num):
         # 'changed_data': changed_data,
         }
     templt = "menu/edit_menu.html"
-    return render_template(templt, **cntext)
+    return checkTemplate_and_render(templt, **cntext)
 
 
 @superuser_required
