@@ -410,8 +410,8 @@ def form_browse(formname: str) -> ResponseReturnValue:
 # form_browse
 
 @superuser_required
-def show_table(tblname):
+def show_table(tablename):
     # showing a table is nothing more than another form
-    return form_browse(tblname)
+    return form_browse(tablename)
 # show_table
 

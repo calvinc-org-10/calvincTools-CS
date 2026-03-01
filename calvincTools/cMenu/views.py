@@ -148,7 +148,7 @@ def handle_command(command_num, command_arg):
         extra_args['formname'] = command_arg
     elif command_num == MENUCOMMAND.OpenTable:
         endpt = 'menu.show_table'
-        extra_args['tblname'] = command_arg
+        extra_args['tablename'] = command_arg
     elif command_num == MENUCOMMAND.RunSQLStatement:
         endpt = 'utils.run_sql'
     elif command_num == MENUCOMMAND.ChangePW:
