@@ -14,6 +14,8 @@ from .cMenu.routes import register_menu_blueprint
 from .utils.routes import register_util_blueprint
 
 class calvincTools_init:
+    cTools_tables = (None, None, None, None, None)   # will be set by init_cDatabase
+    
     def __init__(self, 
         app=None, 
         app_db=None, 
@@ -38,7 +40,7 @@ class calvincTools_init:
 
         # Initialize extensions
         from .models import init_cDatabase      # can I move this back to main imports?
-        init_cDatabase(app, app_db, cTools_bind_key, cTools_tablenames, cTools_models)
+        self.cTools_tables = init_cDatabase(app, app_db, cTools_bind_key, cTools_tablenames, cTools_models)
         # migrate = Migrate(app, cMenu_db)
         init_login_manager(app)
         

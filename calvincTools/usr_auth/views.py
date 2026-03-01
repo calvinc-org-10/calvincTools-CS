@@ -11,8 +11,12 @@ from flask import (
 from flask.views import MethodView
 from flask_login import LoginManager, login_user, logout_user, current_user
 
+from sqlalchemy import select
+from database import app_db
+
 from calvincTools.app_secrets import sysver_key
 from calvincTools.sysver import sysver
+
 
 # db and models imported in each method so that the initalized versions are used
 
@@ -35,7 +39,9 @@ def init_login_manager(app):
     def load_user(user_id):
         """Load user by ID for Flask-Login."""
         from ..models import User
-        return User.query.get(int(user_id))
+        stmt = select(User).where(User.id == int(user_id))
+        u = app_db.session.execute(stmt).scalar_one_or_none()
+        return u
     
     return login_manager
 
@@ -121,12 +127,14 @@ def login_view():
     from ..models import User, cGreetings
     
     if current_user.is_authenticated:
-        flash('You are already logged in.', 'info')
+        flash('You were already logged in. Logged out.', 'info')
         # return a blank page here
-        return redirect(url_for('index'))
+        return redirect(url_for('auth.logout'))
     
-    grts = cGreetings.query.all()
-    Greeting = random.choice(grts).greeting if grts else ''
+    # grts = cGreetings.query.all()
+    stmt = select(cGreetings)
+    grts = app_db.session.execute(stmt).scalars().all()
+    Greeting = random.choice(grts).greeting if grts else '' # type: ignore
 
     templt = 'auth/Uaffirm.html'
     cntext = {

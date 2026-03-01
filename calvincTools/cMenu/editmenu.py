@@ -52,7 +52,10 @@ def edit_menu(group_id, menu_num):
         flash(f"Menu {group_id},{menu_num} does not exist", "error")
         return redirect(url_for("menu.edit_menu_init"))
     menuName = thisMenu.OptionText if thisMenu else ""          # type: ignore
-    group = thisMenu.menu_group                                 # type: ignore
+    group = menuGroups.query.filter_by(id=group_id).first()
+    if not group:
+        flash(f"Menu group {group_id} does not exist", "error")
+        return redirect(url_for("menu.edit_menu_init"))
 
     # construct the query to get all 20 options with left join to menuItems
     # 1. Define the Recursive CTE (Numbers)

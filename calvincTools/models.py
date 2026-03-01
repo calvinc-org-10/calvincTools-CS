@@ -10,6 +10,7 @@ from sqlalchemy import (
     )
 from sqlalchemy.orm import (
     declarative_base,
+    foreign,
     Mapped, mapped_column,
     )
 from sqlalchemy.exc import IntegrityError
@@ -238,6 +239,13 @@ class User(UserMixin, SkeletonModelBase):
 # INITIALIZATION FUNCTION
 # ============================================================================
 
+# Override checklist (for callers of init_cDatabase):
+# 1) If only legacy table names differ, use cTools_tablenames.
+# 2) If legacy columns differ, provide overrides in cTools_models.
+# 3) Avoid string relationship targets that cross SQLAlchemy registries.
+# 4) For legacy models without ORM ForeignKey metadata, rely on the
+#    explicit fallback relationship wiring inside init_cDatabase.
+
 def init_cDatabase(
         flskapp, 
         db_instance, 
@@ -256,6 +264,17 @@ def init_cDatabase(
     Args:
         flskapp: The Flask application instance
         db_instance: The SQLAlchemy instance
+        cTools_bind_key: Optional bind key used for calvincTools models.
+        cTools_tablenames: Optional dict to override table names using calvincTools
+            keys: menuGroups, menuItems, cParameters, cGreetings, User.
+        cTools_models: Optional dict to override one or more model classes using
+            the same keys as cTools_tablenames.
+
+     Notes:
+          - See the override checklist above this function for compatibility rules
+             when using cTools_tablenames and cTools_models with legacy schemas.
+          - Caller-provided menuItems models without explicit ForeignKey metadata
+             are supported via a read-only fallback relationship.
         
     Returns:
         tuple: (menuGroups, menuItems, cParameters, cGreetings, User) - The initialized model classes
@@ -275,6 +294,10 @@ def init_cDatabase(
             }
     if cTools_models is None:
         cTools_models = {}
+
+    menuGroups_table_name = cTools_tablenames.get('menuGroups', 'cMenu_menuGroups')
+    menuItems_table_name = cTools_tablenames.get('menuItems', 'cMenu_menuItems')
+    menuGroups_relationship_target = cTools_models.get('menuGroups') if cTools_models.get('menuGroups') is not None else 'menuGroups'
     
     # Get reference to current module to update the classes
     import sys
@@ -287,14 +310,11 @@ def init_cDatabase(
         class menuGroups(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
             """Menu groups model with database columns."""
             __bind_key__ = cTools_bind_key
-            __tablename__ = cTools_tablenames.get('menuGroups', 'cMenu_menuGroups')
+            __tablename__ = menuGroups_table_name
             
             id = db_instance.Column(db_instance.Integer, primary_key=True)
             GroupName = db_instance.Column(db_instance.String(100), unique=True, nullable=False, index=True)
             GroupInfo = db_instance.Column(db_instance.String(250), default='')
-            
-            # Relationships
-            menu_items = db_instance.relationship('menuItems', back_populates='menu_group', lazy='selectin')
             
             def __repr__(self):
                 return f'<MenuGroup {self.id} - {self.GroupName}>'
@@ -370,15 +390,37 @@ def init_cDatabase(
             # create_newgroup
         # menuGroups
         cTools_models['menuGroups'] = menuGroups
+    else:
+        # If the model is already defined (e.g. by the caller), set menuGroups to that model and add the createtable method if it doesn't exist
+        if not hasattr(cTools_models['menuGroups'], 'createtable'):
+            @classmethod
+            def createtable(cls, flskapp):
+                """Create the table and populate with initial data if empty."""
+                with flskapp.app_context():
+                    # Create tables if they don't exist
+                    db_instance.create_all()
+
+                    if not db_instance.session.query(cls).first():
+                        cls.create_newgroup(
+                            group_name="Initial Group", 
+                            group_info="Group Info here", 
+                            isSuperUser=True
+                            )
+                # endwith app context
+            # createtable
+            setattr(cTools_models['menuGroups'], 'createtable', createtable)
+        # endif createtable check
+        menuGroups = cTools_models['menuGroups']
+    # end if menuGroups not defined by caller
 
     if cTools_models.get('menuItems') is None:
         class menuItems(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
             """Menu items model with database columns."""
             __bind_key__ = cTools_bind_key
-            __tablename__ = cTools_tablenames.get('menuItems', 'cMenu_menuItems')
+            __tablename__ = menuItems_table_name
             
             id = db_instance.Column(db_instance.Integer, primary_key=True)
-            MenuGroup_id = db_instance.Column(db_instance.Integer, db_instance.ForeignKey('cMenu_menuGroups.id', ondelete='RESTRICT'), nullable=True)
+            MenuGroup_id = db_instance.Column(db_instance.Integer, db_instance.ForeignKey(f'{menuGroups_table_name}.id', ondelete='RESTRICT'), nullable=True)
             MenuID = db_instance.Column(db_instance.SmallInteger, nullable=False)
             OptionNumber = db_instance.Column(db_instance.SmallInteger, nullable=False)
             OptionText = db_instance.Column(db_instance.String(250), nullable=False)
@@ -389,7 +431,7 @@ def init_cDatabase(
             bottom_line = db_instance.Column(db_instance.Boolean, nullable=True)
             
             # Relationships
-            menu_group = db_instance.relationship('menuGroups', back_populates='menu_items', lazy='joined')
+            menu_group = db_instance.relationship(menuGroups_relationship_target, back_populates='menu_items', lazy='joined')
             
             # Unique constraint
             __table_args__ = (
@@ -412,6 +454,23 @@ def init_cDatabase(
                 super().__init__(**kw)
         # menuItems
         cTools_models['menuItems'] = menuItems
+    else:
+        menuItems = cTools_models['menuItems']
+    # end if menuItems not defined by caller
+
+    if not hasattr(menuGroups, 'menu_items'):
+        if cTools_models.get('menuItems') is None:
+            menuGroups.menu_items = db_instance.relationship(menuItems, back_populates='menu_group', lazy='selectin')
+        else:
+            # Legacy/caller override path: explicit join because some legacy models
+            # intentionally omit ORM ForeignKey metadata.
+            menuGroups.menu_items = db_instance.relationship(
+                menuItems,
+                lazy='selectin',
+                primaryjoin=lambda: menuGroups.id == foreign(menuItems.MenuGroup_id),
+                foreign_keys=lambda: [menuItems.MenuGroup_id],
+                viewonly=True,
+            )
 
     if cTools_models.get('cParameters') is None:
         class cParameters(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
@@ -456,6 +515,9 @@ def init_cDatabase(
             # set_parameter
         # cParameters
         cTools_models['cParameters'] = cParameters
+    else:
+        cParameters = cTools_models['cParameters']
+    # end if cParameters not defined by caller
 
     if cTools_models.get('cGreetings') is None:
         class cGreetings(_ModelInitMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
@@ -473,6 +535,9 @@ def init_cDatabase(
                 return f'{self.greeting} (ID: {self.id})'
         # cGreetings
         cTools_models['cGreetings'] = cGreetings
+    else:
+        cGreetings = cTools_models['cGreetings']
+    # end if cGreetings not defined by caller
 
     if cTools_models.get('User') is None:
         class User(UserMixin, db_instance.Model):   #pylint: disable=redefined-outer-name
@@ -532,13 +597,16 @@ def init_cDatabase(
                 super().__init__(**kw)
         # User
         cTools_models['User'] = User
+    else:
+        User = cTools_models['User']
+    # end if User not defined by caller
 
     # Update the module-level references so imports work
-    setattr(current_module, 'menuGroups', cTools_models['menuGroups'])
-    setattr(current_module, 'menuItems', cTools_models['menuItems'])
-    setattr(current_module, 'cParameters', cTools_models['cParameters'])
-    setattr(current_module, 'cGreetings', cTools_models['cGreetings'])
-    setattr(current_module, 'User', cTools_models['User'])
+    setattr(current_module, 'menuGroups', menuGroups)
+    setattr(current_module, 'menuItems', menuItems)
+    setattr(current_module, 'cParameters', cParameters)
+    setattr(current_module, 'cGreetings', cGreetings)
+    setattr(current_module, 'User', User)
     
     # Create all tables in the database
     with flskapp.app_context():
@@ -551,4 +619,4 @@ def init_cDatabase(
         cGreetings()
         User()
     
-    return menuGroups, menuItems, cParameters, cGreetings, User
+    return (menuGroups, menuItems, cParameters, cGreetings, User)

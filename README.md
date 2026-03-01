@@ -32,6 +32,47 @@ import calvincTools
 - Feature 2
 - Feature 3
 
+## Legacy Database Overrides (init_cDatabase)
+
+`calvincTools.models.init_cDatabase(...)` supports adapting to legacy schemas in two ways:
+
+1. **Table name only differs**
+   - Use `cTools_tablenames`.
+   - Keys: `menuGroups`, `menuItems`, `cParameters`, `cGreetings`, `User`.
+
+2. **Columns/types differ**
+   - Use `cTools_models` with caller-provided SQLAlchemy models for one or more keys.
+
+### Minimal pattern
+
+```python
+cTools_tablenames = {
+	'menuGroups': 'cMenu_menugroups',
+	'User': 'WICS4_users',
+}
+
+cTools_models = {
+	'menuItems': WICS3_menuItems,
+	'cParameters': WICS3_cParameters,
+}
+
+calvincTools_init(
+	app,
+	app_db,
+	cTools_tablenames=cTools_tablenames,
+	cTools_models=cTools_models,
+)
+```
+
+### Important relationship rule
+
+If a caller-provided model uses `relationship(...)`, ensure the target class resolves in the **same SQLAlchemy registry** as that model. String targets such as `'menuGroups'` can fail when the target class is dynamically created in a different registry.
+
+Recommended options for caller-provided legacy models:
+- Omit cross-registry relationships and let `init_cDatabase` attach compatible links.
+- Or use class-object targets only when both models are guaranteed to be in the same registry.
+
+
 ## Development
 
 To install the package with development dependencies:
