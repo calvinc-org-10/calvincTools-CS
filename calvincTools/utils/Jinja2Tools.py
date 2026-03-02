@@ -7,7 +7,7 @@ def checkTemplate_and_render(template, *args, errmsg=None, **kwargs):
         # Check if the template exists by trying to get it
         current_app.jinja_env.get_template(f'{template}')
         # If it exists, render the template
-        return render_template(f'{template}.html', *args, **kwargs)
+        return render_template(f'{template}', *args, **kwargs)
     except TemplateNotFound:
         # If the template is not found, return a 404 error
         showtemplate = 'UnderConstruction.html'
