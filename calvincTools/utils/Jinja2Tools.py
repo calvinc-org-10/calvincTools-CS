@@ -5,13 +5,13 @@ from jinja2.exceptions import TemplateNotFound
 def checkTemplate_and_render(template, *args, errmsg=None, **kwargs):
     try:
         # Check if the template exists by trying to get it
-        current_app.jinja_env.get_template(f'{template}.html')
+        current_app.jinja_env.get_template(f'{template}')
         # If it exists, render the template
         return render_template(f'{template}.html', *args, **kwargs)
     except TemplateNotFound:
         # If the template is not found, return a 404 error
         showtemplate = 'UnderConstruction.html'
-        notreadyyet_msg = f"Template '{template}.html' not found." + f'\n{errmsg}' if errmsg else ""
+        notreadyyet_msg = f"Template '{template}' not found." + f'\n{errmsg}' if errmsg else ""
         cntext = {
             'notreadyyet_msg': notreadyyet_msg,
             }
