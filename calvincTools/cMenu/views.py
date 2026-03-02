@@ -2,7 +2,7 @@
 from flask import (
     current_app,
     url_for, 
-    render_template, redirect, 
+    redirect, 
     flash, 
     )
 from flask_login import login_required
@@ -11,6 +11,7 @@ from sqlalchemy import (
     func,
 )
 
+from calvincTools.utils import checkTemplate_and_render
 
 # db and models imported in each method so that the initalized versions are used
 
@@ -90,7 +91,7 @@ def load_menu(menu_group, menu_num):
         'applogo_url': current_app.config.get('APP_LOGO_URL', None),
     }
     
-    return render_template(templt, **cntext)
+    return checkTemplate_and_render(templt, **cntext)
 # load_menu
 
 def build_menu_html(menu_items, menu_group, menu_num):  # pylint: disable=unused-argument
@@ -139,6 +140,8 @@ def handle_command(command_num, command_arg):
     """
     Django equivalent: HandleMenuCommand
     """
+    from flask import render_template
+    
     command_name = MENUCOMMANDDICTIONARY.get(command_num, 'UnknownCommand')
     endpt = None
     extra_args = {}
