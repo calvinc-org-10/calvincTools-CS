@@ -82,14 +82,6 @@
 {% block boddy %}
 {% endblock %}
 
-{% macro cancel_button(url="#", label="Cancel") -%}
-    <a href="{{ url }}" 
-       onclick="{% if url == '#' %}window.close();{% endif %}" 
-       class="btn btn-secondary">
-       {{ label }}
-    </a>
-{%- endmacro %}
-
 <dialog id="areYouSureDialog" class="p-4 rounded border-0 shadow">
     <div class="dialog-content">
         <h5 id="dialogTitle" class="mb-3"></h5>

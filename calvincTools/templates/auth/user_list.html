@@ -1,5 +1,5 @@
 {% extends "cTools_common.html" %}
-{% from 'cTools_common.html' import cancel_button %}
+{% from 'macros.html' import cancel_button %}
 
 {% block tTitle %}User Management{% endblock %}
 
@@ -172,7 +172,6 @@
                         Add {{ blank_user_count }} More Users
                     </button>
                     {{ form.submit(class="btn btn-primary") }}
-                    <a href="#" onclick="window.close();" class="btn btn-secondary">Cancel</a>
                     {{ cancel_button() }}
                 </div>
             </form>
