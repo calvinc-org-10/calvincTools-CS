@@ -10,7 +10,7 @@ __author__ = "Calvin C"
 __email__ = "calvinc404@gmail.com"
 
 setup(
-    name="calvincTools-CS",
+    name="calvincTools",
     version=__version__,
     author=__author__,
     author_email=__email__,
