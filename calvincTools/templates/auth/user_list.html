@@ -171,8 +171,8 @@
                         Add {{ blank_user_count }} More Users
                     </button>
                     {{ form.submit(class="btn btn-primary") }}
-                    {# <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a> #}
                     <a href="#" onclick="window.close();" class="btn btn-secondary">Cancel</a>
+                    {{ cancel_button() }}
                 </div>
             </form>
         </div>

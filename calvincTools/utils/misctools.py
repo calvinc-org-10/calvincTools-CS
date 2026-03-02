@@ -1,7 +1,8 @@
 from typing import Any
 import ast
 
-from flask import render_template, current_app
+from flask import current_app
+from ..utils import checkTemplate_and_render
 
 
 def is_hashable(obj: Any) -> bool:
@@ -152,7 +153,7 @@ def show_routes():
     cntext = {
         'rules': rules
     }
-    return render_template(templt, **cntext)
+    return checkTemplate_and_render(templt, **cntext)
 
 def show_forms():
 
@@ -162,5 +163,5 @@ def show_forms():
     cntext = {
         'forms': FormNameToURL_Map
     }
-    return render_template(templt, **cntext)
+    return checkTemplate_and_render(templt, **cntext)
 

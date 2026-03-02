@@ -3,7 +3,7 @@ from functools import wraps
 import random
 
 from flask import (
-    render_template, redirect, url_for, abort,
+    redirect, url_for, abort,
     flash, 
     request, session, 
     current_app,
@@ -12,10 +12,11 @@ from flask.views import MethodView
 from flask_login import LoginManager, login_user, logout_user, current_user
 
 from sqlalchemy import select
-from database import app_db
 
 from calvincTools.app_secrets import sysver_key
+from calvincTools.models import db as app_db
 from calvincTools.sysver import sysver
+from calvincTools.utils import checkTemplate_and_render
 
 
 # db and models imported in each method so that the initalized versions are used
@@ -163,23 +164,23 @@ def login_view():
                 flash(f'DEV BYPASS: Logged in as {user.username}', 'warning')
             else:
                 flash('DEV BYPASS FAILED: User not found.', 'danger')
-                return render_template(templt, **cntext)
+                return checkTemplate_and_render(templt, **cntext)
         else:
             if not username or not password:
                 flash('Please provide both username and password.', 'danger')
-                return render_template(templt, **cntext)
+                return checkTemplate_and_render(templt, **cntext)
             
             user = User.query.filter_by(username=username).first()
             
             if user is None or not user.check_password(password):
                 flash('Invalid username or password.', 'danger')
                 cntext['invalidusr'] = True
-                return render_template(templt, **cntext)
+                return checkTemplate_and_render(templt, **cntext)
             
             if not user.is_active:
                 flash('Your account has been deactivated. Please contact support.', 'danger')
                 cntext['invalidusr'] = True
-                return render_template(templt, **cntext)
+                return checkTemplate_and_render(templt, **cntext)
             
             # Log the user in
             assert isinstance(remember, bool), "Remember must be a boolean value"
@@ -203,7 +204,7 @@ def login_view():
     
     # GET request
 
-    return render_template(templt, **cntext)
+    return checkTemplate_and_render(templt, **cntext)
 # login_view
 # from Django http.py
 import unicodedata
@@ -350,19 +351,19 @@ def change_password_view():
         # Validate inputs
         if not current_password or not new_password or not confirm_password:
             flash('All fields are required.', 'danger')
-            return render_template('auth/change_password.html')
+            return checkTemplate_and_render('auth/change_password.html')
         
         if not current_user.check_password(current_password):
             flash('Current password is incorrect.', 'danger')
-            return render_template('auth/change_password.html')
+            return checkTemplate_and_render('auth/change_password.html')
         
         if new_password != confirm_password:
             flash('New passwords do not match.', 'danger')
-            return render_template('auth/change_password.html')
+            return checkTemplate_and_render('auth/change_password.html')
         
         if len(new_password) < 8:
             flash('Password must be at least 8 characters long. ', 'danger')
-            return render_template('auth/change_password.html')
+            return checkTemplate_and_render('auth/change_password.html')
         
         # Update password
         current_user.set_password(new_password)
@@ -374,7 +375,7 @@ def change_password_view():
         return redirect(url_for('index'))
     
     # GET request
-    return render_template('auth/change_password.html')
+    return checkTemplate_and_render('auth/change_password.html')
 
 
 def register_view():
@@ -398,24 +399,24 @@ def register_view():
         # Validate inputs
         if not username or not email or not password or not confirm_password:
             flash('All fields are required.', 'danger')
-            return render_template('auth/signup.html')
+            return checkTemplate_and_render('auth/signup.html')
         
         if password != confirm_password:
             flash('Passwords do not match.', 'danger')
-            return render_template('auth/signup.html')
+            return checkTemplate_and_render('auth/signup.html')
         
         if len(password) < 8:
             flash('Password must be at least 8 characters long.', 'danger')
-            return render_template('auth/signup.html')
+            return checkTemplate_and_render('auth/signup.html')
         
         # Check if user already exists
         if User.query.filter_by(username=username).first():
             flash('Username already exists. ', 'danger')
-            return render_template('auth/signup.html')
+            return checkTemplate_and_render('auth/signup.html')
         
         if User.query.filter_by(email=email).first():
             flash('Email already registered.', 'danger')
-            return render_template('auth/signup.html')
+            return checkTemplate_and_render('auth/signup.html')
         
         # Create new user
         new_user = User(username=username, email=email)      # type: ignore
@@ -429,7 +430,7 @@ def register_view():
         return redirect(url_for('auth.login'))
     
     # GET request
-    return render_template('auth/signup.html')
+    return checkTemplate_and_render('auth/signup.html')
 
 
 @superuser_required
@@ -476,7 +477,7 @@ def user_list_view():
             blank_user = User()  # type: ignore
             form.users.append_entry(blank_user)
         
-        return render_template(
+        return checkTemplate_and_render(
             'auth/user_list.html',
             form=form,
             blank_user_count=blank_user_count
@@ -554,7 +555,7 @@ def user_list_view():
             # endtry
         else:
             flash('Form validation failed. Please check your entries.', 'danger')
-            return render_template(
+            return checkTemplate_and_render(
                 'auth/user_list.html',
                 form=form,
                 blank_user_count=blank_user_count
@@ -575,7 +576,7 @@ class LoginView(MethodView):
     decorators = [anonymous_required]
     
     def get(self):
-        return render_template('auth/login.html')
+        return checkTemplate_and_render('auth/login.html')
     
     def post(self):
         from ..models import User
@@ -585,17 +586,17 @@ class LoginView(MethodView):
         
         if not username or not password:
             flash('Please provide both username and password.', 'danger')
-            return render_template('auth/login.html')
+            return checkTemplate_and_render('auth/login.html')
         
         user = User.query.filter_by(username=username).first()
         
         if user is None or not user.check_password(password):
             flash('Invalid username or password.', 'danger')
-            return render_template('auth/login.html')
+            return checkTemplate_and_render('auth/login.html')
         
         if not user.is_active:
             flash('Your account has been deactivated.', 'danger')
-            return render_template('auth/login.html')
+            return checkTemplate_and_render('auth/login.html')
         
         assert isinstance(remember, bool), "Remember must be a boolean value"
         login_user(user, remember=remember)
