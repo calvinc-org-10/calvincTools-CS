@@ -7,6 +7,7 @@ from calvincTools.decorators import superuser_required
 from flask import flash, redirect, request, url_for
 from sqlalchemy import case, func, literal, select
 
+from ..utils import checkTemplate_and_render
 
 @superuser_required
 def edit_menu_init():
@@ -99,9 +100,9 @@ def edit_menu(group_id, menu_num):
     else:
         # Initialize form with explicit data so FieldList gets all 20 entries
         menu_group_data = {
-            "id": group.id,
-            "GroupName": group.GroupName,
-            "GroupInfo": group.GroupInfo,
+            "id": group.id, # type: ignore
+            "GroupName": group.GroupName, # type: ignore
+            "GroupInfo": group.GroupInfo, # type: ignore
         }
         form = MenuEditForm(
             formdata=None,
@@ -117,11 +118,11 @@ def edit_menu(group_id, menu_num):
 
     if form.validate_on_submit():
         # Update menu group info if changed
-        if form.menu_group.GroupName.data != group.GroupName:
-            group.GroupName = form.menu_group.GroupName.data
+        if form.menu_group.GroupName.data != group.GroupName:           # type: ignore
+            group.GroupName = form.menu_group.GroupName.data            # type: ignore
             changed_data['GroupName'] = form.menu_group.GroupName.data
-        if form.menu_group.GroupInfo.data != group.GroupInfo:
-            group.GroupInfo = form.menu_group.GroupInfo.data
+        if form.menu_group.GroupInfo.data != group.GroupInfo:           # type: ignore
+            group.GroupInfo = form.menu_group.GroupInfo.data            # type: ignore
             changed_data['GroupInfo'] = form.menu_group.GroupInfo.data
         if 'GroupName' in changed_data or 'GroupInfo' in changed_data:
             db.session.add(group)
@@ -293,7 +294,7 @@ def edit_menu(group_id, menu_num):
     # endif form.validate_on_submit()
 
     mnuGoto = {
-        'menuGroup':group.GroupName,
+        'menuGroup':group.GroupName,        # type: ignore
         'menuGroup_choices': menuGroups.query.all(),
         'menuID':menu_num,
         'menuID_choices':menuItems.query.filter_by(MenuGroup_id=group_id, OptionNumber=0).all(),
