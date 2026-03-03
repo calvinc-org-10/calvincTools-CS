@@ -1,5 +1,3 @@
-from . import app_secrets
-
 calvincTools_config = {
-    'SQLALCHEMY_BINDS': {'cToolsdb': app_secrets.cTools_BIND},
+    'SQLALCHEMY_BINDS': {'cToolsdb': 'sqlite:///calvincTools.db'},
 }
