@@ -128,7 +128,7 @@ def login_view():
     from ..models import User, cGreetings
     
     if current_user.is_authenticated:
-        flash('You were already logged in. Logged out.', 'info')
+        flash('You were already logged in. You have been logged out.', 'info')
         # return a blank page here
         return redirect(url_for('auth.logout'))
     

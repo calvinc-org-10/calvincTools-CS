@@ -13,6 +13,8 @@ from .usr_auth.routes import register_auth_blueprint
 from .cMenu.routes import register_menu_blueprint
 from .utils.routes import register_util_blueprint
 
+from .utils import checkTemplate_and_render
+
 class calvincTools_init:
     cTools_tables = (None, None, None, None, None)   # will be set by init_cDatabase
     
@@ -52,6 +54,12 @@ class calvincTools_init:
         register_auth_blueprint(app)
         register_menu_blueprint(app)
         register_util_blueprint(app)
+        
+        # /index is just a null page
+        @app.route('/index')
+        def index():
+            templt = 'nullpage.html'
+            return checkTemplate_and_render(templt)
         
         # Error handlers
         @app.errorhandler(404)

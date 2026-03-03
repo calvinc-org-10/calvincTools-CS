@@ -1,0 +1,18 @@
+{% extends "cTools_common.html" %}
+{% from "macros.html" import cancel_button %}
+
+{% block tTitle %}Not Ready Yet{% endblock %}
+{% block customCSS %}
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  /* Optional: Set a width or max-width for better control */
+  width: 50%;
+}
+{% endblock %}
+
+
+{% block boddy %}
+<div class="center"> {{ cancel_button(label="Close") }}</div>
+{% endblock %}
