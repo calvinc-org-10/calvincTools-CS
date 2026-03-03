@@ -56,6 +56,9 @@ Homepage = "https://github.com/calvinc-org-10/calvincTools-CS"
 Repository = "https://github.com/calvinc-org-10/calvincTools-CS"
 "Bug Tracker" = "https://github.com/calvinc-org-10/calvincTools/issues-CS"
 
+[tool.setuptools]
+include-package-data = true
+
 [tool.black]
 line-length = 100
 target-version = ['py310', 'py311', 'py312']
