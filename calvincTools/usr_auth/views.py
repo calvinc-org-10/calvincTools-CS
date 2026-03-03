@@ -13,7 +13,6 @@ from flask_login import LoginManager, login_user, logout_user, current_user
 
 from sqlalchemy import select
 
-from calvincTools.app_secrets import sysver_key
 from calvincTools.models import db as app_db
 from calvincTools.sysver import sysver
 from calvincTools.utils import checkTemplate_and_render
@@ -137,12 +136,15 @@ def login_view():
     grts = app_db.session.execute(stmt).scalars().all()
     Greeting = random.choice(grts).greeting if grts else '' # type: ignore
 
+    app_version = current_app.config.get('APP_VERSION', '0.0.0')
+    dev_mode = current_app.config.get('DEV_MODE', False)         
+
     templt = 'auth/Uaffirm.html'
     cntext = {
         'invalidusr': False,
         'Greeting':Greeting,
-        'sysver_key': sysver_key,
-        'sysver':current_app.config.get('APP_VERSION', sysver[sysver_key]),
+        'dev_mode': dev_mode,
+        'sysver':app_version,
         'applogo_url': current_app.config.get('APP_LOGO_URL', None),
         'appNews_htmlfile': current_app.config.get('APP_NEWS_HTMLFILE', None),
     }

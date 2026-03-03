@@ -1,6 +1,6 @@
 {% extends "cTools_common.html" %}
 
-{% block tTitle %}App Login{% if sysver_key == 'DEV' %} D{%endif%}{% endblock %}
+{% block tTitle %}App Login{% if dev_mode %} D{%endif%}{% endblock %}
 {% block tHeader %}
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <meta name="robots" content="NONE,NOARCHIVE">
@@ -54,7 +54,7 @@
                 
                 <div class="row mt-5">
                     <i>{{ Greeting }}</i>
-                    {% if sysver_key == 'DEV' %}
+                    {% if dev_mode %}
                         <p></p>
                         <button type="button" id="dev_bypass_btn" onclick="devSubmit();">DEV</button>
                         <br>
