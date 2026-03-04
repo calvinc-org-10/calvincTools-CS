@@ -23,10 +23,10 @@
         Menu Group <select id="menuGroup" onchange="loadNewMenu(true);">
         {% for ch in menuGoto.menuGroup_choices %}
             <option value="{{ ch.id }}"
-            {% if ch.id == menuGoto.menuGroup %}  selected {% endif %}
+            {% if ch.id == form.menu_group.id.data %}  selected {% endif %}
             >{{ ch }}</option>"
         {% endfor %}
-        </select>  <small>{{ menuGoto.menuGroup }}</small>
+        </select>  <small>{{ form.menu_group.GroupName.data }}</small>
         <small><button type="button" id="NewMenuGroup">New Mnu Grp</button></small>
         <br>
         Menu <select id="menuID" onchange="loadNewMenu(false);">
