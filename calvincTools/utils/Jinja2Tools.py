@@ -11,7 +11,9 @@ def checkTemplate_and_render(template, *args, errmsg=None, **kwargs):
     except TemplateNotFound:
         # If the template is not found, return a 404 error
         showtemplate = 'UnderConstruction.html'
-        notreadyyet_msg = f"Template '{template}' not found." + f'\n{errmsg}' if errmsg else ""
+        if errmsg is None:
+            errmsg = ""
+        notreadyyet_msg = f"Template '{template}' not found.\n{errmsg}"
         cntext = {
             'notreadyyet_msg': notreadyyet_msg,
             }
