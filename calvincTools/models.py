@@ -551,9 +551,12 @@ def init_cDatabase(
 
             id = db_instance.Column(db_instance.Integer, primary_key=True)
             username = db_instance.Column(db_instance.String(80), unique=True, nullable=False, index=True)
+            first_name = db_instance.Column(db_instance.String(80), nullable=False)
+            last_name = db_instance.Column(db_instance.String(80), nullable=True)
             email = db_instance.Column(db_instance.String(120), unique=True, nullable=False, index=True)
+            password_optional = db_instance.Column(db_instance.Boolean, default=False, nullable=False)
             password_hash = db_instance.Column(db_instance.String(255), nullable=False)
-            FLDis_active = db_instance.Column(db_instance.Boolean, default=True, nullable=False)
+            active_status = db_instance.Column(db_instance.Boolean, default=True, nullable=False)
             is_superuser = db_instance.Column(db_instance.Boolean, default=False, nullable=False)
             permissions = db_instance.Column(db_instance.String(1024), nullable=False, default='')
             menuGroup = db_instance.Column(db_instance.Integer, db_instance.ForeignKey(menuGroups.id), nullable=True)
@@ -562,7 +565,7 @@ def init_cDatabase(
 
             @property
             def is_active(self):
-                return self.FLDis_active
+                return self.active_status
             
             def set_password(self, password):
                 """Hash and set the user's password."""

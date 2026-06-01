@@ -18,8 +18,9 @@
 </form>
 {% endmacro %}
 
-{% macro cancel_button(url="#", label="Cancel") -%}
-    <a href="{{ url }}" 
+{% macro cancel_button(url="#", label="Cancel", id="btnCancel") -%}
+    <a id="{{ id }}"
+       href="{{ url }}" 
        onclick="{% if url == '#' %}window.close();{% endif %}" 
        class="btn btn-secondary">
        {{ label }}
