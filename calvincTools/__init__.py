@@ -48,6 +48,7 @@ class calvincTools_init:
         
         # Create default Calvin user if not exists
         # R E M O V E   I N   P R O D U C T I O N   ! ! !
+        # from .app_secrets.create_calvin import create_calvin 
         # create_calvin(app)
         
         # Register blueprints
