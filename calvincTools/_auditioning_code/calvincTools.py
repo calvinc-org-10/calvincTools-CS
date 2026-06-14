@@ -109,7 +109,7 @@ class calvincTools(object):
         # set other hooks that aren't required but may be used by the app
         self.usr_auth = getattr(app_config, 'USER_AUTHENTICATION_ENABLED', True) # use the setter to ensure it's set to a boolean (defaulting to True if usr_auth is provided but not a bool)
         
-        self.create_main_window_stack()  # create the main window stack and its forms (login, menu) at initialization so they're ready to go when needed
+        # self.create_main_window_stack()  # create the main window stack and its forms (login, menu) at initialization so they're ready to go when needed
         
         # 2. Register Blueprints
         # This keeps cTools routes separate from the app routes
@@ -272,83 +272,76 @@ class calvincTools(object):
     def usr_auth(self, usr_auth):
         self._usr_auth = usr_auth if isinstance(usr_auth, bool) else True  # if usr_auth is provided and is a bool, use it; otherwise default to True (using usr_auth)            
 
-    def main_window_stack(self):
-        return self._main_window_stack
-    def login_form(self):
-        return self._login_form
-    def menu_form(self):
-        return self._menu_form
+    # def main_window_stack(self):
+    #     return self._main_window_stack
+    # def login_form(self):
+    #     return self._login_form
+    # def menu_form(self):
+    #     return self._menu_form
 
-    def create_main_window_stack(self):
-        self._login_form = LoginForm(
-            formname=self.appname + " Login",
-            logo=self.logo,
-            # retries=self.retries,
-            appver=self.appver,
-            )
-        self.login_form().login_successful.connect(self._on_login_successful)    # type: ignore
+    # def create_main_window_stack(self):
+    #     self._login_form = url_for('auth.login')
         
-        self._menu_form = cMenu(
-            parent=None,
-            # logo=self.logo,
-            )
+    #     mgroup = 1
+    #     self._menu_form = url_for('menu.load_menu', menu_group=mgroup, menu_num=0)
         
-        self._main_window_stack = QStackedWidget()
-        if self._login_form is not None:
-            self._main_window_stack.addWidget(self._login_form)
-        if self._menu_form is not None:
-            self._main_window_stack.addWidget(self._menu_form)
-            
-    # create_main_window_stack
+        
+    #     # self._main_window_stack = QStackedWidget()    #this is the standalone version
+    #     self._main_window_stack = {}
+    #     if self._login_form is not None:
+    #         self._main_window_stack['login_form'] = self._login_form
+    #     if self._menu_form is not None:
+    #         self._main_window_stack['menu_form'] = self._menu_form
+    # # create_main_window_stack
     
-    def show_menu_form(self):
-        MFm = self.menu_form()
-        # When login is successful, navigate to the menu form
-        if self._main_window_stack is None or MFm is None:
-            return  # main window stack or menu form not properly initialized, can't navigate
-        self._main_window_stack.setCurrentWidget(MFm)
-        cUsr = current_user()
-        mGroup = cMenu._DFLT_menuGroup if cUsr is None else cUsr.menuGroup
-        MFm.loadMenu(mGroup)
-    # show_menu_form
-    def show_login_form(self):
-        LFm = self.login_form()
-        if self._main_window_stack is None or LFm is None:
-            return  # main window stack or menu form not properly initialized, can't navigate
-        if self.usr_auth:
-            LFm.reset_fields() # reset login form fields (e.g. clear username/password) when showing login form
-            self._main_window_stack.setCurrentWidget(LFm)
-        else:
-            self.ShutdownRequested.emit()  # emit logout requested signal to trigger any necessary cleanup in the app (e.g. clearing user session data) when showing login form if usr_auth is False (i.e. no login form, so just trigger logout process)
-            return
-    # show_login_form
+    # def show_menu_form(self):
+    #     MFm = self.menu_form()
+    #     # When login is successful, navigate to the menu form
+    #     if self._main_window_stack is None or MFm is None:
+    #         return  # main window stack or menu form not properly initialized, can't navigate
+    #     self._main_window_stack.setCurrentWidget(MFm)
+    #     cUsr = current_user()
+    #     mGroup = cMenu._DFLT_menuGroup if cUsr is None else cUsr.menuGroup
+    #     MFm.loadMenu(mGroup)
+    # # show_menu_form
+    # def show_login_form(self):
+    #     LFm = self.login_form()
+    #     if self._main_window_stack is None or LFm is None:
+    #         return  # main window stack or menu form not properly initialized, can't navigate
+    #     if self.usr_auth:
+    #         LFm.reset_fields() # reset login form fields (e.g. clear username/password) when showing login form
+    #         self._main_window_stack.setCurrentWidget(LFm)
+    #     else:
+    #         self.ShutdownRequested.emit()  # emit logout requested signal to trigger any necessary cleanup in the app (e.g. clearing user session data) when showing login form if usr_auth is False (i.e. no login form, so just trigger logout process)
+    #         return
+    # # show_login_form
     
-    @Slot()
-    def _on_login_successful(self):
-        self.show_menu_form()
-    # on_login_successful
+    # @Slot()
+    # def _on_login_successful(self):
+    #     self.show_menu_form()
+    # # on_login_successful
     
-    def login(self):
-        # Show the login form or the menu form (whichever is appropriate based on self.usr_auth) when the application starts
-        LFm = self.login_form()
-        MFm = self.menu_form()
-        if self._main_window_stack is None or LFm is None:
-            return  # main window stack or menu form not properly initialized, can't navigate
-        if self.usr_auth:
-            self.show_login_form()
-        else:
-            if MFm is None:
-                return
-            set_current_user(User_usrauth_not_used)  # set to dummy user since we're not using authentication
-            self.show_menu_form()
+    # def login(self):
+    #     # Show the login form or the menu form (whichever is appropriate based on self.usr_auth) when the application starts
+    #     LFm = self.login_form()
+    #     MFm = self.menu_form()
+    #     if self._main_window_stack is None or LFm is None:
+    #         return  # main window stack or menu form not properly initialized, can't navigate
+    #     if self.usr_auth:
+    #         self.show_login_form()
+    #     else:
+    #         if MFm is None:
+    #             return
+    #         set_current_user(User_usrauth_not_used)  # set to dummy user since we're not using authentication
+    #         self.show_menu_form()
 
-    def logout(self):
-        # Emit the LogoutRequested signal to trigger any necessary cleanup in the app (e.g. clearing user session data)
-        self.LogoutRequested.emit()
-        # After cleanup is done, emit the Logout signal to indicate logout has been completed
-        self.show_login_form()      # this will show the login form if usr_auth, else shutdown the app (since there's no login form to show if usr_auth is False, we just trigger the logout process which should lead to app shutdown in that case)
-        self.Logout.emit()
-    # logout
+    # def logout(self):
+    #     # Emit the LogoutRequested signal to trigger any necessary cleanup in the app (e.g. clearing user session data)
+    #     self.LogoutRequested.emit()
+    #     # After cleanup is done, emit the Logout signal to indicate logout has been completed
+    #     self.show_login_form()      # this will show the login form if usr_auth, else shutdown the app (since there's no login form to show if usr_auth is False, we just trigger the logout process which should lead to app shutdown in that case)
+    #     self.Logout.emit()
+    # # logout
             
     # implement later (???)
     # cTools_tables = (None, None, None, None, None)   # will be set by init_cDatabase

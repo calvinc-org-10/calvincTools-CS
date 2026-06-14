@@ -136,14 +136,17 @@ def login_view():
     grts = app_db.session.execute(stmt).scalars().all()
     Greeting = random.choice(grts).greeting if grts else '' # type: ignore
 
+    appname = current_app.config.get('APP_NAME', 'The App')
     app_version = current_app.config.get('APP_VERSION', '0.0.0')
-    dev_mode = current_app.config.get('DEV_MODE', False)         
+    dev_mode = current_app.config.get('DEV_MODE', False)
+         
 
     templt = 'auth/Uaffirm.html'
     cntext = {
         'invalidusr': False,
         'Greeting':Greeting,
         'dev_mode': dev_mode,
+        'appname':appname,
         'sysver':app_version,
         'applogo_url': current_app.config.get('APP_LOGO_URL', None),
         'appNews_htmlfile': current_app.config.get('APP_NEWS_HTMLFILE', None),
@@ -206,7 +209,21 @@ def login_view():
     
     # GET request
 
-    return checkTemplate_and_render(templt, **cntext)
+    usr_auth = current_app.config.get('USER_AUTHENTICATION_ENABLED', True)
+    if usr_auth:
+        return checkTemplate_and_render(templt, **cntext)
+    else:
+        # log in anonyously??
+        flash('User authentication is currently disabled.  Logging you in as a default user.', 'warning')
+        user = User.query.filter_by(is_superuser=True).first()
+        if user:
+            login_user(user)
+            flash(f'Logged in as {user.username}', 'info')
+            mgroup = user.menuGroup if user.menuGroup else 1
+            return redirect(url_for('menu.load_menu', menu_group=mgroup, menu_num=0))  # Redirect to the menu page after login
+        else:
+            flash('No users found to log in as. Please set up a user account.', 'danger')
+            return checkTemplate_and_render(templt, **cntext)
 # login_view
 # from Django http.py
 import unicodedata
