@@ -8,15 +8,15 @@ from flask import Flask, render_template, redirect, url_for, session
 # from flask_migrate import Migrate
 from sqlalchemy.orm import sessionmaker
 
-from ..usr_auth.views import init_login_manager
-from ..blueprints import ctools_bp
-from ..usr_auth.routes import register_auth_blueprint
-from ..cMenu.routes import register_menu_blueprint
-from ..utils.routes import register_util_blueprint
+from .usr_auth.views import init_login_manager
+from .blueprints import ctools_bp
+from .usr_auth.routes import register_auth_blueprint
+from .cMenu.routes import register_menu_blueprint
+from .utils.routes import register_util_blueprint
 
-from ..utils.Jinja2Tools import checkTemplate_and_render
+from .utils.Jinja2Tools import checkTemplate_and_render
 
-from ..CallerContext import CallerContext
+from .CallerContext import CallerContext
 
 class calvincTools(object):
     """
@@ -83,8 +83,9 @@ class calvincTools(object):
 
         # Set provided values, or keep class defaults
         if app_db is not None:
-            self._app_db = app_db
-            self._app_sessionmaker = sessionmaker(bind=app_db.engine)
+            with app.app_context():
+                self._app_db = app_db
+                self._app_sessionmaker = sessionmaker(bind=app_db.engine)
         self._FormNameToURL_Map = getattr(app_config,'FORMNAME_TO_URL_MAP', {})
         self._ExternalWebPageURL_Map = getattr(app_config,'EXTERNAL_WEBPAGE_URL_MAP', {})
         self._appver = getattr(app_config,'APP_VERSION', '')
@@ -119,7 +120,7 @@ class calvincTools(object):
             )
 
         # Initialize extensions
-        from ..models import init_cDatabase      # can I move this back to main imports?
+        from .models import init_cDatabase      # can I move this back to main imports?
         self.cTools_tables = init_cDatabase(app, app_db, cTools_bind_key, cTools_tablenames, cTools_models)
         # migrate = Migrate(app, cMenu_db)
         init_login_manager(app)
@@ -152,7 +153,7 @@ class calvincTools(object):
         
         @app.errorhandler(500)
         def internal_error(error):   # pylint: disable=unused-argument
-            from ..models import db
+            from .models import db
             if db is not None:
                 db.session.rollback()
             return render_template('errors/500.html', error=error), 500

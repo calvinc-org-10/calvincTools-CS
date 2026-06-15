@@ -3,9 +3,9 @@ from dataclasses import dataclass
 
 @dataclass
 class CallerContext:
-    flaskapp:Any
-    config:Any
-    app_db:Any
-    cTools_bind_key:Any
-    cTools_tablenames:Any
-    cTools_models:Any
+    flaskapp:Any = None
+    config:Any = None
+    app_db:Any = None
+    cTools_bind_key:Any = None
+    cTools_tablenames:Any = None
+    cTools_models:Any = None
