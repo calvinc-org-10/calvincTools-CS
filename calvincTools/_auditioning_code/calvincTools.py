@@ -5,7 +5,7 @@ calvincTools - A Python package
 # from .module import function
 
 from flask import Flask, render_template, redirect, url_for, session
-from flask_migrate import Migrate
+# from flask_migrate import Migrate
 from sqlalchemy.orm import sessionmaker
 
 from ..usr_auth.views import init_login_manager
@@ -16,7 +16,7 @@ from ..utils.routes import register_util_blueprint
 
 from ..utils.Jinja2Tools import checkTemplate_and_render
 
-from .CallerContext import CallerContext
+from ..CallerContext import CallerContext
 
 class calvincTools(object):
     """
