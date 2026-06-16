@@ -16,7 +16,11 @@ def register_menu_blueprint(app):
 
     from flask import Blueprint
 
-    menu_bp = Blueprint('menu', __name__, url_prefix='/menu')
+    menu_bp = Blueprint('menu', __name__, url_prefix='/menu',
+        static_folder='assets',  # specify static folder for cTools
+        static_url_path='/static/ctools',  # specify URL path for cTools static files
+        template_folder='templates'
+        )
     
     menu_bp.add_url_rule('/load/<int:menu_group>/<int:menu_num>', 'load_menu', load_menu, methods=['GET'])
     menu_bp.add_url_rule('/command/<int:command_num>/<command_arg>', 'handle_command', handle_command, methods=['GET'])

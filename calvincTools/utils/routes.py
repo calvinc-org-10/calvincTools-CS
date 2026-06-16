@@ -12,7 +12,11 @@ def register_util_blueprint(app):
     """
     from flask import Blueprint
 
-    util_bp = Blueprint('utils', __name__, url_prefix='/utils')
+    util_bp = Blueprint('utils', __name__, url_prefix='/utils',
+        static_folder='assets',  # specify static folder for cTools
+        static_url_path='/static/ctools',  # specify URL path for cTools static files
+        template_folder='templates'
+        )
 
     util_bp.add_url_rule('/routes', 'show_routes', show_routes, methods=['GET'])
     util_bp.add_url_rule('/formlist', 'show_forms', show_forms, methods=['GET'])

@@ -15,7 +15,11 @@ def register_auth_blueprint(app):
     """
     from flask import Blueprint
 
-    auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
+    auth_bp = Blueprint('auth', __name__, url_prefix='/auth',
+        static_folder='assets',  # specify static folder for cTools
+        static_url_path='/static/ctools',  # specify URL path for cTools static files
+        template_folder='templates'
+        )
 
     auth_bp.add_url_rule('/login', 'login', login_view, methods=['GET', 'POST'])
     auth_bp.add_url_rule('/logout', 'logout', logout_view, methods=['GET', 'POST'])
