@@ -60,7 +60,7 @@ class UserForm(FlaskForm):
         render_kw={'class': 'form-control', 'placeholder': 'Leave blank to keep current password'}
     )
     
-    FLDis_active = BooleanField(
+    active_status = BooleanField(
         'Active',
         default=True,
         render_kw={'class': 'form-check-input'}

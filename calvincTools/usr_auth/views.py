@@ -483,7 +483,7 @@ def user_list_view():
                 "pk": user.id,
                 "username": user.username,
                 "email": user.email,
-                "FLDis_active": user.FLDis_active,
+                "active_status": user.active_status,
                 "is_superuser": user.is_superuser,
                 "permissions": user.permissions,
                 "menuGroup": user.menuGroup,
@@ -531,7 +531,7 @@ def user_list_view():
                         # Update existing user
                         user.username = username
                         user.email = email      # pyright: ignore[reportAttributeAccessIssue]
-                        user.FLDis_active = user_form.FLDis_active.data     # pyright: ignore[reportAttributeAccessIssue]
+                        user.active_status = user_form.active_status.data     # pyright: ignore[reportAttributeAccessIssue]
                         user.is_superuser = user_form.is_superuser.data     # pyright: ignore[reportAttributeAccessIssue]
                         user.permissions = user_form.permissions.data or ''     # pyright: ignore[reportAttributeAccessIssue]
                         user.menuGroup = user_form.menuGroup.data           # pyright: ignore[reportAttributeAccessIssue]
@@ -544,7 +544,7 @@ def user_list_view():
                         user = User(  # type: ignore
                             username=username,
                             email=email,
-                            FLDis_active=user_form.FLDis_active.data,
+                            active_status=user_form.active_status.data,
                             is_superuser=user_form.is_superuser.data,
                             permissions=user_form.permissions.data or '',
                             menuGroup=user_form.menuGroup.data

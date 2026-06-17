@@ -108,7 +108,7 @@
                                         {% set username_value = user_form.username.data or '' %}
                                         {% if username_value.strip() %}
                                             <!-- This is an existing user, show status/action button -->
-                                            {% if user_form.FLDis_active.data %}
+                                            {% if user_form.active_status.data %}
                                                 <button type="button" class="btn btn-sm btn-warning make-inactive-btn" 
                                                         data-user-index="{{ loop.index0 }}"
                                                         title="Click to mark user as inactive">
@@ -119,13 +119,13 @@
                                                     INACTIVE
                                                 </span>
                                             {% endif %}
-                                            <input type="hidden" name="users-{{ loop.index0 }}-FLDis_active" 
-                                                   value="{{ user_form.FLDis_active.data|int }}" 
+                                            <input type="hidden" name="users-{{ loop.index0 }}-active_status" 
+                                                   value="{{ user_form.active_status.data|int }}" 
                                                    class="dis-active-input">
                                         {% else %}
                                             <!-- This is a blank row for new user -->
                                             <div class="form-check">
-                                                {{ user_form.FLDis_active(class="form-check-input") }}
+                                                {{ user_form.active_status(class="form-check-input") }}
                                                 <label class="form-check-label">Active</label>
                                             </div>
                                         {% endif %}
@@ -278,9 +278,9 @@ document.addEventListener('DOMContentLoaded', function() {
             <!-- Active Status (checkbox for new blank rows) -->
             <td class="align-middle">
                 <div class="form-check">
-                    <input class="form-check-input" id="${baseName}FLDis_active" 
-                           name="${baseName}FLDis_active" type="checkbox" value="y" checked>
-                    <label class="form-check-label" for="${baseName}FLDis_active">Active</label>
+                    <input class="form-check-input" id="${baseName}active_status" 
+                           name="${baseName}active_status" type="checkbox" value="y" checked>
+                    <label class="form-check-label" for="${baseName}active_status">Active</label>
                 </div>
             </td>
             
