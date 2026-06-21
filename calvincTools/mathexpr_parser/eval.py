@@ -27,6 +27,13 @@ def evaluate(expression, in_vars = None):
         return int(value)
     return value
 
+def eval_arith(expr):
+    try:
+        return evaluate(expr)
+    except (SyntaxError, NameError, TypeError, ZeroDivisionError):
+        return "-- INVALID --"
+
+
 if __name__ == "__main__":
     testexpressions = [
         #{'exp_to_eval':"cos(x+4*3) + 2 * 3", 'vars':{ 'x': 5  }},

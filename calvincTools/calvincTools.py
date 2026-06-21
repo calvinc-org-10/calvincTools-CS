@@ -112,6 +112,10 @@ class calvincTools(object):
         
         # self.create_main_window_stack()  # create the main window stack and its forms (login, menu) at initialization so they're ready to go when needed
         
+        # register functions for Jinja2 templates
+        from .mathexpr_parser import eval_arith
+        app.jinja_env.globals['eval_arith'] = eval_arith
+        
         # 2. Register Blueprints
         # This keeps cTools routes separate from the app routes
         app.register_blueprint(

@@ -1,1 +1,1 @@
-from .eval import evaluate
+from .eval import evaluate, eval_arith
