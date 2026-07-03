@@ -17,10 +17,10 @@ function pleaseWriteMe(addlmessage, parent) {
 * @return {String}        The serialized form data
 */
 function serialize(elmnts) {
-    let retStr = ''
+    let retStr = '';
     // let obj = {};
     for (let theelmnt of elmnts) {
-        retStr += theelmnt.name + "='" + theelmnt.value + "';"
+        retStr += theelmnt.name + "='" + theelmnt.value + "';";
     }
     return retStr;
 }
@@ -91,7 +91,7 @@ _FUNCTIONS = new Map([
     ["sqrt", Math.sqrt],
     ["tan", Math.tan],
     ["tanh", Math.tanh],
-])
+]);
 
 class MathParser {
   /*
@@ -168,7 +168,7 @@ class MathParser {
   parseAddition() {
     var charcter, values, value;
     // values = [this.parseMultiplication()];
-    values = [];  values.push(this.parseMultiplication())
+    values = [];  values.push(this.parseMultiplication());
 
     while (true) {
       this.skipWhitespace();
@@ -177,12 +177,12 @@ class MathParser {
       if (charcter === "+") {
         this.index += 1;
         //values.append(this.parseMultiplication());
-        values.push(this.parseMultiplication())
+        values.push(this.parseMultiplication());
       } else {
         if (charcter === "-") {
           this.index += 1;
           //values.append(-1 * this.parseMultiplication());
-          values.push(-1 * this.parseMultiplication())
+          values.push(-1 * this.parseMultiplication());
         } else {
           break;
         }
@@ -390,26 +390,26 @@ class MathParser {
         try {
             value = pars.getValue();
         } catch (errr) {
-            console.log(errr)
-            value = NaN
+            console.log(errr);
+            value = NaN;
         }
 
         if (isNaN(value)) {
-            return value
+            return value;
         }
         // Return an integer type if the answer is an integer
         if (Number.isInteger(value)) {
-            return parseInt(value)
+            return parseInt(value);
         }
         // If Javascript made some silly precision error like x.99999999999996, just return x+1 as an integer
-        epsilon = 0.0000000001
+        epsilon = 0.0000000001;
         if (parseInt(value + epsilon) != parseInt(value)) {
-            return parseInt(value + epsilon)
+            return parseInt(value + epsilon);
         }
         if (parseInt(value - epsilon) != parseInt(value)) {
-            return parseInt(value)
+            return parseInt(value);
         }
-        return value
+        return value;
     }
 
 	// this fn stays.  Too many calls to it.    
@@ -417,7 +417,7 @@ class MathParser {
         try {
             ev = math_evaluate(expr);
         } catch (errr) {
-            console.log(errr)
+            console.log(errr);
             ev = "????";
         }
         return ev;
