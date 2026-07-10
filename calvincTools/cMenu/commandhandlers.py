@@ -21,6 +21,8 @@ def run_sql():
     from ..models import ( db, )
 
     form = RawSQLForm()
+    tmplt_getSQL = 'utils/enter_SQL.html'
+    tmplt_showSQL = 'utils/show_SQL_results.html'
     context = {}
 
     if form.validate_on_submit():
@@ -29,17 +31,17 @@ def run_sql():
             # is there actually any SQL entered?
             if not sql_query.strip(): # type: ignore
                 flash('Please enter a SQL query.', 'warning')
-                return checkTemplate_and_render('utils/enter_sql.html', form=form)
+                return checkTemplate_and_render(tmplt_getSQL, form=form)
             # Basic safety check to prevent dangerous operations
             forbidden_statements = ['DROP', 'ALTER', 'TRUNCATE', 'CREATE']
             if any(stmt in sql_query.upper() for stmt in forbidden_statements): # type: ignore
                 flash('Forbidden SQL operation detected.', 'danger')
-                return checkTemplate_and_render('utils/enter_sql.html', form=form)
+                return checkTemplate_and_render(tmplt_getSQL, form=form)
             if not sql_query.strip().endswith(';'): # type: ignore
                 sql_query += ';' # type: ignore
         except Exception as e:
             flash(f'Error processing SQL: {str(e)}', 'danger')
-            return checkTemplate_and_render('utils/enter_sql.html', form=form)
+            return checkTemplate_and_render(tmplt_getSQL, form=form)
         # end try
 
 
@@ -60,21 +62,21 @@ def run_sql():
                 # excel_file = save_to_excel(rows, columns)
                 # context['excel_file'] = excel_file
 
-                return checkTemplate_and_render('utils/show_sql_results.html', **context)
+                return checkTemplate_and_render(tmplt_showSQL, **context)
             else:
                 # INSERT/UPDATE/DELETE query
                 db.session.commit()
                 flash(f'Query executed successfully.  {result.rowcount} rows affected. ', 'success') # type: ignore
                 context['col_names'] = f'NO RECORDS RETURNED; {result.rowcount} records affected' # type: ignore
                 context['num_records'] = result.rowcount # type: ignore
-                return checkTemplate_and_render('utils/show_sql_results.html', **context)
+                return checkTemplate_and_render(tmplt_showSQL, **context)
 
         except Exception as e:
             db.session. rollback()
             flash(f'SQL Error: {str(e)}', 'danger')
-            return checkTemplate_and_render('utils/enter_sql.html', form=form)
+            return checkTemplate_and_render(tmplt_getSQL, form=form)
 
-    return checkTemplate_and_render('utils/enter_sql.html', form=form)
+    return checkTemplate_and_render(tmplt_getSQL, form=form)
 # run_sql
 
 # @superuser_required
