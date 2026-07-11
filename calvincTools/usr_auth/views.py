@@ -349,7 +349,8 @@ def logout_view():
         logout_user()
         flash(f'You have been logged out.  Goodbye, {username}!', 'info')
     
-    return redirect(url_for('auth.login'))
+    login_URL = current_app.config.get('STARTUP_URL', url_for('auth.login'))
+    return redirect(login_URL)
 
 
 def change_password_view():
