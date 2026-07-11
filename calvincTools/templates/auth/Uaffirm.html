@@ -2,6 +2,10 @@
 
 {% block tTitle %}App Login{% if dev_mode %} D{%endif%}{% endblock %}
 {% block tHeader %}
+    {# this block assumes that the startup URL redirects here #}
+    {% if config.get('STARTUP_URL') is defined %}
+      <link rel="canonical" href="{{ request.url_root }}{{ config.get('STARTUP_URL').lstrip('/') }}" />
+    {% endif %}
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <meta name="robots" content="NONE,NOARCHIVE">
 {% endblock %}
@@ -58,7 +62,7 @@
                         <p></p>
                         <button type="button" id="dev_bypass_btn" onclick="devSubmit();">DEV</button>
                         <br>
-                        DPW = TempPassword123!
+                        DPW = {{ config.get('NEWUSER_DEFAULT_PW', 'TempPassword123!') }}
                     {% endif %}
                 </div>
             </form>
