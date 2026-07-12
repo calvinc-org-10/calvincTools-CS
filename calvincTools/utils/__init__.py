@@ -5,4 +5,5 @@ from .Excel import *
 from .SQLAlcTools import *
 from .misctools import *
 from .strings import *
+from .datetools import *
 from .Jinja2Tools import *
