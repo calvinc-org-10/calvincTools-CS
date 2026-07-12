@@ -1,3 +1,4 @@
+/*** to be deprecated? cTools_common already has table styling ***/
 table { display:block; height:210px; overflow:auto; }
 thead { 
     position: sticky; 
