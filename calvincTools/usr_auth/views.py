@@ -171,13 +171,17 @@ def login_view():
                 flash('DEV BYPASS FAILED: User not found.', 'danger')
                 return checkTemplate_and_render(templt, **cntext)
         else:
-            if not username or not password:
+            if not username:
                 flash('Please provide both username and password.', 'danger')
                 return checkTemplate_and_render(templt, **cntext)
-            
             user = User.query.filter_by(username=username).first()
             
-            if user is None or not user.check_password(password):
+            if user is None:
+                flash('Invalid username or password.', 'danger')
+                cntext['invalidusr'] = True
+                return checkTemplate_and_render(templt, **cntext)
+            
+            if not user.password_optional and not user.check_password(password):             # pyright: ignore[reportAttributeAccessIssue]
                 flash('Invalid username or password.', 'danger')
                 cntext['invalidusr'] = True
                 return checkTemplate_and_render(templt, **cntext)
@@ -483,7 +487,10 @@ def user_list_view():
             form.users.append_entry({
                 "pk": user.id,
                 "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
                 "email": user.email,
+                "password_optional": user.password_optional,
                 "active_status": user.active_status,
                 "is_superuser": user.is_superuser,
                 "permissions": user.permissions,
@@ -531,11 +538,14 @@ def user_list_view():
                     if user:
                         # Update existing user
                         user.username = username
-                        user.email = email      # pyright: ignore[reportAttributeAccessIssue]
-                        user.active_status = user_form.active_status.data     # pyright: ignore[reportAttributeAccessIssue]
-                        user.is_superuser = user_form.is_superuser.data     # pyright: ignore[reportAttributeAccessIssue]
+                        user.first_name = user_form.first_name.data.strip() if user_form.first_name.data else ''    # pyright: ignore[reportAttributeAccessIssue]
+                        user.last_name = user_form.last_name.data.strip() if user_form.last_name.data else ''       # pyright: ignore[reportAttributeAccessIssue]
+                        user.email = email                                      # pyright: ignore[reportAttributeAccessIssue]
+                        user.password_optional = user_form.password_optional.data     # pyright: ignore[reportAttributeAccessIssue]
+                        user.active_status = user_form.active_status.data       # pyright: ignore[reportAttributeAccessIssue]
+                        user.is_superuser = user_form.is_superuser.data         # pyright: ignore[reportAttributeAccessIssue]
                         user.permissions = user_form.permissions.data or ''     # pyright: ignore[reportAttributeAccessIssue]
-                        user.menuGroup = user_form.menuGroup.data           # pyright: ignore[reportAttributeAccessIssue]
+                        user.menuGroup = user_form.menuGroup.data               # pyright: ignore[reportAttributeAccessIssue]
                         
                         # Only update password if provided
                         if user_form.password.data:
@@ -544,7 +554,10 @@ def user_list_view():
                         # Create new user
                         user = User(  # type: ignore
                             username=username,
+                            first_name=user_form.first_name.data.strip() if user_form.first_name.data else '',
+                            last_name=user_form.last_name.data.strip() if user_form.last_name.data else '',
                             email=email,
+                            password_optional=user_form.password_optional.data,
                             active_status=user_form.active_status.data,
                             is_superuser=user_form.is_superuser.data,
                             permissions=user_form.permissions.data or '',

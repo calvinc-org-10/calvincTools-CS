@@ -45,7 +45,7 @@
                             <tr>
                                 <th>id</th>
                                 <th>Username</th>
-                                <th>Email</th>
+                                <th>First/Last Name<br>Email</th>
                                 <th>Password</th>
                                 <th>Active Status</th>
                                 <th>Superuser</th>
@@ -79,8 +79,12 @@
                                         {% endif %}
                                     </td>
                                     
-                                    <!-- Email -->
+                                    <!-- Full Name + Email -->
                                     <td>
+                                        <div>
+                                        {{ user_form.first_name(class="form-control") }}
+                                        {{ user_form.last_name(class="form-control") }}
+                                        </div>
                                         {{ user_form.email(class="form-control") }}
                                         {% if user_form.email.errors %}
                                             <div class="text-danger small">
@@ -94,6 +98,10 @@
                                     <!-- Password -->
                                     <td>
                                         {{ user_form.password(class="form-control", autocomplete="new-password") }}
+                                        <div class="form-check">
+                                        <label class="form-check-label">PW optional?</label>
+                                        {{ user_form.password_optional(class="form-check-input") }}
+                                        </div>
                                         {% if user_form.password.errors %}
                                             <div class="text-danger small">
                                                 {% for error in user_form.password.errors %}

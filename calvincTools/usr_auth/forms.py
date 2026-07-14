@@ -42,6 +42,26 @@ class UserForm(FlaskForm):
         ],
         render_kw={'class': 'form-control'}
     )
+
+    first_name = StringField(
+        'First Name',
+        validators=[
+            # DataRequired(),
+            Optional(),
+            Length(min=1, max=80, message='First name must be between 1 and 80 characters')
+        ],
+        render_kw={'class': 'form-control'}
+    )
+
+    last_name = StringField(
+        'Last Name',
+        validators=[
+            # DataRequired(),
+            Optional(),
+            Length(min=1, max=80, message='Last name must be between 1 and 80 characters')
+        ],
+        render_kw={'class': 'form-control'}
+    )
     
     email = StringField(
         'Email',
@@ -60,6 +80,12 @@ class UserForm(FlaskForm):
         render_kw={'class': 'form-control', 'placeholder': 'Leave blank to keep current password'}
     )
     
+    password_optional = BooleanField(
+        'Password Optional',
+        default=False,
+        render_kw={'class': 'form-check-input'}
+    )
+
     active_status = BooleanField(
         'Active',
         default=True,
@@ -88,13 +114,6 @@ class UserForm(FlaskForm):
         default=datetime.now().strftime('%Y-%m-%d'),
         render_kw={'class': 'form-control'}
     )
-    # DateField(
-    #     'Date Joined',
-    #     format='%Y-%m-%d',
-    #     default=datetime.now(),
-    #     validators=[Optional()],
-    #     render_kw={'class': 'form-control'}
-    #     )
     
     last_login = HiddenField(
         default='',
