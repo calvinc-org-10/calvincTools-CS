@@ -202,6 +202,13 @@ class cToolsModal1 {
 
     eventThatClosed;
 
+    static buttonPresets = Object.freeze({
+        ok: { text: "OK", className: "btn btn-secondary", closeBtn: true },
+        cancel: { text: "Cancel", className: "btn btn-secondary", closeBtn: true },
+        yes: { text: "Yes", className: "btn btn-secondary", closeBtn: true },
+        no: { text: "No", className: "btn btn-secondary", closeBtn: true }
+    });
+
     /** standard buttons **/
     generateButton(btnTxt, clsNm = "btn btn-secondary", closeBtn = true) {
         const B = document.createElement("button");
@@ -214,21 +221,28 @@ class cToolsModal1 {
 
         return B;
     }
-    ctBtnOK = this.generateButton("OK");
-    ctBtnCancel = this.generateButton("Cancel");
-    ctBtnYes = this.generateButton("Yes");
-    ctBtnNo = this.generateButton("No");
+    // Backward-compatible per-instance button fields.
+    ctBtnOK = this.createPresetButton("ok");
+    ctBtnCancel = this.createPresetButton("cancel");
+    ctBtnYes = this.createPresetButton("yes");
+    ctBtnNo = this.createPresetButton("no");
 
     bootstrapModal;
 
-    constructor(titl, msg, initBtns = [this.ctBtnOK]) {
+    constructor(titl, msg, initBtns = ["ok"]) {
         this.modalTitle.textContent = titl;
         this.modalBody.innerHTML = msg;
 
         this.modalButtons.innerHTML = ""
 
         if (Array.isArray(initBtns)) {
-            initBtns.forEach(btn => this.addButton(btn));
+            initBtns.forEach((btn) => {
+                if (typeof btn === "string") {
+                    this.addPresetButton(btn);
+                    return;
+                }
+                this.addButton(btn);
+            });
         }
         
         // should I set bootstrapModal here?
@@ -236,6 +250,18 @@ class cToolsModal1 {
 
     addButton(btn) {
         this.modalButtons.appendChild(btn);
+    }
+
+    createPresetButton(presetName) {
+        const preset = cToolsModal1.buttonPresets[presetName?.toLowerCase()];
+        if (!preset) {
+            throw new Error(`Unknown modal button preset: ${presetName}`);
+        }
+        return this.generateButton(preset.text, preset.className, preset.closeBtn);
+    }
+
+    addPresetButton(presetName) {
+        this.addButton(this.createPresetButton(presetName));
     }
 
     show () {
