@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "calvincTools"
-version = "2026.07.13.2045"
+version = "2026.08.01.1000"
 description = "A Python package for calvincTools"
 readme = "README.md"
 authors = [

@@ -174,5 +174,85 @@ function areYouSure(title, areYouSureQuestion, options = {}) {
     });
 }
 </script>
+
+/** generic Bootstrap modal **/
+<div id="ct-modal1" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ct-modal1Title"></h5>
+                <div id="ct-modal1Header">
+                </div>
+            </div>
+            <div class="modal-body" id="ct-modal1Body"></div>
+            <div class="modal-footer" id="ct-modal1Footsy">
+                <div id="ct-modal1Btns"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+class cToolsModal1 {
+    modalElmnt = document.getElementById("ct-modal1");
+    modalTitle = document.getElementById("ct-modal1Title");
+    modalHeader = document.getElementById("ct-modal1Header");
+    modalBody = document.getElementById("ct-modal1Body");
+    modalFooter = document.getElementById("ct-modal1Footsy");
+    modalButtons = document.getElementById("ct-modal1Btns");
+
+    eventThatClosed;
+
+    /** standard buttons **/
+    generateButton(btnTxt, clsNm = "btn btn-secondary", closeBtn = true) {
+        const B = document.createElement("button");
+        B.type = "button"
+        B.textContent = btnTxt;
+        B.className = clsNm;
+        if (closeBtn) {
+            B.addEventListener("click", (e) => { this.eventThatClosed = e; this.close(); })
+        }
+
+        return B;
+    }
+    ctBtnOK = this.generateButton("OK");
+    ctBtnCancel = this.generateButton("Cancel");
+    ctBtnYes = this.generateButton("Yes");
+    ctBtnNo = this.generateButton("No");
+
+    bootstrapModal;
+
+    constructor(titl, msg, initBtns = [this.ctBtnOK]) {
+        this.modalTitle.textContent = titl;
+        this.modalBody.innerHTML = msg;
+
+        this.modalButtons.innerHTML = ""
+
+        if (Array.isArray(initBtns)) {
+            initBtns.forEach(btn => this.addButton(btn));
+        }
+        
+        // should I set bootstrapModal here?
+    }
+
+    addButton(btn) {
+        this.modalButtons.appendChild(btn);
+    }
+
+    show () {
+        this.bootstrapModal = bootstrap.Modal.getOrCreateInstance(this.modalElmnt);
+        this.bootstrapModal.show();
+    }
+
+    close() {
+        if (this.bootstrapModal) {
+            this.bootstrapModal.hide();
+        }
+    }
+    hide () {
+        this.close();
+    }
+}
+</script>
+
 </body>
 </html>
