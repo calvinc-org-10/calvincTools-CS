@@ -1,4 +1,5 @@
 
+from .coerce import *
 from .messageBoxes import *
 from .fileDialogs import *
 from .Excel import *
