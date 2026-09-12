@@ -1,4 +1,7 @@
-from datetime import datetime, date, timedelta
+from dataclasses import dataclass
+
+import calendar
+from datetime import datetime, date, time, timedelta
 from dateutil.parser import parse
 from dateutil.rrule import (
     rrule, rruleset, 
@@ -142,3 +145,19 @@ def extract_date_from_text(text, current_year=None):
     return datetime(year, month, day)
 # extract_date_from_text
 
+#########################################################################
+#########################################################################
+#########################################################################
+
+@dataclass
+class DayTimeDuration:
+	dayOfWeek: calendar.Day
+	startTime: time
+	duration: timedelta	# should this be int minutes??
+	
+	def endTime(self) -> tuple[calendar.Day, time]:
+		# Combine with a reference Monday date (2000-01-03 was a Monday)
+		base_date = date(2000, 1, 3) + timedelta(days=int(self.dayOfWeek))
+		start_datetime = datetime.combine(base_date, self.startTime)
+		end_datetime = start_datetime + self.duration
+		return calendar.Day(end_datetime.weekday()), end_datetime.time()
