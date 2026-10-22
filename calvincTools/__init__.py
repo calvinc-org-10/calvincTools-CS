@@ -7,4 +7,9 @@ calvincTools - A Python package
 from .CallerContext import CallerContext
 from .calvincTools import calvincTools
 
+from .sysver import (
+    __version__ as cTools_version,
+    _pkgname as cTools_name,
+    )
+
 

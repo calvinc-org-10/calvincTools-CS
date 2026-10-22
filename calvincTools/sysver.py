@@ -1,10 +1,35 @@
 
-_pkgname='Calvin C Tools'+' Client-Server Version'
+_pkgname_long='Calvin C Tools'+' Client-Server Version'
+_pkgname='CTools-CS'
+from importlib import metadata as _metadata
+from pathlib import Path as _Path
+
+
+def _read_version(dist_name: str = 'calvincTools') -> str:
+    # Installed (including editable) package: pip recorded the pyproject version.
+    try:
+        return _metadata.version(dist_name)
+    except _metadata.PackageNotFoundError:
+        pass
+    # Running from a source tree that was never installed: read pyproject.toml directly.
+    try:
+        try:
+            import tomllib as _toml          # Python 3.11+
+        except ModuleNotFoundError:
+            import tomli as _toml            # Python 3.10 (pip install tomli)  #type: ignore
+        pyproject = _Path(__file__).resolve().parent.parent / 'pyproject.toml'
+        with open(pyproject, 'rb') as f:
+            return _toml.load(f)['project']['version']
+    except Exception:
+        return '0.0.0+unknown'
+
 _base_ver_major=1
 _base_ver_minor=0
 _base_ver_patch='0'
+
 _ver_date='2026-02-21'
-_base_ver = f'{_base_ver_major}.{_base_ver_minor}.{_base_ver_patch}'
+# _base_ver = f'{_base_ver_major}.{_base_ver_minor}.{_base_ver_patch}'      # Date versioning until things get stable, then switch to semantic versioning
+_base_ver = _read_version()
 __version__ = _base_ver
 sysver = {
     'DEV': f'DEV{_base_ver}', 
@@ -12,7 +37,7 @@ sysver = {
     'DEMO': f'DEMO{_base_ver}'
     } 
 
-sysver_key = 'DEV'
+sysver_key = 'PROD'
 
 __author__ = "Calvin C"
 __email__ = "calvinc404@gmail.com"

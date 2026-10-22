@@ -139,7 +139,8 @@ def login_view():
     appname = current_app.config.get('APP_NAME', 'The App')
     app_version = current_app.config.get('APP_VERSION', '0.0.0')
     dev_mode = current_app.config.get('DEV_MODE', False)
-         
+
+    from calvincTools import cTools_name, cTools_version
 
     templt = 'auth/Uaffirm.html'
     cntext = {
@@ -148,6 +149,8 @@ def login_view():
         'dev_mode': dev_mode,
         'appname':appname,
         'sysver':app_version,
+        'cTools_name': cTools_name,
+        'cTools_ver': cTools_version,
         'applogo_url': current_app.config.get('APP_LOGO_URL', None),
         'appNews_htmlfile': current_app.config.get('APP_NEWS_HTMLFILE', None),
     }

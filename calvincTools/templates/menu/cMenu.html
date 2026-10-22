@@ -8,10 +8,13 @@
 <div class="row max-width=100%">
     <div class="col-1 text-start calvin-smalltext">
         {{ grpNum }},{{ menuNum }}
-        <br>
-        {{ sysver }}
     </div>
-    <div class="col-2"></div>
+    <div class="col">
+        {{ appname }} ver {{ sysver }}, {{ cTools_name }} ver {{ cTools_ver }}
+    </div>
+</div>
+<div class="row max-width=100%">
+    <div class="col-3 text-end"></div>
     <div class="col-6 text-center">
         <img src="{{ applogo_url }}" width="150" height="75">
         <img src="{{ url_for('ctools.static', filename='cTools.png') }}" width="150" height="75">

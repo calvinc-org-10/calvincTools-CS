@@ -80,6 +80,8 @@ def load_menu(menu_group, menu_num):
     menu_name = next((item.OptionText for item in menu_items if item.OptionNumber == 0), 'Menu')
     menu_html = build_menu_html(menu_items, menu_group, menu_num)
     sysver = current_app.config.get('APP_VERSION', 'unknown version')
+    
+    from calvincTools import cTools_name, cTools_version
 
     templt = 'menu/cMenu.html'
     cntext = {
@@ -87,7 +89,10 @@ def load_menu(menu_group, menu_num):
         'menuNum': menu_num,
         'menuName': menu_name,
         'menuContents': menu_html,
+        'appname': current_app.config.get('APP_NAME', 'App'),
         'sysver': sysver,
+        'cTools_name': cTools_name,
+        'cTools_ver': cTools_version,
         'applogo_url': current_app.config.get('APP_LOGO_URL', None),
     }
     
