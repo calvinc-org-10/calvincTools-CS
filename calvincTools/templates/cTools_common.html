@@ -12,6 +12,7 @@
     <!-- Bootstrap JS bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
 
+    <script src="{{ url_for('ctools.static', filename='js/PhaseManager.js') }}"></script>
     <script src="{{ url_for('ctools.static', filename='js/calvinprocs.js') }}"></script>
     {# <link rel="icon" type="image/x-icon" href="{% static 'WICS-favicon.png' %}"> do block/tag for app icon #}
     {% if config.get('APP_LOGO_URL') %}
@@ -108,6 +109,7 @@
 </dialog>
 
 <script>
+
 /**
  * Display a confirmation dialog and return the user's choice via a Promise.
  * 

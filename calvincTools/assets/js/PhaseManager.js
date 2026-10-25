@@ -149,19 +149,3 @@ class PhaseManager {
     }
   }
 }
-const example = Object.freeze({
-  INIT_UPL: "init-upl",
-  READ_SPREADSHEET: "01ReadSpreadsheet",
-
-  WANT_RESULTS: "wantresults",
-  CLEANUP_FAILURE: "cleanup-after-failure",
-  RESULTS_PRESENTED: "resultspresented",
-  FINAL: "**FINAL**"
-});
-
-const uploadPhase = new PhaseManager(example);
-
-Am I on the right track? Do you have any corrections or suggestions for improvement?
-
-============================================
-

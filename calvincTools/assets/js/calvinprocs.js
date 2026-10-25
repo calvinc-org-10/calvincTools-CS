@@ -455,4 +455,3 @@ function speak(textToSpeak) {
         synth.speak(utterThis);
     }
 }
-
